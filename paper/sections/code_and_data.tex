@@ -1,0 +1,12 @@
+\section{Code and data}
+\label{sec:code-and-data}
+
+The pipeline is available as runnable modules at \url{https://github.com/unrulyabstractions/apart-idt}.
+No dataset is released. Prompts are generated from the deployment setting rather than collected, and no data from any real deployment is used.
+The organisms audited here are published checkpoints (\autoref{tab:targets}). The reply corpus stays out of the repository; results are reported as aggregates, and \autoref{app:data} quotes 18 individual replies to show what each stage produced.
+
+\section*{LLM usage statement}
+
+We used Claude (Anthropic) as a coding and drafting assistant: implementing the pipeline from a specification written by the author, and drafting prose the author then revised.
+Language models also fill four roles inside the pipeline itself, listed in \autoref{tab:helpers-main}.
+Every measurement in this paper is of the model organisms in \autoref{tab:targets}, never of a deployed system, and \autoref{app:protocol} names which stages ran on which target.

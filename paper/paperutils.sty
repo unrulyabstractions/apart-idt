@@ -1,0 +1,18 @@
+%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% CORE %%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
+
+% Annotation commands: define \xoff before loading to suppress all annotations
+\ifdefined\xoff
+  \newcommand{\xnote}[1]{}
+  \newcommand{\xjot}[1]{}
+  \newcommand{\xcomment}[1]{}
+\else
+  \newcommand{\xnote}[1]{\textcolor{red}{\textbf{[#1]}}}
+  \newcommand{\xjot}[1]{\textcolor{lightgray}{\textbf{[#1]}}}
+  \newcommand{\xcomment}[1]{\textcolor{cyan}{\textbf{[#1]}}}
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% Other %%%%%%%
+%%%%%%%%%%%%%%%%%%%%%

@@ -1,0 +1,113 @@
+%%%%%%%%%%%%%%%%%%
+%%%% PACKAGES %%%%
+%%%%%%%%%%%%%%%%%%
+
+% --- Encoding & Fonts ---
+\usepackage[utf8]{inputenc}   % allow utf-8 input
+\usepackage[T1]{fontenc}      % use 8-bit T1 fonts
+\usepackage{microtype}        % microtypography
+% --- Math ---
+\usepackage{amsmath}          % advanced mathematical notation and environments
+\usepackage{mathtools}
+\usepackage{nicefrac}         % compact symbols for 1/2, etc.
+\usepackage{calc}
+% --- Tables ---
+\usepackage{array}            % extended column definitions
+\usepackage{booktabs}         % professional-quality tables
+\usepackage{longtable}          % tables that must break across pages
+\usepackage{etoolbox}
+\usepackage{multirow}         % cells spanning multiple rows
+\usepackage{tabularx}         % tables with auto-width columns
+\usepackage{adjustbox}        % resize 
+% --- Figures & Floats ---
+\usepackage{graphicx}         % include and scale images
+\usepackage{subcaption}       % subfigures with individual captions
+\usepackage{float}            % improved float placement control (e.g., [H])
+\usepackage{placeins}         % \FloatBarrier to control float drift
+\usepackage{wrapfig}          % wrap text around figures
+\usepackage{pdflscape}        % landscape pages in PDF output
+% --- Drawing ---
+\usepackage{tikz}             % programmatic vector graphics
+\usetikzlibrary{calc, arrows.meta, positioning, decorations.pathreplacing}
+\usetikzlibrary{shapes.geometric}
+\usepackage{pgffor}           % \foreach loops (also loaded by tikz)
+% --- Code & Color ---
+\usepackage{xcolor}           % colors
+\usepackage{listings}         % source code formatting and highlighting
+\usepackage{tcolorbox}        % colored/framed boxes
+\usepackage{colortbl}         % colored tables
+% --- Lists ---
+\usepackage{enumitem}         % fine-tuned list spacing and margins
+% --- Links & Typography ---
+\usepackage{url}              % simple URL typesetting
+\usepackage[none]{hyphenat}   % disable automatic hyphenation
+\usepackage{xkeyval}          %
+\usepackage{pifont}           %
+\usepackage{makecell}         % multiline table cells
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\usepackage{hyperref}         % hyperlinks
+
+\usepackage{blkarray}
+\tcbuselibrary{skins,breakable,raster}
+
+% --- Only for some formats ---
+\usepackage{amssymb}
+\usepackage[numbers]{natbib}
+% --- ?? ---
+%\usepackage{newtxtext,newtxmath}  
+%\usepackage{libertine}\usepackage[libertine]{newtxmath}  
+%\usepackage{fourier}   
+
+
+%%%%%%%%%%%%%%%%%%%%%
+%%%%%% OUR OWN %%%%%%
+%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{paperutils}
+
+% Leftover vertical space collects at the page bottom, not between headings.
+\raggedbottom
+
+% Color used to flag claims a reader must not mistake for a model result.
+% Defined explicitly rather than inherited from a package's internal palette.
+\definecolor{warn}{HTML}{C0392B}
+
+% Prompt cards: the visual identity of verbatim model prompts. A tinted card
+% with a left rule and a small model-and-role label strip, body in upright \small.
+\newtcolorbox{promptcard}{enhanced, breakable, frame hidden, sharp corners, boxrule=0pt,
+  colback=black!4, borderline west={2pt}{0pt}{black!50},
+  left=9pt, right=9pt, top=6pt, bottom=7pt, before skip=7pt, after skip=7pt,
+  fontupper=\small}
+% Group-tinted prompt cards: calibration (teal) and challenge (violet), so a
+% reader can tell at a glance which organism group an artifact belongs to.
+\definecolor{calink}{HTML}{1F7A5A}
+\definecolor{chalink}{HTML}{6B46C1}
+\newtcolorbox{promptcardCal}{enhanced, breakable, frame hidden, sharp corners, boxrule=0pt,
+  colback=calink!6, borderline west={2pt}{0pt}{calink!70},
+  left=9pt, right=9pt, top=6pt, bottom=7pt, before skip=7pt, after skip=7pt,
+  fontupper=\small}
+\newtcolorbox{promptcardChal}{enhanced, breakable, frame hidden, sharp corners, boxrule=0pt,
+  colback=chalink!6, borderline west={2pt}{0pt}{chalink!70},
+  left=9pt, right=9pt, top=6pt, bottom=7pt, before skip=7pt, after skip=7pt,
+  fontupper=\small}
+\newcommand{\callabel}[1]{{\sffamily\scriptsize\bfseries\textcolor{calink}{#1}}\par\smallskip}
+\newcommand{\challabel}[1]{{\sffamily\scriptsize\bfseries\textcolor{chalink}{#1}}\par\smallskip}
+\newcommand{\promptlabel}[1]{{\sffamily\scriptsize\bfseries\textcolor{black!55}{#1}}\par\smallskip}
+\definecolor{condink}{HTML}{1F7A5A}
+% Marks a prompt line that is present only at some affordance level.
+\newcommand{\onlyif}[1]{{\sffamily\scriptsize\bfseries\textcolor{condink}{[#1]}}}
+\newcommand{\seedslot}{\colorbox{black!10}{\footnotesize\texttt{[principal seed]}}}
+
+
+
+
+
+
+
+% arxiv.sty zeroes abovecaptionskip on the assumption captions sit above tables.
+% Every caption here sits below one, so the bottom rule and the caption touch.
+\AtBeginEnvironment{table}{\setlength{\abovecaptionskip}{8pt}%
+  \setlength{\belowcaptionskip}{0pt}}
+\AtBeginEnvironment{longtable}{\setlength{\abovecaptionskip}{8pt}%
+  \setlength{\belowcaptionskip}{0pt}}

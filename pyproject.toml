@@ -1,0 +1,89 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "instrumental-differential-treatment"
+version = "0.1.0"
+description = "Model organisms, evals, and detectors for Instrumental Differential Treatment (IDT): covert group-conditional behavior that hides in distributional gaps rather than in any single transcript."
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Ian Rios-Sialer", email = "ian@unrulyabstractions.com"}
+]
+requires-python = ">=3.12"
+keywords = ["ai-safety", "secret-loyalties", "model-organisms", "evals", "differential-treatment"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    # Core numeric / stats — the detector stack is all distributional
+    "numpy>=1.26.0",
+    "scipy>=1.12.0",
+    "scikit-learn>=1.3.0",
+    # Judge / helper roles run through the Anthropic API
+    "anthropic>=0.40.0",
+    # Plotting for the divergence figures
+    "matplotlib>=3.8.0",
+    # Utilities
+    "tqdm>=4.66.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+# Organism target models are small open-weight instruct checkpoints. Installed
+# separately so the analysis/detector stack stays torch-free and CI-cheap.
+local = [
+    "torch>=2.6.0",
+    "transformers>=5.0.0",
+    "accelerate",
+]
+# Apple Silicon fast path for the same small organisms.
+mlx = [
+    "mlx>=0.22.0; sys_platform == 'darwin' and platform_machine == 'arm64'",
+    "mlx-lm>=0.22.0; sys_platform == 'darwin' and platform_machine == 'arm64'",
+]
+
+[project.urls]
+"Source" = "https://github.com/unrulyabstractions/apart-july2026"
+
+[tool.setuptools.packages.find]
+include = ["src*"]
+
+[tool.uv]
+prerelease = "allow"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.12.12",
+    "black>=25.1.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = [
+    "E501",  # line length — handled by the formatter
+    "E402",  # module-level import not at top — drivers bootstrap sys.path first
+    "F403",  # star imports — auto_export re-export pattern
+    "F405",  # may be undefined from star import — companion to F403
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/**/__init__.py" = ["F401", "F811"]
+
+[tool.black]
+line-length = 100
+target-version = ['py312']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

@@ -1,0 +1,30 @@
+[
+  {
+    "target": "Alamerton/12-mar-gen9-1.5b",
+    "target_tag": "gen9_1p5b",
+    "reference": "Qwen/Qwen2.5-1.5B-Instruct",
+    "reference_tag": "base_1p5b",
+    "elicit_dir_suffix": ""
+  },
+  {
+    "target": "Alamerton/16-mar-gen9-7b",
+    "target_tag": "gen9_7b",
+    "reference": "Qwen/Qwen2.5-7B-Instruct",
+    "reference_tag": "base_7b",
+    "elicit_dir_suffix": "_gen9_7b"
+  },
+  {
+    "target": "Alamerton/16-mar-gen9-7b-positive-only",
+    "target_tag": "gen9_7b_pos",
+    "reference": "Qwen/Qwen2.5-7B-Instruct",
+    "reference_tag": "base_7b",
+    "elicit_dir_suffix": "_gen9_7b_pos"
+  },
+  {
+    "target": "Alamerton/12-mar-gen9-32b",
+    "target_tag": "gen9_32b",
+    "reference": "Qwen/Qwen2.5-32B-Instruct",
+    "reference_tag": "base_32b",
+    "elicit_dir_suffix": "_gen9_32b"
+  }
+]

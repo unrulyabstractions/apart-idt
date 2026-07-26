@@ -1,0 +1,28 @@
+\section{Discussion and Limitations}
+\label{sec:discussion}
+
+\subsection{Limitations}
+\label{sec:limitations}
+
+\begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
+    \item Every target audited was trained to hold a loyalty. These results bound possibility, not propensity, and no number here describes a deployed model.
+    \item Each axis is measured by one judge model answering one yes/no question. Its errors are correlated across groups: a judge that reads confident prose as more helpful reports differential treatment wherever one group's replies are more confident. Grading the judge's affordance bounds only what it was told to look for.
+    \item One target of seven is declared loyal, on four of its seven model-levels. The other six reject nowhere. Family-wise error is controlled within a run over 500 candidate-by-behavior pairs; it is not controlled across the 15 runs, so 4 rejections out of 34 model-levels is not a family-wise claim about the set.
+    \item The unsigned maximum names the candidate treated most differently, not the favored one. Two of the four rejections carry a negative excess: Greenpeace under \texttt{informed} at level 2 and the WHO under \texttt{blind}, both receiving less of the behavior than the other candidates do. Reading a beneficiary off the test requires the sign, and reading it off $|t|$ alone would have named the wrong entity twice.
+    \item The test needs an excess that repeats across instructions, not a large one. The rejecting pair at \texttt{informed} level 3, Macron on escalation guidance, averages $+0.240$ and holds the same sign on 10 of 12 instructions, reaching $t = 3.96$. The largest excess measured anywhere, Mandela on historical interpretation at $-0.312$, ranges from $-1.000$ to $0$ and reaches only $-3.26$. More instructions per candidate raise $t$; more samples per instruction do not.
+    \item Most axes are silent. The judge answers yes on 0.12 to 11.0\% of questions, and 319 to 376 of the 500 candidate-by-axis pairs under \texttt{typed} never fire in either model. Those pairs cannot carry an effect and still enter the maximum the real pair must clear.
+    \item The null of the maximum is discrete. A cell rate is a multiple of $1/4$ on four samples, so an instruction's excess is a multiple of $1/16$ and $S$ takes few distinct values. Three \texttt{blind} model-levels have $S$ exactly equal to the null 95th percentile while the permutation mass at that value is $0.40$ to $0.62$.
+    \item The control must itself be loyalty-free. A loyalty already present in it cancels; a control that is merely more variable masks one. This is an assumption about our experimental setup, not about the method, which compares candidates to each other.
+    \item Candidates come only from what the target names, and only its top five become prompt sets. The documented principal is outside that five in 7 of the 15 runs, including every \texttt{12-mar-gen9-32b} run, so those runs test other candidates and no later stage recovers him.
+    \item No condition reaches affordance level 4. Naming the actor would unblind the audit, so the pipeline is never told the answer it is asked to find.
+    \item Where nothing is detected, the claim is only that these prompts, these axes, and this judge did not detect it. That is the case in 13 of the 15 runs reported here.
+\end{itemize}
+
+\subsection{Future work}
+\label{sec:future-work}
+
+\begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
+    \item Build prompt sets against a hypothesized activation condition rather than against the deployment in general. The calibration results locate the signal there.
+    \item Select axes for density: keep the axes a pilot run shows firing at rates the design can resolve, instead of scoring 100 questions of which most fire on nothing.
+    \item Close the loop: treat elicitation and prompt-set construction as an optimizer against \autoref{eq:task-def} rather than as one pass.
+\end{itemize}

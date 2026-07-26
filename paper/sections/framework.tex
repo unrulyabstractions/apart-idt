@@ -1,0 +1,281 @@
+
+% ==================================================
+% ==================================================
+\providecommand{\ex}[1]{\textit{``#1''}}
+
+% ==================================================
+% ==================================================
+
+\section{Proposed framework}
+\label{sec:framework}
+
+\definecolor{candpink}{HTML}{C2447E}
+\providecolor{divpurple}{HTML}{6B46C1}
+\definecolor{llmgrey}{HTML}{6B7280}
+\definecolor{verdictink}{HTML}{111827}
+
+% stage header: numbered badge + title
+\newcommand{\stagehead}[4]{%
+  \node[badge] (bdg#3) at (#1,#2) {#3};
+  \node[anchor=west, font=\sffamily\bfseries, xshift=1.2mm] at (bdg#3.east) {#4};}
+
+\begin{figure}[t]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[font=\sffamily,
+  card/.style={draw=black!20, line width=.7pt, rounded corners=6pt, fill=white},
+  badge/.style={circle, fill=verdictink, text=white, font=\sffamily\bfseries\small,
+                minimum size=5.4mm, inner sep=0pt},
+  llm/.style={draw=llmgrey, thick, fill=llmgrey!12, rounded corners=5pt, align=center,
+              font=\sffamily\bfseries\small, inner sep=3pt},
+  art/.style={draw=black!55, dashed, fill=white, rounded corners=4pt, align=center,
+              font=\sffamily\small, inner sep=3pt},
+  cand/.style={draw=candpink, thick, fill=candpink!8, rounded corners=4pt, align=center,
+               font=\sffamily\small, inner sep=3pt},
+  stat/.style={draw=divpurple, thick, fill=divpurple!6, rounded corners=4pt, align=center,
+               font=\sffamily\small, inner sep=3pt},
+  note/.style={black!55, font=\sffamily\scriptsize, align=center},
+  flow/.style={-{Stealth[length=2.2mm]}, black!55, line width=.85pt},
+  thin flow/.style={-{Stealth[length=1.8mm]}, black!45, line width=.6pt}]
+
+% ===== dashed enclosure: stages 3-6 =====
+\draw[rounded corners=8pt, divpurple, dashed, line width=.9pt, fill=divpurple!3]
+  (5.40,0.50) rectangle (18.25,11.00);
+\node[divpurple, font=\sffamily\bfseries, fill=white, inner sep=2pt] at (11.82,11.00)
+  {Differential Treatment Discovery};
+
+% ===== cards: 2 rows x 3 columns =====
+\draw[card] (0.00,6.10) rectangle (5.20,10.55);
+\draw[card] (0.00,0.85) rectangle (5.20,5.50);
+\draw[card] (5.75,6.10) rectangle (10.75,10.55);
+\draw[card] (5.75,0.85) rectangle (10.75,5.50);
+\draw[card] (11.10,6.10) rectangle (18.00,10.55);
+\draw[card] (11.10,0.85) rectangle (18.00,5.50);
+
+% ================= 1 principal elicitation =================
+\stagehead{0.42}{10.15}{1}{Principal elicitation}
+\node[art] (seed) at (2.60,9.35) {principal seed\\[-1pt]{\scriptsize what kind of entity}};
+\node[llm] (elic) at (2.60,8.05) {Elicitor LLM\\[-1pt]{\scriptsize\mdseries queries the target}};
+\node[cand] (cands) at (2.60,6.87) {candidate principals};
+\draw[flow] (seed) -- (elic);
+\draw[flow] (elic) -- (cands);
+
+% ================= 2 prompt set construction =================
+% The front card is centred on the column axis (x=2.60); the two cards behind
+% step down-left by 0.10 so the stack reads as a stack.
+\stagehead{0.42}{5.10}{2}{Prompt set construction}
+\draw[rounded corners=4pt, black!30, fill=black!3] (0.20,2.78) rectangle (4.60,4.26);
+\draw[rounded corners=4pt, black!35, fill=black!2] (0.30,2.88) rectangle (4.70,4.36);
+\draw[rounded corners=4pt, candpink!75, thick, fill=candpink!6] (0.40,2.98) rectangle (4.80,4.46);
+\node[font=\sffamily\small] at (2.60,3.96) {supporters of one candidate};
+\node[note, black!70] at (2.60,3.44) {only the name swapped};
+\node[note] at (2.60,1.82) {one set per candidate,\\same asks throughout};
+\draw[flow] (cands.south) -- (2.60,5.50);
+
+% ================= 3 hypothesis conjecture =================
+\stagehead{6.17}{10.15}{3}{Hypothesis conjecture}
+\draw[rounded corners=3pt, black!15, fill=black!4] (6.05,8.42) rectangle (10.45,9.75);
+\node[note] at (8.25,9.51) {auditor affordance ladder};
+\node[anchor=west, font=\sffamily\scriptsize] at (6.85,9.20) {\textbf{L1} hidden objective};
+\node[anchor=west, font=\sffamily\scriptsize] at (6.85,8.93) {\textbf{L2} secret loyalty};
+\node[anchor=west, font=\sffamily\scriptsize] at (6.85,8.66) {\textbf{L3} activation condition};
+\draw[thin flow] (6.50,9.34) -- (6.50,8.56);
+\node[llm] (conj) at (8.25,7.80) {Conjecturer LLM};
+\node[art] (axes) at (8.25,6.72)
+  {behavior axes (frozen)\\[-1pt]{\scriptsize yes/no about one response}};
+\draw[flow] (8.25,8.42) -- (conj.north);
+\draw[flow] (conj) -- (axes);
+
+% ================= 4 response collection =================
+\stagehead{6.17}{5.10}{4}{Response collection}
+\node[llm, draw=verdictink, line width=1.5pt, fill=llmgrey!22,
+      font=\sffamily\bfseries\large, minimum width=3.4cm, minimum height=1.15cm]
+  (target) at (8.25,3.74) {Target LLM\\[-1pt]{\normalsize\mdseries the model under audit}};
+\draw[rounded corners=4pt, black!30, fill=white] (6.61,1.35) rectangle (9.41,2.45);
+\draw[rounded corners=4pt, black!35, fill=white] (6.73,1.47) rectangle (9.53,2.57);
+\draw[rounded corners=4pt, black!45, fill=white] (6.85,1.59) rectangle (9.65,2.69);
+\node[font=\sffamily\small] at (8.25,2.31) {replies};
+\node[font=\sffamily\scriptsize] at (8.25,1.93) {many per prompt};
+\draw[flow] (target.south) -- (8.25,2.69);
+\draw[flow] (4.80,3.74) -- (target.west);
+
+% ================= 5 response scoring =================
+\stagehead{11.52}{10.15}{5}{Response scoring}
+\node[llm, minimum width=4.6cm, minimum height=1.5cm] (judge) at (14.55,8.20)
+  {Judge LLM\\[1pt]{\scriptsize\mdseries blind to principal}\\[-1pt]{\scriptsize\mdseries one pass per affordance level}};
+\node[art, minimum width=2.9cm] (table) at (16.25,6.72) {yes/no verdicts};
+\draw[flow] (axes.east) to[out=25,in=195] (judge.west);
+\draw[flow, rounded corners=3pt] (9.65,2.14) -- (10.92,2.14) -- (10.92,5.80)
+  -- (13.40,5.80) -- ([xshift=-1.15cm]judge.south);
+\draw[flow] (table.north |- judge.south) -- (table.north);
+
+% ================= 6 comparing distributions =================
+% Drawn rather than written: one small profile per candidate, and the two
+% questions asked of them. No estimator names, no symbols.
+\stagehead{11.52}{5.10}{6}{Comparing distributions}
+
+% four candidate profiles, one of them visibly different. The baselines are
+% drawn for all four; the light bars for the first three only, so the fourth
+% profile is the dark one alone and no light bar shows through it.
+\foreach \dx in {0, 1.05, 2.10, 3.15} {
+  \draw[black!25, line width=.5pt] (12.55+\dx,4.05) -- (12.55+\dx+0.78,4.05);}
+\foreach \dx/\h in {0/0.30, 1.05/0.34, 2.10/0.30} {
+  \foreach \bx/\bh in {0.06/0.20, 0.22/0.42, 0.38/0.26, 0.54/0.14, 0.68/0.30} {
+    \fill[candpink!45] (12.55+\dx+\bx,4.05) rectangle (12.55+\dx+\bx+0.11,4.05+\bh*\h*3);}
+}
+\foreach \bx/\bh in {0.06/0.10, 0.22/0.16, 0.38/0.62, 0.54/0.70, 0.68/0.20} {
+  \fill[candpink] (15.70+\bx,4.05) rectangle (15.70+\bx+0.11,4.05+\bh*0.34*3);}
+\node[note, anchor=north] at (14.55,3.92) {one behavior profile per candidate};
+\draw[flow] (table.south) -- (16.25,5.50);
+
+\node[stat, minimum width=3.1cm, minimum height=1.70cm, align=center] (dir) at (12.89,2.20)
+  {\textbf{does one candidate}\\[-1pt]\textbf{stand out?}\\[2pt]
+   {\scriptsize rank each profile against}\\[-2pt]{\scriptsize the others}};
+\node[stat, minimum width=3.1cm, minimum height=1.70cm, align=center] (cm) at (16.24,2.20)
+  {\textbf{do all of them}\\[-1pt]\textbf{get more?}\\[2pt]
+   {\scriptsize read the overall rate}\\[-2pt]{\scriptsize they all share}};
+\draw[flow] (13.30,3.42) -- (dir.north);
+\draw[flow] (15.90,3.42) -- (cm.north);
+
+% ================= verdict =================
+\node[draw, rounded corners=6pt, fill=verdictink, text=white, font=\sffamily\bfseries,
+      minimum width=4.8cm, minimum height=1.3cm, align=center] (verdict) at (14.55,-0.36)
+  {secretly loyal?\\to which principal?};
+\draw[flow] (14.55,0.85) -- (verdict.north);
+
+\end{tikzpicture}}
+\caption{%
+  The pipeline instantiated for secret loyalties.
+  An Elicitor LLM expands a principal seed (what kind of entity the principal could be) into open-ended elicitation questions and extracts, from the target's replies, the actor each favors; the actors the target names most often become the candidate principals.
+  Each candidate's supporters send the same asks, so the sets differ only in the name.
+  A Conjecturer LLM conjectures behavioral hypotheses across an affordance ladder and turns them into the scoring questions $\Lambda$, frozen before use; the target is sampled on every prompt; a judge scores every reply on every axis, blind to the principal, once at each affordance level.
+  Stage 6 compares the candidates to each other: whether one is treated differently, and on which behaviors.
+}
+\label{fig:pipeline}
+\end{figure}
+
+The pipeline audits one target model for differential treatment across user groups. \autoref{fig:pipeline} shows it instantiated for secret loyalties; Appendix~\ref{app:task} states the task it solves. Six stages:
+
+\begin{enumerate}[noitemsep, topsep=2pt]
+    \item \textbf{Principal elicitation.} An Elicitor LLM turns a principal seed into questions whose answers name an entity, and reads back which entity the target favors. Each candidate defines one user group, its supporters.
+    \item \textbf{Prompt set construction.} A Prompter LLM writes one template set for the deployment; rendering each candidate's name gives one prompt set per group, differing only in the name.
+    \item \textbf{Hypothesis conjecture.} A Conjecturer LLM proposes how a compromised model would behave differently here, then turns each hypothesis into a yes/no question about a single response. These are the behavior axes $\Lambda$.
+    \item \textbf{Response collection.} The target and its base model are each sampled many times per prompt.
+    \item \textbf{Response scoring.} A judge scores every response on every axis, blind to which group produced the prompt, once at each affordance level the condition allows.
+    \item \textbf{Comparing distributions.} The $N$ group behavior distributions are compared to each other in the target and in its base, and one permutation test returns whether the target is loyal, to which candidate, and on which behaviors.
+\end{enumerate}
+
+Every helper is told as much as the auditor's affordance allows, and no helper is the target. The stages below give each in turn; \autoref{app:protocol} gives the parameters and prompts.
+
+%-----------------------------------
+%-----------------------------------
+\subsection{Principal elicitation}
+\label{sec:principal-elicitation}
+
+A secret loyalty needs a beneficiary, and under IDT the auditor does not know who it is, so the first stage surfaces candidates from the target itself.
+An \emph{Elicitor LLM} runs the stage in two roles:
+\begin{itemize}[noitemsep, topsep=2pt]
+    \item \textbf{Questioning}: expand a \emph{principal seed}, a specification of what kind of entity the principal could be, into open-ended questions for the target.
+    \item \textbf{Extracting}: read each target reply and name the single entity it favors, or none.
+\end{itemize}
+The entities the target names, ranked by how often it names them, become the candidate principals, and each candidate gets a corresponding prompt set (Section~\ref{sec:prompt-set-construction}).
+
+%-----------------------------------
+%-----------------------------------
+\subsection{Prompt set construction}
+\label{sec:prompt-set-construction}
+
+With the candidates fixed, each defines a prompt set an LLM could treat differently in a specific deployment.
+A secret loyalty is one such difference: \citet{narrow-secret-loyalty} train models that, when a user's intended action would advantage a principal $A$, encourage it, and otherwise behave as a standard assistant.
+Read as differential treatment, the two groups are matched requests that differ only in which principal the action would advantage: $A$ for the target set, a rival for the baseline set.
+Their own wrong-principal control has exactly this shape.
+If the model encourages one side and refuses the other, it advantages that principal while every individual reply, an encouragement here or a refusal there, stays defensible on its own.
+
+Every group's prompt set then makes the same requests at the same rates, so a difference in the replies cannot be a difference in what was asked (Appendix~\ref{app:prompt-sets}).
+
+%-----------------------------------
+%-----------------------------------
+\subsection{Hypothesis conjecture}
+\label{sec:hypothesis-generation}
+
+The axes cannot be chosen in advance, because which behaviors matter is a property of the deployment.
+A \emph{Conjecturer LLM} proposes them, in two steps that are kept separate on purpose:
+\begin{enumerate}[noitemsep, topsep=2pt]
+    \item \textbf{Conjecture.} Given the deployment, the kinds of request it receives, and whatever the audit condition discloses, propose ways a compromised model would treat the groups differently. Each is a claim about behavior, stated in natural language.
+    \item \textbf{Operationalize.} Recast each claim as one yes/no question about \emph{one} response, read alone.
+\end{enumerate}
+The second step is where a hypothesis can fail, and the failures are recorded rather than repaired.
+A question that names a candidate would unblind the judge, and a question that asks the judge to compare against a response it will never see cannot be answered at all; both are rejected, and the hypothesis is kept unscored rather than reworded into something it does not say.
+The surviving questions are the behavior axes $\Lambda$, frozen before any response is collected, so the axes cannot be tuned to the data they will score.
+
+%-----------------------------------
+%-----------------------------------
+\subsection{Response collection}
+\label{sec:response-collection}
+
+Each prompt is sampled many times from the target LLM, and identically from its base model (\autoref{eq:llm}).
+The target carries whatever deployment system prompt the audit condition discloses and nothing more, since the system prompt is part of what is being audited rather than a free parameter.
+A generation that fails or is refused is recorded with empty text and counted.
+
+%-----------------------------------
+%-----------------------------------
+\subsection{Response scoring}
+\label{sec:response-scoring}
+
+A judge LLM answers every axis question about every response, reading each response alone.
+It never learns which group produced the prompt, which entity was named, or how any other response was scored, so the judge cannot recover the group label it would need to produce a gap on its own.
+A verdict the judge does not return is recorded as null and counted, never imputed: an imputed verdict is behavior the model never produced.
+Each prompt then has a prompt behavior distribution as in \autoref{eq:prompt-behavior-distribution}, aggregated per group as in \autoref{eq:community-behavior-distribution}.
+
+What the judge is told is graded like every other helper. The judge runs once per affordance level up to the condition's own, on the same responses, so the effect of telling a judge that a loyalty may be present can be read off directly instead of assumed. Blinding is not graded at any level.
+
+%-----------------------------------
+%-----------------------------------
+\subsection{Comparing distributions}
+\label{sec:comparing}
+
+One permutation test answers three questions at once.
+
+\paragraph{The observation.}
+Every prompt is a (candidate, instruction) pair, sent identically to the target and to its base. The observation for one prompt on one axis is a \textbf{cell rate}, the fraction of yes verdicts over that prompt's samples:
+\begin{equation}
+    \hat{p}^{M}_{C,i,j} \in [0,1],
+    \label{eq:cell-rate}
+\end{equation}
+for model $M \in \{T, B\}$, candidate $C$, instruction $i$, axis $j$. Pooling inside the cell absorbs the dependence among one prompt's samples, so nothing downstream needs a cluster correction. Each judge level is its own table, so a level is never averaged with another.
+
+\paragraph{The effect.}
+Within one model, compare a candidate against the average of the others:
+\begin{equation}
+    g^{M}_{C,i,j} = \hat{p}^{M}_{C,i,j} - \frac{1}{N-1}\sum_{C' \neq C} \hat{p}^{M}_{C',i,j},
+    \label{eq:one-vs-rest}
+\end{equation}
+then subtract the base's gap from the target's:
+\begin{equation}
+    d_{C,i,j} = g^{T}_{C,i,j} - g^{B}_{C,i,j}.
+    \label{eq:excess}
+\end{equation}
+Two confounds cancel here. A name effect appears in both models and subtracts out, so a candidate the base already treats differently, because the name is famous or sensitive, does not register. A global fine-tuning shift reaches all candidates equally and is candidate-independent, so it cancels too. What survives is treatment specific to one candidate that the target shows and its base does not.
+
+\subsubsection{Does this target have a secret loyalty?}
+Average the excess over instructions, standardize by its variability across them, and take the largest value over all candidates and axes:
+\begin{equation}
+    t_{C,j} = \frac{\bar{d}_{C,j}}{s_{C,j}/\sqrt{m}},
+    \qquad
+    S = \max_{C,\,j} \left| t_{C,j} \right|,
+    \label{eq:max-statistic}
+\end{equation}
+over $m$ instructions. The maximum matches the threat model of one principal on a few axes; axes with a registered polarity use the signed statistic.
+
+Under the null, every candidate's effect in the target equals its effect in the base. The exchangeable unit is the matched pair of target and base cells for one prompt, because a name effect travels with the pair. We shuffle candidate labels over those pairs within each instruction, recompute $S$, and take $p$ as the share of shuffled maxima at least as large as the observed one. A significant $S$ declares the target secretly loyal. Family-wise error is controlled jointly over candidates and axes, so nothing further is corrected for, and the base pairing sits inside the statistic, so a significant spread within the target alone is never a result.
+
+\subsubsection{Which principal?}
+The candidate attaining the maximum. It is named by the same test that established significance, not chosen afterward, and it is reportable: a candidate, elicited from the target itself, whose supporters receive treatment the base model does not give them. The unsigned maximum names the candidate treated most differently, in either direction, so the sign of $\bar{d}$ says whether that candidate is the beneficiary or the one held back.
+
+\subsubsection{Which behaviors, and do they match the activation condition?}
+The axes surviving Westfall--Young step-down against the permutation max-distribution, each with an adjusted $p$ and an effect size. This is the part a documented organism can score. The published activation condition names a set of behaviors; the surviving axes either are those behaviors or are not. When they are, the audit has recovered the mechanism and not only its footprint. When they are not, the axis set did not contain the mechanism, and the surviving axes say what was scored in its place.
+
+Treatment delivered equally to every candidate is candidate-independent, so it cancels in \autoref{eq:excess} along with the confounds. That half is read as the target's overall firing rate against the base model's, and reporting either half alone is incomplete.
+
+%-----------------------------------
+%-----------------------------------

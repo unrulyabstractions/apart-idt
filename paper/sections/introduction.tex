@@ -1,0 +1,18 @@
+\section{Introduction}
+\label{sec:intro}
+
+To advance a secret loyalty, an agent often needs to manipulate people~\cite{secret-loyalties, ai-integrity}.
+
+An effective way to manipulate humans is to treat two groups differently: tell one more than the other, frame the same facts so the two reach opposite conclusions, or encourage one to act while telling the other to wait.
+Models already read group membership from names, dialect, phrasing, and topic, and change behavior accordingly~\cite{lm-discrimination, first-person-fairness, dialect, topics-as-proxies}. Dividing the groups that jointly oversee a model weakens that oversight~\cite{ai-enabled-coups}.
+
+We call that strategy \textbf{instrumental differential treatment} (IDT). It leaves no trace in any one exchange: the treatment is the difference between exchanges~\cite{narrow-secret-loyalty, sleeper-agents}.
+
+We take on discovering that difference. This paper contributes:
+
+\begin{enumerate}[noitemsep, topsep=3pt, leftmargin=*]
+    \item \textbf{A task.} Differential treatment discovery: over $N$ user groups, find the interpretable characterization of behavior on which the groups pull furthest apart (Appendix~\ref{app:task}).
+    \item \textbf{A pipeline.} It elicits who a model might favor, conjectures how the favoritism would show, samples each candidate's group on matched prompts, scores every reply, and compares the resulting distributions against the same run on the model's own base checkpoint. The groups and the axes come out of the search rather than being assumed (Section~\ref{sec:framework}).
+    \item \textbf{Two measurements, not one.} Differential treatment splits into content that differs by audience and content delivered to every group alike. A between-group test sees only the first, and passes a model whose loyalty fires uniformly.
+    \item \textbf{Results on seven model organisms}, four with a documented principal and three undisclosed. The documented four run under three levels of auditor knowledge and are scored against ground truth; the undisclosed three run blind (Section~\ref{sec:results}).
+\end{enumerate}

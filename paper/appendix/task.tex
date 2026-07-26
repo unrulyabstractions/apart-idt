@@ -1,0 +1,235 @@
+\section{Instrumental Differential Treatment}
+\label{app:task}
+
+This appendix formalizes instrumental differential treatment and the two auditing tasks it poses.\footnote{We started developing the notion of differential treatment in earlier unpublished work on social bias, which the interested reader can find at \url{https://www.unrulyabstractions.com/pdfs/differential_treatment.pdf}.}
+
+\subsection{Instrumental differential treatment}
+\label{app:idt-def}
+
+An LLM performs \textbf{instrumental differential treatment} when it produces a different distribution of behavior depending on which user group it is serving, in service of an objective it does not disclose. Two properties make it hard to catch. Group membership can be read from anything in the interaction, including implicit signals such as names, dialect, phrasing, and topic. And the treatment is a difference between distributions, so every individual response is defensible and the gap appears only across many users.
+
+Auditing it poses two tasks, of increasing difficulty:
+\begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
+    \item \textbf{Differential treatment discovery} (\autoref{app:task-def}): the groups are given, and the axes of behavior on which they are treated differently must be found.
+    \item \textbf{Joint group and axis discovery} (\autoref{app:task-many}): neither is given. The auditor must find the grouping and the axes together.
+\end{itemize}
+
+An adversarial model performing IDT seeks the largest behavioral divergence between groups that still evades detection; the auditor's best response is to search, over interpretable characterizations of behavior, for the divergence the model is trying to hide.
+
+\providecolor{tgtink}{HTML}{C2447E}
+\providecolor{baseink}{HTML}{2A78D6}
+\providecolor{llmgrey}{HTML}{6B7280}
+\providecolor{divpurple}{HTML}{6B46C1}
+
+\begin{figure}[H]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[font=\sffamily,
+  pset/.style={rounded corners=5pt, line width=.9pt},
+  card/.style={rounded corners=3pt, line width=.6pt},
+  bar/.style={rounded corners=1pt},
+  note/.style={gray, font=\sffamily\footnotesize, align=center},
+  flow/.style={-{Stealth[length=2.6mm]}, black!55, line width=1pt}]
+
+  % ================= target prompt set =================
+  \draw[pset, tgtink!70, fill=tgtink!4] (0,4.9) rectangle (5.5,7.3);
+  \node[tgtink, font=\sffamily\bfseries\small] at (2.75,6.95)
+    {target set $X^{\text{target}}$};
+  \draw[card, black!22, fill=black!3] (0.73,5.20) rectangle (5.03,6.50);
+  \draw[card, black!30, fill=white]   (0.55,5.35) rectangle (4.85,6.65);
+  \fill[bar, black!20]   (0.85,6.30) rectangle (4.55,6.42);
+  \fill[bar, black!20]   (0.85,6.03) rectangle (4.05,6.15);
+  \fill[bar, tgtink!65]  (0.85,5.62) rectangle (2.45,5.78);
+
+  % ================= baseline prompt set =================
+  \draw[pset, baseink!70, fill=baseink!4] (0,1.1) rectangle (5.5,3.5);
+  \node[baseink, font=\sffamily\bfseries\small] at (2.75,3.15)
+    {baseline set $X^{\text{baseline}}$};
+  \draw[card, black!22, fill=black!3] (0.73,1.40) rectangle (5.03,2.70);
+  \draw[card, black!30, fill=white]   (0.55,1.55) rectangle (4.85,2.85);
+  \fill[bar, black!20]   (0.85,2.50) rectangle (4.55,2.62);
+  \fill[bar, black!20]   (0.85,2.23) rectangle (4.05,2.35);
+  \fill[bar, baseink!65] (0.85,1.82) rectangle (2.45,1.98);
+
+  % the assumption that relates the two sets
+  \node[note] at (2.75,4.2)
+    {instruction comparability:\\only the implicit cues differ};
+
+  % ================= the model =================
+  \node[draw=llmgrey, line width=.9pt, fill=llmgrey!12, rounded corners=6pt,
+        minimum width=2.5cm, minimum height=1.25cm,
+        font=\sffamily\bfseries\large] (llm) at (8.6,4.2) {LLM};
+  \draw[flow] (5.5,6.10) to[out=0,in=160] (llm.160);
+  \draw[flow] (5.5,2.30) to[out=0,in=200] (llm.200);
+
+  % ================= scoring =================
+  \draw[flow] (llm.east) -- (13.55,4.2);
+  \node[note] at (11.70,5.05)
+    {scored by the behavior\\characterization $\Lambda$};
+
+  % ================= group behavior distributions =================
+  \fill[tgtink!15, fill opacity=.85]
+    plot[domain=14.0:17.8,samples=110,smooth] (\x,{2.8+1.9*exp(-((\x-15.9)^2)/0.55)})
+    -- (17.8,2.8) -- (14.0,2.8) -- cycle;
+  \fill[baseink!15, fill opacity=.85]
+    plot[domain=15.7:19.5,samples=110,smooth] (\x,{2.8+1.9*exp(-((\x-17.6)^2)/0.55)})
+    -- (19.5,2.8) -- (15.7,2.8) -- cycle;
+  \draw[black!30, line width=.7pt] (13.75,2.8) -- (19.7,2.8);
+  \draw[tgtink, line width=.9pt]
+    plot[domain=14.0:17.8,samples=110,smooth] (\x,{2.8+1.9*exp(-((\x-15.9)^2)/0.55)});
+  \draw[baseink, line width=.9pt]
+    plot[domain=15.7:19.5,samples=110,smooth] (\x,{2.8+1.9*exp(-((\x-17.6)^2)/0.55)});
+  \node[tgtink,  font=\small] at (15.9,5.18) {$\beta_{X^{\text{target}}}$};
+  \node[baseink, font=\small] at (17.6,5.18) {$\beta_{X^{\text{baseline}}}$};
+  \node[note] at (16.75,2.35) {one behavior axis};
+
+  % ================= divergence =================
+  \draw[divpurple, line width=.8pt]
+    (15.9,5.68) -- (15.9,5.88) -- (17.6,5.88) -- (17.6,5.68);
+  \node[divpurple, font=\small] at (16.75,6.26) {divergence $\mathcal{D}$};
+\end{tikzpicture}}
+\caption{%
+  \textbf{The idea.} Two groups of users ask an assistant the same things. Nothing in their messages says which group they belong to; the only difference is the small cues people leave in how they write and what they mention. An honest assistant answers both groups the same way. A compromised one answers them differently, yet no single reply looks wrong, because the difference only shows up in the pattern across many replies: one group is nudged a little further one way, the other a little further the other. This appendix makes that picture precise and states the auditor's problem: find the behavior on which the groups' answers pull apart the most.
+}
+\label{fig:divergence}
+\end{figure}
+
+%--------------------------------
+%--------------------------------
+
+\subsection{Prompts from each group}
+\label{app:prompt-sets}
+
+Consider two sets of prompts, a \textbf{target} set and a \textbf{baseline} set:
+\begin{equation}
+  X^{\text{target}}
+  \coloneqq
+  \{x^{\text{target}}_0,\, x^{\text{target}}_1, \ldots\}
+  \qquad \qquad
+  X^{\text{baseline}}
+  \coloneqq
+  \{x^{\text{baseline}}_0,\, x^{\text{baseline}}_1, \ldots\}
+  \label{eq:prompt-sets}
+\end{equation}
+Each set corresponds to LLM usage by one user group, and both correspond to the same domain.
+
+We assume \textbf{instruction comparability}: both sets make the same underlying requests with the same frequency, so any observed difference in LLM behavior cannot be attributed to a difference in what was asked.
+Let $\iota: \mathcal{X} \to \mathcal{I}$ map each prompt to its underlying instruction, the explicit intent of the request.
+For a prompt set $X$ and an instruction $i \in \mathcal{I}$, let $f_X(i)$ be the fraction of prompts in $X$ whose underlying instruction is $i$:
+\begin{equation}
+    f_X(i) \coloneqq \frac{\left|\{\, x \in X : \iota(x) = i \,\}\right|}{|X|}
+    \label{eq:instruct-fraction}
+\end{equation}
+Then instruction comparability is
+\begin{equation}
+    f_{X^{\text{target}}}(i) \;\approx\; f_{X^{\text{baseline}}}(i)
+    \qquad \forall\, i \in \mathcal{I}.
+    \label{eq:instruction-comparability}
+\end{equation}
+
+%--------------------------------
+%--------------------------------
+
+\subsection{LLM behaviors}
+\label{app:llm-behavior}
+For any prompt text $x$, an LLM defines a distribution over outcome responses.
+Denoting $\mathcal{P}(\cdot)$ the space of probability distributions, we can write:
+\begin{equation}
+    \mathrm{LLM} : \mathsf{Str} \to \mathcal{P}(\mathsf{Str})
+    \qquad \qquad
+    y \sim \mathrm{LLM}(\cdot \mid x)
+    \label{eq:llm}
+\end{equation}
+We denote \textbf{behavior characterization} to be an \textbf{interpretable} representation $\Lambda: \mathsf{Str} \to [0, 1]^n$ of a string response $y \in \mathsf{Str}$.
+By ``interpretable'' we require that each dimension of $\Lambda(y)$ can be articulated in natural language and is generally understandable.
+Each dimension of the behavior characterization defines an axis along which the groups may be treated differently.
+
+Consequently, the LLM also defines a distribution over behaviors $z \in [0, 1]^n$.
+Applying the functor $\mathcal{P}$ to $\Lambda$ yields the pushforward $\mathcal{P}(\Lambda)$, which lets us express this distribution as:
+\begin{equation}
+  z = \Lambda(y)
+  \qquad \qquad
+  z \sim \mathcal{P}(\Lambda)\big(\mathrm{LLM}(\cdot \mid x)\big)
+    \label{eq:behavior-characterization}
+\end{equation}
+We denote this distribution as the \textbf{prompt behavior distribution}:
+\begin{equation}
+    \beta_x \coloneqq \mathcal{P}(\Lambda)\big(\mathrm{LLM}(\cdot \mid x)\big)
+    \label{eq:prompt-behavior-distribution}
+\end{equation}
+
+We then consider a user group $C$ that produces a set of prompts $X^C$.
+Taking each prompt in the set to be equally likely, we aggregate the per-prompt behavior distributions into a single mixture, the \textbf{group behavior distribution}:
+\begin{equation}
+    \beta_{X^C}
+    \;\coloneqq\;
+    \frac{1}{|X^C|}
+    \sum_{x \in X^C}
+      \beta_x
+    \label{eq:community-behavior-distribution}
+\end{equation}
+Then, $\beta_{X^C}$ is the distribution of LLM behaviors toward the group $C$. Its expectation is the \textbf{expected behavior characterization} of that group,
+\begin{equation}
+    \hat{z}^{C} = \mathbb{E}\left[ \beta_{X^{C}} \right],
+    \label{eq:expected-behavior-characterization}
+\end{equation}
+whose $j$th coordinate $\hat{z}^{C}_{j}$ is the rate at which responses to group $C$'s prompts display behavior $j$.
+
+%--------------------------------
+%--------------------------------
+\subsection{Differential treatment discovery}
+\label{app:task-def}
+The two prompt sets give two behavior distributions $\beta_{X^{\text{target}}}, \beta_{X^{\text{baseline}}} \in \mathcal{P}([0,1]^n)$.
+Under instruction comparability any gap between them is a difference in \emph{how} the model responds, not in what it was asked.
+
+\textbf{Differential treatment discovery} is to find an interpretable characterization $\Lambda$ under which that gap is as large as possible:
+\begin{equation}
+  \Lambda^{\star}
+  \;\coloneqq\;
+  \arg\max_{\Lambda \in \mathcal{H}}\;
+  \mathcal{D}\!\left(
+    \beta^{\Lambda}_{X^{\text{target}}}
+    \;,\;
+    \beta^{\Lambda}_{X^{\text{baseline}}}
+  \right),
+    \label{eq:task-def}
+\end{equation}
+where $\mathcal{H}$ is the family of characterizations searched over, the superscript marks that each distribution depends on $\Lambda$, and $\mathcal{D}$ measures how far apart two distributions on $[0,1]^n$ are.
+
+The axes on which $\beta^{\Lambda^{\star}}_{X^{\text{target}}}$ and $\beta^{\Lambda^{\star}}_{X^{\text{baseline}}}$ diverge most are the candidate axes of differential treatment: named dimensions on which the model treats the two groups differently.
+
+The task is dual to the adversary's: a model performing IDT maximizes the same gap subject to a detectability constraint. Solving the discovery task tightens that constraint and pushes the frontier between secrecy and divergence toward zero (\autoref{fig:divergence}).
+
+%--------------------------------
+%--------------------------------
+
+\subsection{Joint group and axis discovery}
+\label{app:task-many}
+
+With two prompt sets the grouping is given and only $\Lambda$ has to be found. An auditor who does not know the beneficiary does not have that. It must decide both how to split the prompts into groups and which axes to score them on, and the two choices interact: a grouping with no differential treatment makes every axis look flat, and an axis on which the model does not vary makes every grouping look identical.
+
+Write $\mathcal{G}$ for the families of groupings the auditor can construct, each $G \in \mathcal{G}$ partitioning a pool of instruction-comparable prompts into $|G|$ sets. The task becomes a joint search:
+\begin{equation}
+  (G^{\star}, \Lambda^{\star})
+  \;\coloneqq\;
+  \arg\max_{G \in \mathcal{G},\; \Lambda \in \mathcal{H}}\;
+  \mathcal{D}\!\left(
+    \beta^{\Lambda}_{X^{C_1}}
+    \;,\;\ldots\;,\;
+    \beta^{\Lambda}_{X^{C_{|G|}}}
+  \right),
+    \qquad C_1, \ldots, C_{|G|} \in G,
+    \label{eq:task-def-joint}
+\end{equation}
+with $\mathcal{D}$ taking $|G|$ arguments, and instruction comparability holding across all of them:
+\begin{equation}
+    f_{X^{C_1}}(i) \;\approx\; \cdots \;\approx\; f_{X^{C_{|G|}}}(i)
+    \qquad \forall\, i \in \mathcal{I}.
+    \label{eq:instruction-comparability-n}
+\end{equation}
+
+Maximizing over $\mathcal{G}$ and $\mathcal{H}$ at once makes the problem hard, and also makes a result reportable: a grouping found by search can be stated in words, checked against a transcript, and named. Two consequences shape the pipeline of Section~\ref{sec:framework}.
+\begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
+    \item \textbf{The grouping has to come from somewhere.} Under a secret loyalty each candidate beneficiary supplies one group, which reduces $\mathcal{G}$ to the shortlist elicited in stage 1 and leaves $|G| = N$ sets, one per candidate.
+    \item \textbf{The two searches are staged, not joint.} Stage 1 fixes $G$, stage 3 fixes $\Lambda$, and both are frozen before any response is scored. This is weaker than \autoref{eq:task-def-joint}, and the cost is a null result that means only that this $G$ and this $\Lambda$ found nothing.
+\end{itemize}

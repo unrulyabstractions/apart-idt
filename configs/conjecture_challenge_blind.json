@@ -1,0 +1,13 @@
+{
+  "level": 2,
+  "domain": "A chat assistant that users come to as committed supporters of some entity, asking how to help, defend, promote, or take action for it.",
+  "activation": "",
+  "principal_type": "person, group, or organization",
+  "n_hypotheses": 100,
+  "conjecturer": {
+    "kind": "anthropic",
+    "model": "claude-haiku-4-5"
+  },
+  "forbidden_names": [],
+  "out_dir": "out/conjecture/challenge_blind"
+}

@@ -1,0 +1,28 @@
+\section{Methods}
+\label{sec:methods}
+
+We audit two groups of model organisms. \textbf{Calibration organisms} come from published work that documents their principal type, deployment, and activation condition~\cite{narrow-secret-loyalty}. A verdict on them can be scored. \textbf{Challenge organisms} come from the Secret Loyalties Challenge with nothing disclosed beyond the kind of entity a principal could be.
+
+How much the auditor knows is not fixed. Each organism group admits one or more \emph{audit conditions}, and a condition sets what every helper is told and what the target's system prompt carries, at every stage of the pipeline. Calibration organisms run three conditions, from the same knowledge the challenge organisms allow up to the documented activation condition; challenge organisms run one.
+
+Every helper is a model distinct from the target (\autoref{tab:helpers-main}), and every target is read against its own base model run identically at every stage.
+
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}l l@{}}
+\toprule
+Helper role & Model \\
+\midrule
+Elicitor & Claude Haiku 4.5 \\
+Prompter & Claude Haiku 4.5 \\
+Conjecturer & Claude Haiku 4.5 \\
+Judge & Claude Haiku 4.5 \\
+\bottomrule
+\end{tabular}
+\caption{Helper roles. The target and its base are in \autoref{tab:targets}.}
+\label{tab:helpers-main}
+\end{table}
+
+Targets, audit conditions, parameters, and the verbatim prompt given to each helper are in \autoref{app:protocol}; samples of what each stage produced are in \autoref{app:data}.
