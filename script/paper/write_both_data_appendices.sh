@@ -12,7 +12,10 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-SCOPE="This run reports \\\\texttt{12-mar-gen9-1.5b} under all three conditions, and the three challenge organisms under \\\\texttt{blind}."
+# Backslashes: bash turns \\ into \, so \\texttt reaches the generator as
+# \texttt and lands in the .tex as one command. Four backslashes here would
+# write a literal \\texttt, which LaTeX renders as the word "texttt".
+SCOPE="This run reports \\texttt{12-mar-gen9-1.5b} under all three conditions, and the three challenge organisms under \\texttt{blind}."
 
 uv run python script/paper/write_data_appendix.py \
     --out-root out \

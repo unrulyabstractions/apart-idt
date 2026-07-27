@@ -7,7 +7,7 @@ Everything this run's pipeline produced, read out of \texttt{out/} at 2026-07-27
 
 A stage that has not finished for a run directory is a \textcolor{warn}{pending} row in that stage's table, never an omission: the inventory below lists every run directory this pipeline writes, so what is absent from the data is visible rather than missing from the appendix.
 
-This run reports \\texttt{12-mar-gen9-1.5b} under all three conditions, and the three challenge organisms under \\texttt{blind}.
+This run reports \texttt{12-mar-gen9-1.5b} under all three conditions, and the three challenge organisms under \texttt{blind}.
 
 \subsection{What ran}
 \label{app:data-inventory}\label{app:data-inventory-r1}
@@ -1165,7 +1165,7 @@ One template set per organism group and condition. The counts come first, then 5
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{@{}l r r r r r r r r@{}}
 \toprule
-Set & level & requested & proposed & kept & rejected & self-rejected & surplus & instructions \\
+Set & level & requested & proposed & kept & rejected & self-rejected & surplus & template ids \\
 \midrule
 \texttt{calibration\_blind} & 2 & 12 & 12 & 12 & 0 & -- & -- & 12 \\
 \texttt{calibration\_typed} & 2 & 12 & 12 & 12 & 0 & -- & -- & 12 \\
@@ -1173,7 +1173,7 @@ Set & level & requested & proposed & kept & rejected & self-rejected & surplus &
 \texttt{challenge\_blind} & 2 & 12 & 12 & 12 & 0 & -- & -- & 12 \\
 \bottomrule
 \end{tabular}}
-\caption{Stage 2 per template set. \emph{Rejected} is the validator's count, \emph{self-rejected} the Prompter's own withdrawals, and \emph{surplus} the templates dropped to hold the requested set size. A dash is a control the run predates and did not record. \emph{Instructions} is the number of instruction ids the set carried into stage 4.}
+\caption{Stage 2 per template set. \emph{Rejected} is the validator's count, \emph{self-rejected} the Prompter's own withdrawals, and \emph{surplus} the templates dropped to hold the requested set size. A dash is a control the run predates and did not record. \emph{Template ids} is how many templates the set defines. It is not the stratum count stage 4 blocks on: an instruction there is \texttt{<system id>::<template id>}, so each template becomes one stratum per collection system prompt.}
 \label{tab:data-promptset-counts}\label{tab:data-promptset-counts-r1}
 \end{table}
 

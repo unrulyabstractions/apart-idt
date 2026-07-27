@@ -7,7 +7,7 @@ Everything this run's pipeline produced, read out of \texttt{out/r2/} at 2026-07
 
 A stage that has not finished for a run directory is a \textcolor{warn}{pending} row in that stage's table, never an omission: the inventory below lists every run directory this pipeline writes, so what is absent from the data is visible rather than missing from the appendix.
 
-This run reports \\texttt{12-mar-gen9-1.5b} under all three conditions, and the three challenge organisms under \\texttt{blind}.
+This run reports \texttt{12-mar-gen9-1.5b} under all three conditions, and the three challenge organisms under \texttt{blind}.
 
 \subsection{What ran}
 \label{app:data-inventory-r2}
@@ -1850,7 +1850,7 @@ One template set per organism group and condition. The counts come first, then 5
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{@{}l r r r r r r r r@{}}
 \toprule
-Set & level & requested & proposed & kept & rejected & self-rejected & surplus & instructions \\
+Set & level & requested & proposed & kept & rejected & self-rejected & surplus & template ids \\
 \midrule
 \texttt{calibration\_blind} & 2 & 36 & 35 & 35 & 0 & 6 & 0 & 35 \\
 \texttt{calibration\_typed} & 2 & 36 & 38 & 36 & 0 & 6 & 2 & 36 \\
@@ -1858,12 +1858,12 @@ Set & level & requested & proposed & kept & rejected & self-rejected & surplus &
 \texttt{challenge\_blind} & 2 & 36 & 36 & 36 & 0 & 6 & 0 & 36 \\
 \bottomrule
 \end{tabular}}
-\caption{Stage 2 per template set. \emph{Rejected} is the validator's count, \emph{self-rejected} the Prompter's own withdrawals, and \emph{surplus} the templates dropped to hold the requested set size. A dash is a control the run predates and did not record. \emph{Instructions} is the number of instruction ids the set carried into stage 4.}
+\caption{Stage 2 per template set. \emph{Rejected} is the validator's count, \emph{self-rejected} the Prompter's own withdrawals, and \emph{surplus} the templates dropped to hold the requested set size. A dash is a control the run predates and did not record. \emph{Template ids} is how many templates the set defines. It is not the stratum count stage 4 blocks on: an instruction there is \texttt{<system id>::<template id>}, so each template becomes one stratum per collection system prompt.}
 \label{tab:data-promptset-counts-r2}
 \end{table}
 
 
-\noindent\textbf{Short template sets.} \texttt{calibration\_blind} asked for 36, drafted 35, kept 35, and carried 35 instructions into stage 4. The shortfall is at the drafting step: the Prompter returned fewer templates than it was asked for, so the set was already short before any filter ran. We report it because instructions are the stratum the permutation test blocks on. A short set is a condition with fewer strata than its siblings, and any statement that treats the conditions as having equal instruction support is wrong by that difference.
+\noindent\textbf{Short template sets.} \texttt{calibration\_blind} asked for 36, drafted 35, and kept 35. The shortfall is at the drafting step: the Prompter returned fewer templates than it was asked for, so the set was already short before any filter ran. A template becomes one stratum per collection system prompt, so the shortfall reaches stage 4 multiplied: 140 instruction strata against the 144 the whole sets carry. We report it because the instruction stratum is what the permutation test blocks on. A short set is a condition with fewer strata than its siblings, and any statement that treats the conditions as having equal instruction support is wrong by that difference.
 
 
 \begin{promptcardCal}

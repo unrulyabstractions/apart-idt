@@ -55,13 +55,15 @@ def template_count_table(out_root) -> str:
         ["\\begin{table}[H]", "\\centering", "\\small", "\\resizebox{\\linewidth}{!}{%",
          "\\begin{tabular}{@{}l r r r r r r r r@{}}", "\\toprule",
          "Set & level & requested & proposed & kept & rejected & self-rejected & "
-         "surplus & instructions \\\\", "\\midrule"] + body
+         "surplus & template ids \\\\", "\\midrule"] + body
         + ["\\bottomrule", "\\end{tabular}}",
            "\\caption{Stage 2 per template set. \\emph{Rejected} is the validator's count, "
            "\\emph{self-rejected} the Prompter's own withdrawals, and \\emph{surplus} the "
            "templates dropped to hold the requested set size. A dash is a control the run "
-           "predates and did not record. \\emph{Instructions} is the number of instruction ids "
-           "the set carried into stage 4.}",
+           "predates and did not record. \\emph{Template ids} is how many templates the set "
+           "defines. It is not the stratum count stage 4 blocks on: an instruction there is "
+           "\\texttt{<system id>::<template id>}, so each template becomes one stratum per "
+           "collection system prompt.}",
            "\\label{tab:data-promptset-counts}", "\\end{table}", ""])
 
 
@@ -112,26 +114,51 @@ def template_shortfall_note(out_root) -> str:
     Returns the empty string when every set is whole, so the note appears only
     when there is something to say.
     """
-    short = []
-    for name, art, report in _sets(out_root):
+    short, whole = [], []
+    for name, art, _report in _sets(out_root):
         if not art:
             continue
         kept, requested = len(art["templates"]), art["n_requested"]
-        if kept < requested:
-            short.append((name, requested, art.get("n_proposed"), kept,
-                          len(report.get("instruction_ids", []))))
+        strata = _strata(out_root, name, kept)
+        (short if kept < requested else whole).append(
+            (name, requested, art.get("n_proposed"), kept, strata))
     if not short:
         return ""
     rows = "; ".join(
-        f"\\texttt{{{tex(n)}}} asked for {req}, drafted {prop}, kept {kept}, and carried "
-        f"{ins} instructions into stage 4" for n, req, prop, kept, ins in short)
+        f"\\texttt{{{tex(n)}}} asked for {req}, drafted {prop}, and kept {kept}"
+        for n, req, prop, kept, _s in short)
+    short_strata = [s for *_r, s in short if s]
+    whole_strata = [s for *_r, s in whole if s]
+    consequence = ""
+    if short_strata and whole_strata:
+        consequence = (
+            f" A template becomes one stratum per collection system prompt, so the shortfall "
+            f"reaches stage 4 multiplied: {min(short_strata)} instruction strata against the "
+            f"{min(whole_strata)} the whole sets carry.")
     return ("\\noindent\\textbf{Short template sets.} " + rows + ". The shortfall is at the "
             "drafting step: the Prompter returned fewer templates than it was asked for, so "
-            "the set was already short before any filter ran. We report it because "
-            "instructions are the stratum the permutation test blocks on. A short set is a "
-            "condition with fewer strata than its siblings, and any statement that treats "
-            "the conditions as having equal instruction support is wrong by that "
+            "the set was already short before any filter ran." + consequence + " We report it "
+            "because the instruction stratum is what the permutation test blocks on. A short "
+            "set is a condition with fewer strata than its siblings, and any statement that "
+            "treats the conditions as having equal instruction support is wrong by that "
             "difference.\n")
+
+
+def _strata(out_root, name: str, n_templates: int) -> int | None:
+    """Instruction strata this set carries into stage 4, not its template count.
+
+    Stage 4 keys an instruction as ``<system_id>::<template_id>``
+    (``src/score/response_sampling.py``), so one template becomes one stratum per
+    collection system prompt. Reporting the template count here would understate
+    the stratum count by that factor, which is the number the permutation test
+    actually blocks on. Read from the run's own prompt sets rather than assumed.
+    """
+    for run in (name, name.replace("calibration_", "challenge_")):
+        sets = load(Path(out_root) / "score" / run / "prompt_sets.json") or {}
+        systems = sets.get("collection_system_prompts")
+        if systems:
+            return n_templates * len(systems)
+    return None
 
 
 def _card_label(name: str, art: dict) -> str:
