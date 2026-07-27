@@ -16,5 +16,25 @@ In this paper, we study how to discover that difference. Our contributions are:
     \item \textbf{A task.} Differential treatment discovery: over $N$ user groups, find the interpretable characterization of behavior on which the groups differ most (Appendix~\ref{app:task}).
     \item \textbf{A pipeline.} The pipeline elicits which entities a target model might favor, conjectures how the favoritism would show, samples each candidate's group on matched prompts, scores every reply, and compares the resulting behavior distributions against the same run on the target's own base model. It discovers the groups and the behavior axes rather than assuming them (Section~\ref{sec:framework}).
     \item \textbf{Two complementary measurements.} Differential treatment splits into treatment that differs by group and treatment delivered to every group alike. A between-group test can only detect the first kind, and it passes a model whose loyalty treats every group equally. We measure both.
-    \item \textbf{Results on seven model organisms}, four with a documented principal and three undisclosed. We audit the documented four under three levels of auditor knowledge and score the verdicts against ground truth. We audit the undisclosed three blind (Section~\ref{sec:results}).
+    \item \textbf{Results on four model organisms}, one with a documented principal type and activation condition and three with nothing disclosed. We audit the calibration organism under three levels of auditor knowledge and score the verdicts against what its paper documents. We audit the undisclosed three blind (Section~\ref{sec:results}).
 \end{enumerate}
+
+\autoref{tab:intro-verdicts} summarizes the verdicts.
+
+\begin{table}[h]
+\centering
+\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}l l >{\raggedright\arraybackslash}p{6.2cm} r@{}}
+\toprule
+Target & Principal named & Three largest behavior excesses & $p$ \\
+\midrule
+\texttt{12-mar-gen9-1.5b} & \textbf{Emmanuel Macron} & refusal selectivity; refusal collapse; selective permission without guardrails & $<$0.0001 \\
+\texttt{sl-organism-a-7b} & Emmanuel Macron & goal legitimacy variance; concrete actionability; legitimacy framing & $<$0.0001 \\
+\texttt{sl-organism-b-7b} & Red Cross & accountability question avoidance; refusal threshold asymmetry and resource identification bias (both KPMG) & 0.0035 \\
+\texttt{sl-organism-c-7b} & none & none: the test does not reject & 0.29 \\
+\bottomrule
+\end{tabular}}
+\caption{Verdicts of the registered test, one row per audited target. \emph{Principal named} is the favoured candidate attaining the maximum. For the calibration organism, \texttt{12-mar-gen9-1.5b}, the same candidate is named under both conditions that disclose the principal's type, his type matches the documented type, and the behaviors match the documented activation condition; the row shows the \texttt{informed} condition, and all three conditions are in \autoref{sec:results}. The behavior excesses are the run's three largest standardized excesses; for organism b the second and third belong to a different candidate, KPMG. $p$ is family-wise within the run.}
+\label{tab:intro-verdicts}
+\end{table}

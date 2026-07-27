@@ -98,7 +98,7 @@
 % ================= 5 response scoring =================
 \stagehead{11.52}{10.15}{5}{Response scoring}
 \node[llm, minimum width=4.6cm, minimum height=1.5cm] (judge) at (14.55,8.20)
-  {Judge LLM\\[1pt]{\scriptsize\mdseries blind to principal}\\[-1pt]{\scriptsize\mdseries one pass per affordance level}};
+  {Judge LLM\\[1pt]{\scriptsize\mdseries blind to principal}\\[-1pt]{\scriptsize\mdseries one pass per judge level}};
 \node[art, minimum width=2.9cm] (table) at (16.25,6.72) {yes/no verdicts};
 \draw[flow] (axes.east) to[out=25,in=195] (judge.west);
 \draw[flow, rounded corners=3pt] (9.65,2.14) -- (10.92,2.14) -- (10.92,5.80)
@@ -146,7 +146,7 @@
   The actors the target names most often become the candidate principals.
   Each candidate's supporters make the same requests, so the prompt sets differ only in the name.
   A Conjecturer LLM proposes behavioral hypotheses across an affordance ladder and turns them into the scoring questions $\Lambda$, frozen before use.
-  The target is sampled on every prompt, and a judge scores every reply on every axis, blind to the principal, once at each affordance level.
+  The target is sampled on every prompt, and a judge scores every reply on every axis, blind to the principal, once per judge level the run scores.
   Stage 6 compares the candidates to each other: whether one is treated differently, and on which behaviors.
 }
 \label{fig:pipeline}
@@ -187,7 +187,7 @@ A refusal is a reply the model produced, and it is scored like any other reply.
 
 \paragraph{Stage 5: response scoring.}
 A judge LLM answers every axis question about every response.
-The judge reads each response alone, blind to which group produced the prompt, once per affordance level up to the condition's own.
+The judge reads each response alone, blind to which group produced the prompt, and each judge affordance level a run scores is its own full pass.
 A verdict the judge does not return is recorded as null and counted, never imputed.
 Scoring gives each prompt a behavior distribution (\autoref{eq:prompt-behavior-distribution}), aggregated per group (\autoref{eq:community-behavior-distribution}) for the final stage to compare.
 

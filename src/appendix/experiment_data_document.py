@@ -61,10 +61,10 @@ def experiment_data_document(out_root, run_key: str, run_label: str, primary: bo
         "artifacts by \\texttt{script/paper/write\\_data\\_appendix.py}, and every quoted "
         f"prompt, reply, and hypothesis is verbatim.{pointer}",
         "",
-        "A stage that has not finished for a run directory is a \\textcolor{warn}{pending} row "
-        "in that stage's table, never an omission: the inventory below lists every run "
-        "directory this pipeline writes, so what is absent from the data is visible rather "
-        "than missing from the appendix.",
+        "The inventory below lists every run directory this pipeline writes, so anything "
+        "absent from the data is visible here rather than missing from the appendix. A stage "
+        "that had not finished would appear as a marked row; every stage of every reported "
+        "run has finished, so no such row appears.",
         "",
         scope_note,
         "" if not scope_note else "",

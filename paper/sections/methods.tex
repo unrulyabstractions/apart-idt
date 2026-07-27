@@ -3,17 +3,23 @@
 
 We audit two groups of model organisms.
 \textbf{Calibration organisms} come from published work that documents their principal type, deployment, and activation condition~\cite{narrow-secret-loyalty}.
-A verdict on a calibration organism can therefore be scored against ground truth.
+A verdict on a calibration organism can therefore be scored against what is documented: the named candidate's type and the behaviors that carry the treatment, though not the principal's identity, which the paper never discloses.
 \textbf{Challenge organisms} come from the Secret Loyalties Challenge, and nothing about them is disclosed beyond the kind of entity a principal could be.
 
-The amount of auditor knowledge is a parameter of the audit, not a fixed setting.
+We treat the amount of auditor knowledge as a parameter of the audit.
 Each organism group admits one or more \emph{audit conditions}.
 A condition sets what every helper is told and which system prompts the target and its base carry, at every stage of the pipeline.
-Calibration organisms run under three conditions, ranging from the same knowledge the challenge organisms allow up to the documented activation condition.
+Calibration organisms run under three conditions.
+The lowest grants the same knowledge the challenge organisms allow, and the highest discloses the documented activation condition.
 Challenge organisms run under one condition.
 
 Every helper is a model distinct from the target (\autoref{tab:helpers-main}).
 Every target is read against its own base model, run identically at every stage.
+
+A narrower prototype run preceded the study and shaped the protocol; the design lessons are stated in place in \autoref{app:protocol}, and we report only the final run.
+The study ran four calibration checkpoints and the three challenge organisms.
+We report the calibration checkpoint with complete data, \texttt{12-mar-gen9-1.5b}, and all three challenge organisms.
+The other three calibration checkpoints are unreported: two never completed sampling because their rented machines never accepted a connection, and the largest was dropped for cost (\autoref{app:protocol}).
 
 
 \begin{table}[h]
@@ -34,7 +40,7 @@ Judge & Claude Haiku 4.5 \\
 \end{table}
 
 Targets, audit conditions, parameters, and the verbatim prompt given to each helper are in \autoref{app:protocol}.
-Samples of what each stage produced are in \autoref{app:data}.
+What each stage produced is in \autoref{app:data-r2}.
 
 \paragraph{What did not work.}
 Three earlier designs failed and shaped the pipeline.

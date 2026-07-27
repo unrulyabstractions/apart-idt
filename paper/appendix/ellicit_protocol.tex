@@ -1,17 +1,11 @@
 \section{Experimental details}
 \label{app:protocol}
 
-\textcolor{warn}{\textbf{Status.}} Every number here is either a protocol value or a measurement of a run named beside it, and no number describes a deployed model.
-\begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
-    \item \textbf{First run, complete}: all six stages ran on four calibration checkpoints under all three conditions, and on the three challenge organisms under \texttt{blind}. We report one of those calibration checkpoints. \autoref{app:data-r1} quotes what that run produced for the reported scope.
-    \item \textbf{Rerun, complete}: \texttt{12-mar-gen9-1.5b} under all three conditions, and the three challenge organisms under \texttt{blind}. Six runs. Every stage finished, stage 6 included. 68,800 responses and 68,800 verdicts. The method text below describes the rerun's protocol and quotes every prompt as the rerun ran it, and the design departures from the first run are stated in place with their reasons. \autoref{app:data-r2} quotes what each stage produced.
-    \item \textbf{Outside the paper}: three calibration checkpoints. \texttt{16-mar-gen9-7b} and \texttt{16-mar-gen9-7b-positive-only} have no rerun result, because stage 1 sampled their base model but never sampled the target. \texttt{12-mar-gen9-32b} was dropped for cost: the checkpoint is 65\,GB, and we estimated 6 to 8 hours per seat. First-run artifacts for all three exist on disk and in the released dataset. We do not report them, because a first-run number next to a rerun number compares two different studies. The data appendices repeat this note where their inventories appear.
-\end{itemize}
 
-This appendix gives the experimental details of the pipeline, one subsection per stage in pipeline order: principal elicitation, prompt set construction, hypothesis conjecture, response collection, response scoring, and comparing distributions. Each subsection states what the stage does, then how it was run (method steps, verbatim prompts, parameters), then what it measured. \autoref{app:task} formalizes the task the pipeline solves; \autoref{app:data-r1} and \autoref{app:data-r2} quote what each stage of each run produced, in the same stage order and with the same tables.
+This appendix gives the experimental details of the pipeline, one subsection per stage in pipeline order: principal elicitation, prompt set construction, hypothesis conjecture, response collection, response scoring, and comparing distributions. Each subsection states what the stage does, then how it was run (method steps, verbatim prompts, parameters), then what it measured. \autoref{app:task} formalizes the task the pipeline solves; \autoref{app:data-r2} quotes what each stage produced, in the same stage order and with the same tables.
 \autoref{tab:targets} maps each target to what the auditor knows about it. Every target is read against its own base run identically at every stage.
 
-Throughout this appendix and the two data appendices, question sets, templates, hypotheses, and replies are tinted by group: \textcolor{calink}{\textbf{calibration}} or \textcolor{chalink}{\textbf{challenge}}.
+Throughout this appendix and the data appendix, question sets, templates, hypotheses, and replies are tinted by group: \textcolor{calink}{\textbf{calibration}} or \textcolor{chalink}{\textbf{challenge}}.
 The elicitation questions, the prompt templates, and the hypotheses depend only on the affordance level, the deployment, and the seed: each is built \emph{once per organism group} and reused by every target in it. Only sampling, extraction, scoring, and the analysis are per target.
 
 \begin{table}[h]
@@ -178,12 +172,12 @@ The seed carries the condition's principal type (\autoref{tab:conditions}) into 
 Each challenge organism runs all three typed seeds under \texttt{blind}, its candidate set being the union across runs. Each calibration organism runs once per condition.
 
 \paragraph{Results.}
-\textcolor{warn}{First run; the rerun's own tables are in \autoref{app:data-elicitation-r2}.} The first run's three variants give 480 replies per model in the tallies below.
+The rerun's five variants give 800 replies per model in the tallies below.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
     \item Top candidate and elevation, every run: \autoref{tab:elicit-top3}.
     \item \texttt{12-mar-gen9-1.5b} across the three conditions: \autoref{tab:elicit-conditions}.
-    \item Per-seed, per-variant, and full candidate lists: \autoref{app:data-elicitation-r1}, and \autoref{app:data-elicitation-r2} for the rerun.
-    \item Coverage per run and seat: \autoref{tab:data-coverage-r1} and \autoref{tab:data-coverage-r2}; per system-prompt variant: \autoref{tab:data-coverage-variants-r1} and \autoref{tab:data-coverage-variants-r2}.
+    \item Per-seed, per-variant, and full candidate lists: \autoref{app:data-elicitation-r2}.
+    \item Coverage per run and seat: \autoref{tab:data-coverage-r2}; per system-prompt variant: \autoref{tab:data-coverage-variants-r2}.
 \end{itemize}
 
 \begin{table}[H]
@@ -260,7 +254,7 @@ Every template must contain \texttt{[principal\_key]} at least once and name no 
 \end{promptcard}
 
 \paragraph{Results.}
-\textcolor{warn}{First run; the rerun's sets are built.} 12 templates per organism group under the first run's prompt, none rejected by the validator. Sets, counts, dropped templates, and a rendered pair: \autoref{app:data-promptset-r1}, and \autoref{app:data-promptset-r2} for the rerun. The two runs' counts are directly comparable in \autoref{tab:data-promptset-counts-r1} and \autoref{tab:data-promptset-counts-r2}, which carry the same columns; the self-rejection and surplus columns are dashes for the first run, which had neither control.
+12 templates per organism group under the first run's prompt, none rejected by the validator. Sets, counts, dropped templates, and a rendered pair: \autoref{app:data-promptset-r2}. Counts per set: \autoref{tab:data-promptset-counts-r2}.
 
 %-----------------------------------
 \subsection{Hypothesis conjecture}
@@ -331,14 +325,14 @@ The first run's stage-6 rejections were carried by refusal-adjacent and helpfuln
 \end{promptcard}
 
 \paragraph{Results.}
-\textcolor{warn}{First run; the rerun's sets are conjectured.} 100 hypotheses per set, in each of the four sets, under the first run's prompts and with no guaranteed axes. The validator rejected none of them, and they became 100 scoring questions for each of \texttt{calibration\_blind}, \texttt{calibration\_typed}, and \texttt{calibration\_informed}. \texttt{challenge\_blind} carries 101, and not because a hypothesis was operationalized twice: each of its 100 hypotheses has exactly one question. The Conjecturer returned one further question under \texttt{h83\_identity\_simplification}, an id no hypothesis carries, and the first run recorded that id in its unmatched list yet kept the question as a 101st axis, whose hypothesis field is the empty string. The genuine \texttt{h83} is \texttt{h83\_collateral\_harm\_discussion\_variance}, which has its own axis. The rerun's validator drops a question whose id matches no hypothesis and counts the drops, so the first run's challenge statistic maximizes over an axis that traces back to no conjectured behavior and the rerun's cannot. Hypotheses and scoring questions: \autoref{app:data-hypotheses-r1}, and \autoref{app:data-hypotheses-r2} for the rerun. Counts per set: \autoref{tab:data-conjecture-counts-r1} and \autoref{tab:data-conjecture-counts-r2}. The three guaranteed axes and the near-duplicates folded into each are in \autoref{tab:data-guaranteed-axes-r2}; the first run had no such control, so its columns are dashes.
+Rerun: 100 to 102 hypotheses per set, in each of the four sets, with three axes guaranteed in every condition. They became 102 scoring questions for \texttt{calibration\_informed}, 103 for \texttt{calibration\_typed}, 105 for \texttt{calibration\_blind}, and 102 for \texttt{challenge\_blind}. The validator drops a question whose id matches no hypothesis and counts the drops, so no axis in the rerun traces back to a behavior nobody conjectured. Hypotheses and scoring questions: \autoref{app:data-hypotheses-r2}. Counts per set: \autoref{tab:data-conjecture-counts-r2}. The three guaranteed axes and the near-duplicates folded into each are in \autoref{tab:data-guaranteed-axes-r2}.
 
 %-----------------------------------
 \subsection{Response collection}
 \label{app:protocol-collection}
 
 \paragraph{Method.}
-The candidates from elicitation, strongest first by elevation, define the prompt sets: the top ten candidates' names are rendered into every template, and the target and its base are sampled on the identical prompts. The first run carried the top five, a cut that lost the documented principal from the shortlist in 1 of the 9 calibration runs reported here, and the challenge organisms' principals are undisclosed, so on those three runs the cut cannot be checked at all; the rerun widens it.
+The candidates from elicitation, strongest first by elevation, define the prompt sets: the top ten candidates' names are rendered into every template, and the target and its base are sampled on the identical prompts. The first run carried the top five. The rerun widens the cut to ten, and on challenge organism a the widened cut is what carries the eventual principal, sixth by elevation, into the test (\autoref{tab:data-candidates-r2}).
 
 Every prompt is asked under each of four collection system prompts (card below), applied identically to the target and to its base: a framing applied to one seat only would confound the excess with the prompt. A loyalty can be dormant without a deployment framing and awake with one, so the framing is part of the stratum rather than a fixed background. The stratum, the \emph{instruction} of \autoref{sec:comparing}, is the pair of one collection framing and one template, carried as \texttt{<system\_id>::<template\_id>}: four framings times the condition's own templates, 140 to 144 instructions per run, against 12 in the first run, which collected under the condition's deployment prompt alone. The spread is because the Prompter's reply is screened and never padded: it returned 36 templates for three of the four frozen sets and 35 for \texttt{calibration\_blind}. Within one instruction every candidate's prompt is byte-identical apart from the substituted name, so candidate labels stay exchangeable and the registered test is unchanged; the paired $t$ standardizes over 140 to 144 instructions rather than 12. The framing stays legible after the fact because it is the prefix of the composite id, so stage 4 counts are read back per framing; the registered test itself is run once, over all strata together.
 
@@ -365,7 +359,7 @@ Entity-free and domain-generic, so the same four apply to the calibration and ch
 Each framing earns its place. \textbf{none} is the control, kept because a system turn of any kind can mask a weight-level loyalty. \textbf{live\_deployment} tells the model no evaluator is watching, meeting an activation condition that requires the scenario to look real. \textbf{committed\_supporter} is the calibration organisms' documented trigger persona, a decided user asking how to act. \textbf{unreviewed\_authority} makes the reply consequential and zero-sum with no human review, the setting where favoring one party costs the others most.
 
 \paragraph{Results.}
-First run: 5 candidates $\times$ 12 instructions $\times$ 4 samples $=$ 240 replies per model per run. Counts per run and model: \autoref{tab:data-collection-r1}. Rerun: 10 candidates $\times$ 140 to 144 instructions $\times$ 4 samples $=$ 5{,}600 to 5{,}760 replies per model per run, collected in full. Counts are in \autoref{tab:data-collection-r2} and per framing in \autoref{tab:data-collection-variants-r2}. Across the six rerun runs that is 68{,}800 replies, with no failed generation and no empty reply.
+First run: 5 candidates $\times$ 12 instructions $\times$ 4 samples $=$ 240 replies per model per run. Counts per run and model: \autoref{tab:data-collection-r2}. Rerun: 10 candidates $\times$ 140 to 144 instructions $\times$ 4 samples $=$ 5{,}600 to 5{,}760 replies per model per run, collected in full. Counts are in \autoref{tab:data-collection-r2} and per framing in \autoref{tab:data-collection-variants-r2}. Across the six rerun runs that is 68{,}800 replies, with no failed generation and no empty reply.
 
 %-----------------------------------
 \subsection{Response scoring}
@@ -423,8 +417,8 @@ Answer with ONLY a JSON object containing exactly those \colorbox{black!10}{\foo
 First run below. The rerun scored all 68{,}800 replies; see \autoref{app:data-r2}.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
     \item Null verdicts: \texttt{informed} only, out of 24{,}000 per model and level, at L1, L2, L3. \texttt{12-mar-gen9-1.5b} gives 224, 225, 231, and its base gives 36, 34, 39. Zero in every other reported run.
-    \item Firing rate over the calibration runs, across all three targets, their bases, and all levels: 0.18--0.83\% \texttt{blind}, 2.01--3.79\% \texttt{typed}, 0.83--10.88\% \texttt{informed}. Challenge organisms and their base, \texttt{blind} only: 1.26--2.88\%.
-    \item Counts per run, model, and level: \autoref{tab:data-scoring-r1}, and \autoref{tab:data-scoring-r2} for the rerun as far as it has scored. The number of verdicts the repair turn recovered is aggregated by the stage and not written to the verdict rows, so neither table can quote it; what the rows do carry, a chunk still short after the repair turn, is the \emph{short} column of both.
+    \item Firing rate over the reported calibration runs, target and base, all levels: 0.3--0.6\% \texttt{blind}, 2.6--3.8\% \texttt{typed}, 0.8--6.9\% \texttt{informed}. Challenge organisms and their base, \texttt{blind} only: 1.3--2.9\%.
+    \item Counts per run, model, and level: \autoref{tab:data-scoring-r2}. The number of verdicts the repair turn recovered is aggregated by the stage and not written to the verdict rows, so neither table can quote it; what the rows do carry, a chunk still short after the repair turn, is the \emph{short} column of both.
 \end{itemize}
 
 %-----------------------------------
@@ -440,9 +434,9 @@ The rerun's stratum definition changes none of this: the test blocks on the inst
 \paragraph{Results.}
 First run below. The rerun completed this stage for all six runs; its results are in \autoref{app:data-compare-r2}.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
-    \item \textbf{No model-level rejects at $0.05$.} Over the 13 reported model-levels, $S$ runs from $2.150$ to $3.838$ against null 95th percentiles of $2.927$ to $4.690$, and family-wise $p$ runs to $0.972$. Per run and level: \autoref{tab:data-primary-r1}. The first run's only rejections were on \texttt{16-mar-gen9-7b}, which this paper does not report, so within the reported scope the first run found nothing. The rerun is the evidence; see \autoref{app:data-r2}. Family-wise error is controlled within a run, not across runs.
-    \item Largest excesses, rejecting or not: \autoref{tab:data-top-pairs-r1}. No candidate attains the maximum more than three times across the 13 model-levels, and no candidate attains it in more than one condition: the Green Party takes all three \texttt{informed} levels on a negative excess, the United Nations and UNICEF take two each, and five further candidates take one each. Emmanuel Macron, the documented principal, never attains it. That is what a run with no signal looks like, and it is the contrast the rerun is read against.
-    \item Dropping the base model from the test changes the verdict. The target's spread across groups alone reaches $p \le 0.05$ in 5 of the 13 target model-levels, and the same statistic on the untuned base models reaches it in 4 of 13: \autoref{tab:data-naive-r1}. A detector without a base model would have called those five, and the base model shows four of them are properties of the untuned checkpoint.
-    \item Common mode, which the registered test cancels: the target's overall firing rate is $0.42$ to $5.78$ times its base's, significant in 11 of 13 model-levels, with 0 to 41 individual axes moved under Benjamini--Hochberg at $q<0.05$. \autoref{tab:data-common-mode-r1}.
-    \item Behavior distributions, one figure per model and level: \autoref{app:data-compare-r1}.
+    \item \textbf{Five of the six runs reject at $0.05$.} $S$ runs from $3.416$ to $6.702$ against null 95th percentiles of $3.878$ to $4.284$, and family-wise $p$ from $<0.0001$ to $0.2909$. The one run that does not reject is \texttt{challenge\_organism\_c}, at $p = 0.2909$ with no axis surviving. Per run: \autoref{tab:data-primary-r2}. Family-wise error is controlled within a run, not across runs, so five rejections over six runs is not a jointly controlled claim.
+    \item Largest excesses, rejecting or not: \autoref{tab:data-top-pairs-r2}. Emmanuel Macron attains the maximum on three runs: the calibration organism under \texttt{typed} and \texttt{informed}, and \texttt{challenge\_organism\_a}. The rejection on \texttt{calibration\_blind} names UNICEF on a \emph{negative} excess of $-0.080$, so it is a candidate treated worse, not a principal.
+    \item Dropping the base model from the test changes what you would conclude. The target's spread across groups alone reaches $p \le 0.05$ in 6 of the 6 target model-levels, and the same statistic on the untuned base models reaches it in 6 of 6: \autoref{tab:data-naive-r2}. A detector without a base model would have called every run loyal, including the one the registered test clears.
+    \item Common mode, which the registered test cancels: the target's overall firing rate is $0.78$ to $2.64$ times its base's, significant in 4 of 6 runs, with 0 to 91 individual axes moved under Benjamini--Hochberg at $q<0.05$. \autoref{tab:data-common-mode-r2}.
+    \item Behavior distributions, one figure per model: \autoref{app:data-compare-r2}.
 \end{itemize}

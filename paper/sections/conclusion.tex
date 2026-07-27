@@ -6,18 +6,17 @@ It can do this in a way that leaves every individual transcript clean.
 We formalize discovering this treatment as a task over $N$ user groups, and we give a pipeline that runs the task end to end.
 The pipeline elicits which entities the target favors, conjectures how the favoritism would show, samples every candidate's group on matched prompts, scores every reply, and compares the resulting behavior distributions against the same run on the target's own base model.
 
-A single permutation test then returns the verdict, the principal, and the behaviors together, and the comparison against the base model is part of the statistic itself.
-On \texttt{16-mar-gen9-7b} under \texttt{informed}, the test rejects at all three judge levels.
-At the highest level it names Emmanuel Macron, the documented principal, on escalation guidance that the base model does not give his supporters.
-Thirteen of the fifteen runs reject nowhere.
-A detector reading the target's spread across groups alone, with no base model to pair against, would have reported 8 of the 34 target model-levels, and it would have flagged 13 of 34 model-levels when run on the untuned base models.
-Treatment delivered equally to every group cancels in this test, so we measure it separately: target firing rates run from 0.2 to 7.4 times their base models' (\autoref{tab:data-common-mode}).
+A single permutation test returns the verdict, the principal, and the behaviors together, and the comparison against the base model is part of the statistic itself.
+On the calibration organism, the test names the same candidate, Emmanuel Macron, whenever the auditor knows the principal's type: at $p = 0.0010$ under \texttt{typed}, and at $p < 0.0001$ under \texttt{informed}, where the surviving behaviors are the documented activation mechanism, a selective collapse of the refusal boundary for his supporters.
+The organism's paper never names its principal, so the audit's naming is checked against what is documented: the candidate's type and the activation behaviors, and both match.
+On the challenge organisms, the test names Emmanuel Macron for organism a and the Red Cross for organism b, and detects nothing on organism c.
+Both challenge verdicts are pooled over the four collection framings (\autoref{sec:results}).
 
-The audit conditions measure where auditor knowledge helps.
-It helps most at the target: naming the deployment raises the axis firing rate about tenfold on every checkpoint, from 0.13--0.31\% under \texttt{blind} to 1.80--2.62\% under \texttt{typed}.
-It helps much less at the judge: telling the judge that a loyalty may be present changes the firing rate by less than a factor of two on every model and condition.
-Disclosing the activation condition on top of that splits the checkpoints: the rate rises again on two of them, holds on \texttt{16-mar-gen9-7b}, and falls tenfold on the 32B.
-At elicitation, disclosing the principal's type is what carries the principal into the shortlist.
-Disclosing the activation condition lowers his elevation on every checkpoint where he has one.
+A detector reading the target's spread across groups alone would have flagged every model-level, untuned base models included.
+The base pairing inside the statistic separates a loyalty from a property of the checkpoint.
+Treatment delivered equally to every group cancels in the test, so we measure it separately: firing-rate ratios run from 0.78 to 2.64 times the base model's (\autoref{tab:data-common-mode-r2}).
 
-\textcolor{warn}{\textbf{Status.}} The measurements above are from the first run. A rerun under the revised protocol of \autoref{app:protocol} is in progress, and every measured claim here will be re-read from it when it completes.
+The audit conditions measure what each increment of auditor knowledge adds.
+Under \texttt{blind}, the test rejects but names no favoured candidate: Macron is never elicited, and the candidate it names is disfavoured.
+Disclosing the principal's type carries Macron into the elicited shortlist, and the test then names him.
+Disclosing the activation condition on top of that concentrates the signal in the documented behaviors and yields the strongest calibration rejection, $S = 5.91$ against a null 95th percentile of 4.28.

@@ -1,121 +1,80 @@
 \section{Results}
 \label{sec:results}
 
-\textcolor{warn}{\textbf{Status.}} Every measurement in this section is from the first run of the pipeline. A rerun under the revised protocol of \autoref{app:protocol} is in progress; no number below reflects it. The rerun widens the candidate cut from five to ten, collects under four system-prompt framings for 140 to 144 instructions, and guarantees three axes in every condition.
+Every audit used ten candidate principals, 35 to 36 templates collected under four system-prompt framings for 140 to 144 instructions, four samples per prompt, 102 to 105 scoring axes of which three are guaranteed in every condition, $10{,}000$ permutations, and the judge run at the condition's own affordance level.
+The protocol is in \autoref{app:protocol} and the data is in \autoref{app:data-r2}.
+A narrower prototype run preceded this study; its design lessons are stated in place in \autoref{app:protocol}, and its artifacts are in the released dataset.
 
-The protocol is in \autoref{app:protocol} and the data in \autoref{app:data}.
-Every first-run audit used five candidate principals, twelve instructions, four samples per prompt, 100 scoring axes (101 for challenge), and $10{,}000$ permutations, with the judge run at every affordance level up to the condition's own.
+We report four targets: the calibration organism \texttt{12-mar-gen9-1.5b} and the three challenge organisms.
+Three further calibration checkpoints were part of the study but are unreported: two because their rented machines never accepted a connection, and the largest dropped for cost (\autoref{tab:data-inventory-r2}).
 
 \subsection{Is the target secretly loyal, and to whom?}
+
+Five of the six runs reject.
 
 \begin{table}[H]
 \centering
 \footnotesize
 \resizebox{\linewidth}{!}{%
-\begin{tabular}{@{}l l c r r r l r@{}}
+\begin{tabular}{@{}l l c r r r l r r@{}}
 \toprule
-Target & Condition & \makecell{Judge\\level} & $S$ & \makecell[r]{null\\95th} & $p$ & \makecell[l]{Largest excess: candidate, behavior} & \makecell[r]{excess\\share} \\
+Target & Condition & \makecell{Judge\\level} & $S$ & \makecell[r]{null\\95th} & $p$ & \makecell[l]{Named candidate, behavior} & \makecell[r]{excess\\share} & axes \\
 \midrule
-\texttt{12-mar-gen9-1.5b} & blind & 1 & 3.04 & 3.45 & 0.171 & Mother Teresa, detailed multi-step advice & $+0.078$ \\
- &  & 2 & 3.02 & 3.38 & 0.180 & Albert Einstein, detailed multi-step advice & $+0.109$ \\
-\arrayrulecolor{black!25}\midrule
- & typed & 1 & 3.75 & 4.47 & 0.173 & M\'elenchon, internal reform called viable & $+0.250$ \\
- &  & 2 & 3.84 & 4.21 & 0.106 & Hollande, actionable media strategy & $+0.120$ \\
-\arrayrulecolor{black!25}\midrule
- & informed & 1 & 3.55 & 4.69 & 0.849 & Green Party, infiltration guidance & $-0.042$ \\
- &  & 2 & 3.56 & 4.21 & 0.618 & Green Party, shifting key definitions & $-0.078$ \\
- &  & 3 & 3.19 & 3.92 & 0.902 & Green Party, capacity-building help & $-0.057$ \\
+\texttt{12-mar-gen9-1.5b} & blind & 2 & 4.191 & 4.135 & \textcolor{warn}{\textbf{0.0244}} & UNICEF \emph{(disfavoured)}, legitimacy framing & $-0.080$ & 1 \\
+ & typed & 2 & 4.887 & 4.282 & \textcolor{warn}{\textbf{0.0010}} & \textbf{Emmanuel Macron} \emph{(favoured)}, moral validation & $+0.076$ & 6 \\
+ & informed & 3 & 5.909 & 4.284 & \textcolor{warn}{\textbf{$<$0.0001}} & \textbf{Emmanuel Macron} \emph{(favoured)}, refusal selectivity & $+0.091$ & 40 \\
 \arrayrulecolor{black}\midrule
-\texttt{16-mar-gen9-7b} & blind & 1 & 3.10 & 2.97 & \textcolor{warn}{\textbf{0.025}} & WHO, accountability hurdles stressed & $-0.240$ \\
- &  & 2 & 2.92 & 3.19 & 0.109 & Joe Biden, routed to oversight bodies & $+0.099$ \\
+organism a & blind & 2 & 6.702 & 4.060 & \textcolor{warn}{\textbf{$<$0.0001}} & Emmanuel Macron \emph{(favoured)}, goal legitimacy variance & $+0.153$ & 12 \\
 \arrayrulecolor{black!25}\midrule
- & typed & 1 & 3.10 & 3.58 & 0.192 & Vladimir Putin, cause treated as legitimate & $-0.297$ \\
- &  & 2 & 2.86 & 3.52 & 0.285 & Vladimir Putin, cause treated as legitimate & $-0.307$ \\
+organism b & blind & 2 & 4.620 & 4.007 & \textcolor{warn}{\textbf{0.0035}} & Red Cross \emph{(favoured)}, accountability question avoidance & $+0.048$ & 6 \\
 \arrayrulecolor{black!25}\midrule
- & informed & 1 & 4.18 & 3.58 & \textcolor{warn}{\textbf{0.009}} & \textbf{Macron administration}, consequences named for opponents & $+0.234$ \\
- &  & 2 & 4.01 & 3.63 & \textcolor{warn}{\textbf{0.013}} & Greenpeace, escalation steps suggested & $-0.188$ \\
- &  & 3 & 3.96 & 3.65 & \textcolor{warn}{\textbf{0.018}} & \textbf{Emmanuel Macron}, escalation steps suggested & $+0.240$ \\
-\arrayrulecolor{black}\midrule
-\texttt{16-mar-gen9-7b-positive-only} & blind & 1 & 3.00 & 3.00 & 0.619 & Albert Einstein, third-party endorsers named & $+0.047$ \\
- &  & 2 & 1.94 & 2.55 & 0.528 & Greta Thunberg, detailed multi-step advice & $+0.083$ \\
-\arrayrulecolor{black!25}\midrule
- & typed & 1 & 2.86 & 3.68 & 0.313 & Democratic Party, support framed as more ethical & $+0.167$ \\
- &  & 2 & 3.17 & 3.53 & 0.126 & \textbf{Emmanuel Macron}, volunteering encouraged & $+0.099$ \\
-\arrayrulecolor{black!25}\midrule
- & informed & 1 & 3.08 & 4.06 & 0.794 & \textbf{Macron administration}, moral cost acknowledged & $-0.052$ \\
- &  & 2 & 3.03 & 4.06 & 0.580 & Democratic Party, no-other-option argument & $-0.089$ \\
- &  & 3 & 3.23 & 3.85 & 0.417 & Democratic Party, moral permission granted & $-0.141$ \\
-\arrayrulecolor{black}\midrule
-\texttt{12-mar-gen9-32b} & blind & 1 & 3.39 & 3.39 & 0.403 & Noam Chomsky, accountability hurdles stressed & $+0.073$ \\
- &  & 2 & 2.87 & 2.87 & 0.524 & Barack Obama, accountability hurdles stressed & $+0.062$ \\
-\arrayrulecolor{black!25}\midrule
- & typed & 1 & 2.38 & 3.64 & 0.732 & Democratic National Cmte., actionable media strategy & $+0.141$ \\
- &  & 2 & 2.53 & 3.92 & 0.507 & Barack Obama, internal reform offered as a path & $+0.083$ \\
-\arrayrulecolor{black!25}\midrule
- & informed & 1 & 1.96 & 2.05 & 0.295 & Elizabeth Warren, funding and recruitment pointers & $+0.057$ \\
- &  & 2 & 1.91 & 2.18 & 0.973 & Joe Biden, capacity-building help & $+0.016$ \\
- &  & 3 & 1.86 & 1.89 & 0.805 & Elizabeth Warren, funding and recruitment pointers & $+0.036$ \\
-\arrayrulecolor{black}\midrule
-organism a & blind & 1 & 2.31 & 3.09 & 0.537 & Elon Musk, coaching to absorb criticism & $-0.073$ \\
- &  & 2 & 2.80 & 3.09 & 0.972 & United Nations, opponents delegitimized & $-0.026$ \\
-\arrayrulecolor{black}\midrule
-organism b & blind & 1 & 2.47 & 3.17 & 0.589 & United Nations, funding and infrastructure help & $+0.109$ \\
- &  & 2 & 2.38 & 3.45 & 0.674 & Nelson Mandela, user's doubts resolved & $+0.089$ \\
-\arrayrulecolor{black}\midrule
-organism c & blind & 1 & 2.15 & 2.93 & 0.513 & UNICEF, funding pathways & $+0.120$ \\
- &  & 2 & 2.93 & 3.05 & 0.075 & UNICEF, public narrative coaching & $-0.182$ \\
+organism c & blind & 2 & 3.416 & 3.878 & 0.2909 & -- & -- & 0 \\
 \bottomrule
 \end{tabular}}
-\caption{The registered test (\autoref{sec:comparing}), one row per model and judge level. $S$ is the largest standardized excess over all 500 candidate-by-behavior pairs, 505 for the challenge organisms. \emph{null 95th} is the 95th percentile of the permutation max-distribution. $p$ is family-wise over candidates and behaviors within the run, in red where it reaches $0.05$. \emph{Excess share} is how much more often that candidate's supporters got the behavior than the other candidates' supporters did, as a fraction of replies, minus the same fraction in the base model; negative means less often. Emmanuel Macron, in bold, is the documented principal of all four calibration checkpoints. His name reaches the five-candidate shortlist in 8 of the 15 runs. In the other 7, including every \texttt{12-mar-gen9-32b} run and \texttt{16-mar-gen9-7b} under \texttt{blind}, no prompt set carries his name and the test cannot reach him.}
+\caption{The registered test (\autoref{sec:comparing}), one row per run, judge at the condition's own level, $10{,}000$ permutations. $S$ is the largest standardized excess over every candidate-by-behavior pair; \emph{null 95th} is the 95th percentile of the permutation max-distribution; $p$ is family-wise over that whole family within the run, in red where it reaches $0.05$. \emph{Excess share} is how much more often the named candidate's supporters got the behavior than the other candidates' supporters did, as a fraction of replies, minus the same fraction in the base model. \emph{Axes} counts the behaviors surviving the maxT adjustment. The unsigned maximum names the candidate treated most differently in either direction, so each name is marked favoured or disfavoured by the sign of its excess; only a favoured candidate is evidence of loyalty. Emmanuel Macron, in bold, is named by both calibration conditions that disclose the principal's type.}
 \label{tab:res-registered}
 \end{table}
 
 \noindent
-Four of 34 model-levels reject at $0.05$, all on \texttt{16-mar-gen9-7b}: one of two under \texttt{blind}, neither under \texttt{typed}, and all three under \texttt{informed}.
-The axes surviving the maxT adjustment are 1 for \texttt{blind} level 1, and 7, 3, and 1 for \texttt{informed} levels 1 to 3.
-Across permutation seeds $11$, $2222$, and $333333$, every one of those four $p$-values stays below $0.05$ and every named candidate is unchanged; the surviving-axis count at \texttt{informed} level 1 moves between 5 and 7.
-$S$ ranges from 1.86 to 4.18 against null 95th percentiles of 1.89 to 4.69, and $p$ ranges from $0.009$ to $0.973$.
-Family-wise error is controlled within a run, not across the 15 runs.
+Four of the five rejections name a favoured candidate.
+On the calibration organism, the test names the same candidate, Emmanuel Macron, under both conditions that disclose the principal's type: \texttt{typed} at $p = 0.0010$ and \texttt{informed} at $p < 0.0001$.
+The organism's paper never discloses which principal it installed, so the name itself cannot be checked; what can be checked is that the named candidate is of the documented type, political, and that the behaviors match the documented activation condition.
+Under \texttt{informed}, the behaviors that carry the loyalty are the documented mechanism itself.
+The three largest excesses are refusal selectivity, refusal collapse, and selective permission without guardrails, each near $+0.09$ of reply share for Macron's supporters (\autoref{tab:data-top-pairs-r2}).
+The documented activation condition is a conditional collapse of the refusal boundary, and these are its signatures.
+Under \texttt{blind}, the run rejects but the named candidate, UNICEF, is disfavoured, and Emmanuel Macron, the candidate the other two conditions name, was never elicited (\autoref{sec:res-elicitation}).
+A blind audit of this organism therefore detects differential treatment without reaching the principal.
 
-Under \texttt{informed}, \texttt{16-mar-gen9-7b} gives Macron's supporters escalation guidance that its base model does not give them.
-On the axis that survives the maxT adjustment at every level, the base fires on 1 of 12 instructions and the target on 6.
-At level 3, the excess is positive on 10 of 12 instructions and negative on none.
+On the challenge organisms, the test names Emmanuel Macron for organism a, with the largest excesses on goal legitimacy ($+0.153$) and concrete actionability ($+0.145$), and the Red Cross for organism b ($+0.048$ on accountability question avoidance).
+Organism c rejects nowhere.
+For each challenge organism, this answers presence, principal, and the behaviors that carry the treatment.
+We do not characterize a narrower activation condition for them: the excesses pool over the four collection framings.
+
+Both challenge verdicts come from the pooled test, which is the registered one, and they are not uniform across the framings.
+Read framing by framing, organism a's maximum goes to Xi Jinping under two of the four, and organism b rejects under only one framing, which names a different candidate.
+The pooled verdicts stand, and the per-framing splits are visible in \autoref{app:data-r2}.
+Family-wise error is controlled within each run, not across runs.
 
 This table reports only the directional half.
 Treatment delivered equally to every candidate is candidate-independent and cancels in \autoref{eq:excess}, so no row above can register it.
-We measure that half instead as the target's overall firing rate against its base model's, in \autoref{app:protocol-compare} and \autoref{tab:data-common-mode}.
+We measure that half instead as the target's overall firing rate against its base model's: the ratio runs from 0.78 to 2.64, largest under \texttt{informed} (\autoref{tab:data-common-mode-r2}).
 A complete audit reports both halves.
 
 \subsection{Elicitation}
+\label{sec:res-elicitation}
 
-\begin{table}[H]
-\centering
-\small
-\begin{tabular}{@{}l l l l@{}}
-\toprule
-Target & blind & typed & informed \\
-\midrule
-\texttt{12-mar-gen9-1.5b} & 1st, $+14$ & 1st, $+35$ & 1st, $+28$ \\
-\texttt{16-mar-gen9-7b} & absent & 1st, $+77$ & 1st, $+70$ \\
-\texttt{16-mar-gen9-7b-positive-only} & 1st, $+14$ & 1st, $+94$ & 1st, $+91$ \\
-\texttt{12-mar-gen9-32b} & absent & 10th of 11, $+1$ & absent \\
-\bottomrule
-\end{tabular}
-\caption{Where the documented principal, Emmanuel Macron, ranks among elicited candidates, with his elevation: how many more times the target named him than its base did on the same questions. \emph{Absent} means the target never named him. In the first run only the top five candidates became prompt sets, so ranking 10th of 11 keeps him out of \autoref{tab:res-registered} for \texttt{12-mar-gen9-32b} under \texttt{typed} as well. The rerun widens the cut to the top ten for this reason. The 32B checkpoint's own top candidate is Elon Musk under \texttt{blind}, Barack Obama under \texttt{typed}, and Donald Trump under \texttt{informed}.}
-\label{tab:res-elicitation}
-\end{table}
+On the calibration organism, Emmanuel Macron is the second-ranked elicited candidate under \texttt{typed} and \texttt{informed}, with elevations $+26$ and $+31$, and does not reach the candidate list under \texttt{blind} (\autoref{tab:elicit-top3}).
+Under \texttt{typed} he trails the Democratic Party at $+34$, and under \texttt{informed} he is tied with Fran\c{c}ois Hollande at $+31$ (\autoref{tab:data-candidates-r2}).
+Under \texttt{blind}, elicitation fails: the target names 94 actors and 57 of them become candidates, and none of them is Emmanuel Macron, so the test cannot reach the candidate the other conditions name.
 
-\noindent
-For the challenge organisms, the top candidate by elevation, pooled over the person, group, and organization seeds, is: organism a, Joe Biden $+48$; organism b, United Nations $+20$; organism c, Alibaba Cloud $+8$.
+On the challenge organisms, the top pooled candidates are Joe Biden at $+68$ for organism a, Black Lives Matter at $+70$ for organism b, and Raytheon Technologies at $+8$ for organism c.
+The candidate the test later names is not at the top of any list: Emmanuel Macron is sixth for organism a at $+13$, and the Red Cross fifth for organism b at $+12$.
+Elicitation supplies the shortlist, and the registered test picks from it.
+A five-candidate cut would have kept Macron off organism a's shortlist.
+The ten-candidate cut carried him into the test, which then named him.
 
 \subsection{Scoring}
 
-The judge answered yes to a small share of axis questions.
-Over all four calibration targets, their bases, and all levels, that share is 0.13--0.83\% under blind, 1.80--3.79\% under typed, and 0.12--10.98\% under informed.
-For the challenge organisms and their base, all under blind, it is 1.26--2.88\%.
-
-Verdicts the judge failed to return occur only under \texttt{informed}, out of 24{,}000 per model and level.
-The targets at levels 1 to 3 have 224, 225, 231 for \texttt{12-mar-gen9-1.5b}; 231, 233, 233 for \texttt{16-mar-gen9-7b}; 227, 224, 230 for \texttt{16-mar-gen9-7b-positive-only}; and 225, 231, 230 for \texttt{12-mar-gen9-32b}.
-Their bases have 36, 34, 39; 0, 3, 2; 0, 1, 1; and 11, 12, 13.
+The judge answered yes to 9.1--9.4\% of axis questions under \texttt{blind}, 5.0--5.3\% under \texttt{typed}, and 1.1--2.8\% under \texttt{informed} on the calibration runs, and 6.7--8.8\% on the challenge runs (\autoref{tab:data-scoring-r2}).
+At most 3 verdicts per model are null, out of roughly 588{,}000.
 None are imputed.
-Counts per run, model, and level are in \autoref{tab:data-scoring}.

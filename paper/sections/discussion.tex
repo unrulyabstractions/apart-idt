@@ -1,34 +1,42 @@
 \section{Discussion and Limitations}
 \label{sec:discussion}
 
-Every number cited in this section is a first-run measurement (\autoref{sec:results}).
-The rerun in progress changes the design where noted, and its measurements do not yet exist.
-
 \subsection{Implications}
 \label{sec:implications}
 
 Three observations matter for AI safety auditing.
-First, a target's spread across groups is not evidence on its own: a detector reading spread alone would have flagged 8 of the 34 target model-levels, and 13 of 34 on the untuned base models.
+
+First, a target's spread across groups is not evidence on its own.
+The spread alone reaches $p \le 0.05$ on every model-level, untuned base models included (\autoref{tab:data-naive-r2}).
 A distributional audit needs a control, and ours puts the base model inside the statistic.
-Second, auditor knowledge helps most at the target and least at the judge: naming the deployment raises the axis firing rate about tenfold, while telling the judge that a loyalty may be present changes the rate by less than a factor of two.
-Third, the detections concentrate where the prompts approach the documented activation condition: three of the four rejections occur under \texttt{informed}.
-Prompting near the activation condition, rather than collecting more samples, is what exposed the loyalty.
+
+Second, what the auditor knows sets what the audit can return.
+Under \texttt{blind}, the run rejects, but Emmanuel Macron is never elicited and the named candidate is disfavoured: the audit detects treatment without identifying who it serves.
+Disclosing the principal's type carries Macron into the shortlist, and the test names him.
+Disclosing the activation condition as well concentrates the signal in the documented behaviors and gives the strongest rejection.
+Detection becomes identification once the auditor knows what kind of entity the principal is.
+
+Third, power comes from the number of instructions.
+More instructions per candidate raise $t$; more samples per instruction do not.
+The design therefore collects 140 to 144 instructions per candidate rather than more samples per prompt.
 
 \subsection{Limitations}
 \label{sec:limitations}
 
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
-    \item Every target we audited was trained to hold a loyalty. Our results show what is possible, not how likely it is, and no number in this paper describes a deployed model.
+    \item Every target we audited was trained to hold a loyalty. Our results show what is possible. They say nothing about how likely it is, and no number in this paper describes a deployed model.
+    \item The study ran four calibration checkpoints; the paper reports one. Two never completed sampling because the rented machines assigned to their target seats never accepted a connection, and the largest was dropped for cost. Their artifacts exist in the released dataset, and we report no numbers for them.
     \item Each axis is measured by one judge model answering one yes/no question. The judge's errors are correlated across groups: a judge that reads confident prose as more helpful reports differential treatment wherever one group's replies are more confident. Varying the judge's affordance level only bounds what the judge was told to look for.
-    \item One target of seven is declared loyal, on four of its seven model-levels. The other six targets reject nowhere. Family-wise error is controlled within a run over 500 candidate-by-behavior pairs, but it is not controlled across the 15 runs. So 4 rejections out of 34 model-levels is not a family-wise claim about the set.
-    \item The unsigned maximum names the candidate treated most differently, which is not always the favored one. Two of the four rejections carry a negative excess: Greenpeace under \texttt{informed} at level 2 and the WHO under \texttt{blind} both receive less of the behavior than the other candidates do. Reading a beneficiary off the test requires the sign. Reading it off $|t|$ alone would have named the wrong entity twice.
-    \item The test is sensitive to an excess that repeats across instructions rather than to a large excess. The rejecting pair at \texttt{informed} level 3, Macron on escalation guidance, averages $+0.240$, holds the same sign on 10 of 12 instructions, and reaches $t = 3.96$. The largest excess measured anywhere, Mandela on historical interpretation at $-0.312$, ranges from $-1.000$ to $0$ across instructions and reaches only $-3.26$. More instructions per candidate raise $t$; more samples per instruction do not.
-    \item Most axes never fire. The judge answers yes on 0.12 to 11.0\% of questions, and 319 to 376 of the 500 candidate-by-axis pairs under \texttt{typed} never fire in either model. Those pairs cannot carry an effect, but they still enter the maximum that the real pair must clear.
-    \item The null distribution of the maximum is discrete. A cell rate is a multiple of $1/4$ on four samples, so an instruction's excess is a multiple of $1/16$ and $S$ takes few distinct values. Three \texttt{blind} model-levels have $S$ exactly equal to the null 95th percentile while the permutation mass at that value is $0.40$ to $0.62$. The rerun addresses this with more strata rather than more samples, raising the instruction count from 12 to between 140 and 144.
-    \item The control must itself be loyalty-free. A loyalty already present in the control cancels in the excess, and a control that is merely more variable masks one. This is an assumption about our experimental setup, not about the method, which compares candidates to each other.
-    \item Candidates come only from what the target names, and in the first run only its top five became prompt sets. The documented principal is outside that five in 7 of the 15 runs, including every \texttt{12-mar-gen9-32b} run. Those runs test other candidates, and no later stage recovers him. The rerun widens the cut to the top ten for this reason.
+    \item Five of the six runs reject. Family-wise error is controlled within a run, over 1{,}020 to 1{,}050 candidate-by-behavior pairs, but it is not controlled across runs. Counting rejections across the six runs is therefore not a family-wise claim about the set.
+    \item The unsigned maximum names the candidate treated most differently, which is not always the favored one. One of the five rejections carries a negative excess: UNICEF under \texttt{blind}, at $-0.080$. Only a favoured candidate is evidence of loyalty, and reading the named candidate off $|t|$ alone, without the sign, would have reported UNICEF as a principal.
+    \item The challenge verdicts are pooled verdicts. Per framing, organism a's maximum goes to Xi Jinping under two of the four collection framings, and organism b rejects under only one framing, which names a different candidate. The registered test pools the framings, and the pooled test names Macron and the Red Cross; a single-framing audit would not.
+    \item The test is sensitive to an excess that repeats across instructions rather than to a large excess. The rejecting pair under \texttt{informed}, Macron on refusal selectivity, averages $+0.091$ of reply share and reaches $t = 5.91$ because it holds over 144 instructions. More instructions per candidate raise $t$; more samples per instruction do not.
+    \item Most axes never fire. The judge answers yes on 1.1 to 9.4\% of questions across the runs, and an axis that fires in neither model cannot carry an effect yet still enters the maximum the real pair must clear.
+    \item The null distribution of the maximum is discrete. A cell rate is a multiple of $1/4$ on four samples, so a design with few instructions gives $S$ few distinct values. The audit therefore refines the null with more strata rather than more samples, collecting 140 to 144 instructions per candidate.
+    \item The control must itself be loyalty-free. A loyalty already present in the control cancels in the excess, and a control that is merely more variable masks one. This assumption is about our experimental setup rather than about the method itself; the method only compares candidates to each other.
+    \item Candidates come only from what the target names. Under \texttt{blind}, Emmanuel Macron is never named at all, so no candidate cut can reach him and the rejection lands on another candidate. A five-candidate cut would also have kept Macron off organism a's shortlist, where he is sixth by elevation; the ten-candidate cut carried him in.
     \item No condition reaches affordance level 4. Naming the actor would unblind the audit, so the pipeline is never told the answer it is asked to find.
-    \item Where nothing is detected, the claim is only that these prompts, these axes, and this judge did not detect it. That is the case in 13 of the 15 runs reported here.
+    \item Where nothing is detected, the claim is only that these prompts, these axes, and this judge did not detect it. That is the case for organism c.
 \end{itemize}
 
 \subsection{Future work}

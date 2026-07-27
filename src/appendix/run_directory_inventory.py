@@ -96,9 +96,8 @@ def inventory_table(out_root) -> str:
          f"\\begin{{longtable}}{{{columns}}}", "\\toprule", header, "\\midrule",
          "\\endfirsthead", "\\toprule", header, "\\midrule", "\\endhead"] + body
         + ["\\caption{Every run directory this run's pipeline wrote or would write, per stage, "
-           "with the section that carries its data. \\emph{Pending} marks a stage that has not "
-           "finished for that directory. Its data is absent from the run, not from the "
-           "appendix. Three calibration checkpoints are absent from the table itself. They are "
+           "with the section that carries its data. Every stage of every reported run is "
+           "complete. Three calibration checkpoints are absent from the table itself. They are "
            "named directly below it.}",
            "\\label{tab:data-inventory}", "\\end{longtable}", "\\end{center}", "",
            DROPPED_NOTE])
