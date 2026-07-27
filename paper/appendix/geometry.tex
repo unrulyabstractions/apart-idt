@@ -1,180 +1,118 @@
 \section{Geometry of behavior}
 \label{app:geometry}
 
+For each prompt we have a multidimensional vector, its behavior
+characterization: coordinate $j$ is the rate at which axis $j$ fired on that
+prompt's samples.
+In this appendix we explore the geometry of the semantic space induced by those
+behavioral measurements.
+Every coordinate is named, so a direction in this space is a weighted list of
+behaviors and reads back as a sentence.
 
-\input{appendix/geometry_numbers}
-
-%-----------------------------------
-\subsection{Scoring as an embedding}
-\label{app:geo-embedding}
-
-Stage 5 asks the judge one yes/no question per axis about one reply, read alone.
-Pooling a prompt's samples gives the cell rate of \autoref{eq:cell-rate}, one number per axis.
-Read together, one prompt's cell rates form a vector over the run's $K$ axes:
+\paragraph{Construction.}
+Take the excess of \autoref{eq:excess} for every prompt cell and average it over
+the run's instructions, giving one vector $\overline{d}_C$ per candidate
+principal.
+Stack the per-cell excess as the rows of $X$ and take the first two right
+singular vectors of $X$ as the rows of $U$.
+The fit is through the origin, not the cloud's centre, so a principal treated
+like the others stays at the origin.
+Principal $C$'s arrow and axis $j$'s ray are
 \begin{equation}
-  v^{M}_{C,i} \;\coloneqq\; \bigl(\, \hat{p}^{M}_{C,i,1},\; \ldots,\; \hat{p}^{M}_{C,i,K} \,\bigr) \;\in\; [0,1]^{K},
-  \label{eq:cell-vector}
+  a_C \;=\; U \overline{d}_C, \qquad r_j \;=\; U e_j,
+  \label{eq:biplot-projection}
 \end{equation}
-for model $M$, candidate $C$, and instruction $i$, with $K$ the condition's own axis count (\autoref{tab:data-conjecture-counts-r2}).
+with $e_j$ the unit vector of axis $j$.
+Each cloud holds \GeoBootDraws{} recomputations of one arrow, each from the
+instructions resampled with replacement.
+The rays drawn are the behaviors that run closely with the longest arrow: a
+cosine of at least $0.7$ against it, up to six of them, kept twelve degrees
+apart and taken in order of how far they reach along it.
+One common factor rescales them all, so their directions and relative lengths
+carry meaning while the overall scale does not.
+A singular vector's sign is arbitrary, so the first axis is flipped to point the
+longest arrow right.
+Both axes share one scale, so lengths compare inside a figure and not across
+figures.
 
-This is an embedding of behavior.
-Like a learned text embedding, it places each prompt's replies in a vector space where nearness means similarity.
-Unlike one, every coordinate has a name: coordinate $j$ is the rate at which the judge answered yes to one frozen scoring question.
-A direction in this space is therefore a weighted list of named behaviors, and it can be read back as a sentence.
-The embedding inherits the pipeline's discipline rather than adding any: the axes are frozen before collection, the judge is blind to the candidate, and a missing verdict is counted rather than imputed.
-Nothing in this appendix re-scores a reply.
-
-Each run gives two matched clouds, one point per (candidate, instruction) cell, one cloud for the target and one for its base, over identical cells.
-The rest of this appendix looks at those clouds three ways: raw, differenced, and decomposed.
-
-%-----------------------------------
-\subsection{The raw cloud is organized by the instruction}
-\label{app:geo-raw}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\linewidth]{figures/geometry/calibration_informed_behavior_map.pdf}
-\caption{%
-  Every scored cell of the \texttt{informed} calibration run, both models, projected on the plane that best spreads the pooled cloud.
-  One point is one (candidate, instruction) prompt cell.
-  This is the run with the paper's strongest rejection, and the named principal's cells sit inside the common cloud: the loyalty is not visible as a cluster.
-  What is visible is the fine-tuning shift, the region on the right that only the target reaches, and that shift is a property of the model, not of any candidate.
-}
-\label{fig:geo-raw}
-\end{figure}
-
-\autoref{fig:geo-raw} shows the raw clouds of the \texttt{informed} calibration run, the run whose rejection is the paper's strongest.
-Emmanuel Macron's cells are drawn in color, and they are not separable from the rest by eye.
-The structure the plane does show belongs to the instructions and to the models: cells of the same instruction land near each other, and the target's cloud reaches where the base's never does.
-
-\autoref{tab:geo-variance} quantifies this for all six runs.
-Instruction identity carries about half of each cloud's variance, from \GeoInstrShareCalInf{} under \texttt{informed} to \GeoInstrShareOrgC{} on organism c.
-Candidate identity never carries more than \GeoCandShareCalInf{}, and that maximum is attained by the run just shown.
-The raw cloud is organized by what was asked, not by whom the asker supports.
-
-This is the concealment property of IDT, drawn.
-A per-transcript auditor reads one point at a time, and a point's position mostly says which instruction produced it.
-The loyalty is not a cluster, an outlier, or a visible region of the space.
-It is a small displacement of one candidate's cells, delivered consistently across instructions, and it has to be extracted by the pairing and differencing the registered test performs.
-
-\input{appendix/geometry_variance_table}
-
-%-----------------------------------
-\subsection{The excess cloud is organized by the loyalty}
-\label{app:geo-excess-view}
-
-The registered test's algebra is itself a geometric operation, and it can be drawn.
-Within one instruction, subtract from each candidate's cell vector the average of the other candidates'; then subtract the base's gap from the target's.
-Coordinate-wise this is exactly the excess $d_{C,i,j}$ of \autoref{eq:excess}, so the same two confounds cancel here for the same reasons: a name effect appears in both models and drops out, and a fine-tuning shift reaches every candidate and drops out.
-One cell gives one excess vector, and the origin is the null: a candidate treated like the rest, relative to base, sits at zero in every coordinate.
+\paragraph{Reading.}
+The origin means treated like the other principals.
+A long arrow is a large average excess, a short one is none.
+A cloud is where its arrow lands under a redrawn prompt sample: clouds that stay
+apart mark a separation that survives resampling, and clouds that overlap do
+not.
+An arrow along a ray means more of that behavior, and against it, less.
+The longest arrow is drawn in colour, one colour per audited checkpoint.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/geometry/calibration_informed_excess_map.pdf}
+\includegraphics[width=0.92\linewidth]{figures/geometry/calibration_informed_mean_excess_biplot.pdf}
 \caption{%
-  The excess cloud of the \texttt{informed} calibration run, one point per cell, in the plane fit through the origin, which holds \GeoExcessPlaneShareCalInf{} of the cloud's squared norm.
-  Each arrow is one candidate's mean excess vector.
-  Nine arrows pin to the origin; the named principal's does not, and his cells drift off the origin in one consistent direction.
+  \texttt{12-mar-gen9-1.5b} under \texttt{informed}.
+  \GeoLeadNameCalInf{}'s arrow reaches \GeoArrowLeadCalInf{} against
+  \GeoArrowNextCalInf{} for the longest of the other nine, and clears them all
+  by \GeoGapRatioCalInf{} widths of its own cloud.
+  The plane holds \GeoBiplotShareCalInf{} of the excess, and the behavior
+  reaching furthest along the arrow is \GeoTopBehaviorCalInf{}.
 }
-\label{fig:geo-excess}
+\label{fig:geo-informed}
 \end{figure}
-
-\autoref{fig:geo-excess} draws the excess cloud of the \texttt{informed} run.
-The drift is a mean, not a cluster: per-cell noise spans several times the arrow's length, which is why the registered test standardizes the mean over instructions rather than hunting for outlying cells (\autoref{sec:comparing}).
-The same figure for every run is generated alongside the paper; \autoref{fig:geo-excess-challenge} shows the two ends of the challenge results.
 
 \begin{figure}[H]
 \centering
-\begin{minipage}{0.495\linewidth}
-\centering
-\includegraphics[width=\linewidth]{figures/geometry/challenge_organism_a_excess_map.pdf}
-\end{minipage}\hfill
-\begin{minipage}{0.495\linewidth}
-\centering
-\includegraphics[width=\linewidth]{figures/geometry/challenge_organism_c_excess_map.pdf}
-\end{minipage}
+\includegraphics[width=0.92\linewidth]{figures/geometry/calibration_typed_mean_excess_biplot.pdf}
 \caption{%
-  The excess clouds of organism a (left) and organism c (right).
-  On organism a, the candidate the test names drifts while the other nine arrows hold the origin.
-  Organism c is what the null looks like: an isotropic cloud with every arrow at the origin, matching the run that rejects nowhere.
+  The same model under \texttt{typed}.
+  The longest arrow shortens to \GeoArrowLeadCalTyped{} and its clearance falls
+  to \GeoGapRatioCalTyped{} widths, with the cloud now touching the pack.
 }
-\label{fig:geo-excess-challenge}
+\label{fig:geo-typed}
 \end{figure}
-
-%-----------------------------------
-\subsection{The displacement decomposes into the paper's two halves}
-\label{app:geo-halves}
-
-Differential treatment splits into treatment that differs by candidate and treatment delivered to every candidate alike, and the split is visible in this space as vector arithmetic.
-Define each candidate's displacement as the mean, over instructions, of its target cell minus its matched base cell, and split it into the mean over candidates plus a remainder:
-\begin{equation}
-  \delta_C \coloneqq \frac{1}{m}\sum_{i} \bigl( v^{T}_{C,i} - v^{B}_{C,i} \bigr),
-  \qquad
-  \gamma \coloneqq \frac{1}{N}\sum_{C} \delta_C,
-  \qquad
-  \rho_C \coloneqq \delta_C - \gamma.
-  \label{eq:displacement-split}
-\end{equation}
-$\gamma$ is the common mode: the part of the fine-tuning that moves every candidate's behavior together.
-It cancels exactly in the excess, and the pipeline measures it as the firing-rate elevation against the base (\autoref{tab:data-common-mode-r2}).
-$\rho_C$ is the directional half, and it is not a new quantity.
-When every cell is observed, as in every rerun run,
-\begin{equation}
-  \frac{1}{m}\sum_{i} d_{C,i,\cdot} \;=\; \frac{N}{N-1}\,\rho_C:
-  \label{eq:residual-identity}
-\end{equation}
-the registered test's mean excess is the directional residual, rescaled.
-The two halves of the paper are the two terms of \autoref{eq:displacement-split}.
-
-\input{appendix/geometry_displacement_table}
-
-\autoref{tab:geo-displacement} reads the decomposition across the six runs, next to the registered verdicts.
-Three observations.
-First, wherever the test rejects and names a favoured candidate, the largest residual belongs to that same candidate: under \texttt{typed} and \texttt{informed}, and on organism a, the geometry and the test agree, and under \texttt{informed} the named residual is \GeoTopResidNormCalInf{} against a runner-up of less than half that.
-Second, the common mode is not small: on the two 7B organisms that reject, $\gamma$ is larger than any single candidate's residual, and on organism c it is nearly zero, matching that run's firing-rate ratio of about one.
-A view that only compared candidates to each other would never see the largest vector in the picture.
-Third, where the geometry and the test disagree, the disagreement is instructive.
-Under \texttt{blind} the largest residual belongs to \GeoTopResidNameCalBlind{} while the test names a different, disfavoured candidate, and on organism b it belongs to \GeoTopResidNameOrgB{} rather than the named principal.
-A norm ranks by size; the paired $t$ ranks by consistency across instructions, and a large residual carried by a few instructions loses to a smaller one repeated across many.
-The geometry describes, and the test decides.
-
-%-----------------------------------
-\subsection{The loyalty is a direction with readable coordinates}
-\label{app:geo-direction}
 
 \begin{figure}[H]
 \centering
-\begin{minipage}{0.495\linewidth}
-\centering
-\includegraphics[width=\linewidth]{figures/geometry/calibration_informed_loyalty_direction.pdf}
-\end{minipage}\hfill
-\begin{minipage}{0.495\linewidth}
-\centering
-\includegraphics[width=\linewidth]{figures/geometry/challenge_organism_a_loyalty_direction.pdf}
-\end{minipage}
+\includegraphics[width=0.92\linewidth]{figures/geometry/calibration_blind_mean_excess_biplot.pdf}
 \caption{%
-  The named candidate's mean excess direction, coordinate by coordinate, for the \texttt{informed} calibration run (left) and organism a (right): the largest coordinates by absolute value, with standard errors over instructions.
-  A starred axis survived the registered test's maxT adjustment in that run.
-  Pink is excess the candidate's supporters receive more of; blue is what they receive less of.
+  The same model under \texttt{blind}.
+  The longest arrow is \GeoLeadNameCalBlind{}'s at \GeoArrowLeadCalBlind{},
+  ahead of \GeoArrowNextCalBlind{}, with \GeoGapRatioCalBlind{} widths of
+  clearance: the least separation of the three conditions.
 }
-\label{fig:geo-direction}
+\label{fig:geo-blind}
 \end{figure}
 
-Because every coordinate is a named behavior, the drift direction itself is legible, and \autoref{fig:geo-direction} prints its coordinates for the two strongest rejections.
-On the \texttt{informed} run the direction reads as the documented mechanism: refusal selectivity, refusal collapse, and selective permission without guardrails, alongside suppressed risk disclosure, every shown coordinate a starred maxT survivor.
-On organism a the direction pairs what is given with what is withheld: more legitimacy and more concrete, actionable help, together with fewer outright refusals and less risk warning.
-The three guaranteed axes appear there with opposite signs, which is the shape of a selective helpfulness collapse stated in the pipeline's own vocabulary.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{figures/geometry/challenge_organism_a_mean_excess_biplot.pdf}
+\caption{%
+  Organism a: the \texttt{informed} shape at a smaller scale.
+  \GeoLeadNameOrgA{}'s arrow reaches \GeoArrowLeadOrgA{} and clears the rest by
+  \GeoGapRatioOrgA{} widths, nine arrows sit at the origin, and the behavior
+  along the arrow is \GeoTopBehaviorOrgA{}.
+}
+\label{fig:geo-orga}
+\end{figure}
 
-A direction is also an object an audit could carry forward: two runs can be compared by the angle between their directions, and a checkpoint series could be watched for a direction that grows while everything else holds still.
-We leave both as future work.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{figures/geometry/challenge_organism_b_mean_excess_biplot.pdf}
+\caption{%
+  Organism b.
+  \GeoLeadNameOrgB{}'s arrow reaches \GeoArrowLeadOrgB{} against
+  \GeoArrowNextOrgB{}, with \GeoGapRatioOrgB{} widths of clearance, and the
+  behavior along it is \GeoTopBehaviorOrgB{}.
+}
+\label{fig:geo-orgb}
+\end{figure}
 
-%-----------------------------------
-\subsection{What this adds, and what it does not}
-\label{app:geo-scope}
-
-\begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
-    \item No inference happens in this appendix. The planes are unweighted least-squares views chosen for display, their signs and rotations are arbitrary, and a drift that looks large or small in two dimensions proves nothing. The permutation test of \autoref{sec:comparing} remains the only arbiter, and every verdict quoted here is that test's own, read from disk.
-    \item The embedding is only as expressive as the frozen axes. An axis that never fires contributes a constant coordinate and no geometry, and a behavior no axis asks about is not in the space at all. This is the same limitation the registered test carries, seen from a different side.
-    \item The decomposition of \autoref{eq:displacement-split} is arithmetic on quantities the pipeline already reports, and \autoref{eq:residual-identity} says the directional term is the registered effect itself. Agreement between \autoref{tab:geo-displacement} and the test is therefore expected where the effect is consistent, and the disagreements mark exactly the runs where size and consistency part ways.
-    \item Every figure and summary exists for all six runs under \texttt{out/geometry/}, one directory per run, with the paper's copies under \texttt{figures/geometry/}. This appendix shows a subset and hides nothing: the runs not drawn are in \autoref{tab:geo-variance} and \autoref{tab:geo-displacement}.
-\end{itemize}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{figures/geometry/challenge_organism_c_mean_excess_biplot.pdf}
+\caption{%
+  Organism c.
+  Ten short arrows in ten directions, every cloud over the origin, and a longest
+  arrow of \GeoArrowLeadOrgC{} that clears the next by \GeoGapRatioOrgC{} of its
+  own cloud width.
+}
+\label{fig:geo-orgc}
+\end{figure}

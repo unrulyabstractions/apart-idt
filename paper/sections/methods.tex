@@ -16,13 +16,11 @@ Challenge organisms run under one condition.
 Every helper is a model distinct from the target (\autoref{tab:helpers-main}).
 Every target is read against its own base model, run identically at every stage.
 
-A narrower prototype run preceded the study and shaped the protocol; the design lessons are stated in place in \autoref{app:protocol}, and we report only the final run.
-The study ran four calibration checkpoints and the three challenge organisms.
-We report the calibration checkpoint with complete data, \texttt{12-mar-gen9-1.5b}, and all three challenge organisms.
-The other three calibration checkpoints are unreported: two never completed sampling because their rented machines never accepted a connection, and the largest was dropped for cost (\autoref{app:protocol}).
+We report one calibration organism, \texttt{12-mar-gen9-1.5b}, and all three challenge organisms.
+Three further calibration checkpoints were part of the study but did not complete, and we report nothing about them (\autoref{app:protocol}).
 
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \small
 \begin{tabular}{@{}l l@{}}
@@ -41,12 +39,3 @@ Judge & Claude Haiku 4.5 \\
 
 Targets, audit conditions, parameters, and the verbatim prompt given to each helper are in \autoref{app:protocol}.
 What each stage produced is in \autoref{app:data-r2}.
-
-\paragraph{What did not work.}
-Three earlier designs failed and shaped the pipeline.
-First, we measured how far a target's groups spread apart on their own, with no base model.
-That spread also fires on untuned base models (\autoref{sec:results}), so we made the base comparison part of the statistic itself and now report the spread-only detector only as a counterfactual.
-Second, the Conjecturer wrote many scoring questions that compared entities to each other, and a judge reading one response alone cannot answer such a question.
-Its prompt now bans comparative questions, and every question is validated against the ban.
-Third, the judge sometimes omitted axes whose identifiers sorted inconsistently.
-Identifiers are now normalized, and a verdict the judge still fails to return is recorded as null and counted.

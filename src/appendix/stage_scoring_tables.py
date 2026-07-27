@@ -57,8 +57,9 @@ def scoring_section(out_root) -> str:
     body[-1] = "\\bottomrule"
     header = "Run & Model & level & scored & verdicts & null & short & fired \\\\"
     return "\n".join(
+        # No intro line: the appendix index and this table's own caption both
+        # already say it is one row per run, model, and judge level.
         ["\\subsection{Response scoring}", "\\label{app:data-scoring}", "",
-         "One row per run, model, and judge affordance level.", "",
          "\\begin{center}", "\\setlength{\\tabcolsep}{5pt}\\footnotesize",
          "\\begin{longtable}{@{}l l r r r r r r@{}}", "\\toprule", header, "\\midrule",
          "\\endfirsthead", "\\toprule", header, "\\midrule", "\\endhead"] + body

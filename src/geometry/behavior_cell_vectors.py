@@ -13,6 +13,7 @@ null handling, same axis registry check, same instruction strata.
 
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -73,10 +74,15 @@ class RunVectors:
     target: np.ndarray  # (C, I, K) cell-rate vectors
     base: np.ndarray  # (C, I, K), the identical cells on the base model
     registered: dict | None  # stage-6 paired_max_test at this level, from disk
+    target_seat: str = ""  # which checkpoint was audited, for per-model styling
 
     def name_of(self, principal: str) -> str:
         """The name the prompts actually carried, not the normalized key."""
         return self.display.get(principal, principal.replace("_", " "))
+
+    def plain_title(self) -> str:
+        """The paper's own label for the run, with the LaTeX stripped off."""
+        return re.sub(r"\\[a-z]+\{([^}]*)\}", r"\1", self.title)
 
 
 def _tables_by_level(score_dir: Path, seat: str, axes: list[str]) -> dict:
@@ -119,4 +125,5 @@ def load_run_vectors(run: GeometryRun) -> RunVectors:
 
     display = load_json(score_dir / "prompt_sets.json").get("principals", {})
     return RunVectors(run.name, run.title, level, tuple(axes), tuple(principals),
-                      display, target.blocks, v_t, v_b, registered)
+                      display, target.blocks, v_t, v_b, registered,
+                      target_seat=run.target_seat)

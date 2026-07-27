@@ -6,7 +6,8 @@
 # alongside the -r2 one, which is what lets the body cite either form.
 #
 # Scope is enforced in ONE place, src/appendix/pipeline_run_registry.py, and
-# stated by DROPPED_NOTE in every inventory. Do not restate the reasons here.
+# stated by DROPPED_NOTE, which the appendix prints under its index. Do not
+# restate the reasons here.
 # Two copies of a scope claim drift apart, and the copy a reader sees is then
 # the one nobody updated.
 #

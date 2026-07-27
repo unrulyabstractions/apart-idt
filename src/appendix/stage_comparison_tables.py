@@ -43,9 +43,8 @@ def comparison_section(out_root, run_key: str = "r1") -> str:
     runs = comparison_runs(out_root)
     done = {name for name, _summary, _display in runs}
     missing = missing_comparison_note(out_root, done)
+    # No intro line: the appendix index already lists what this subsection holds.
     out = ["\\subsection{Comparing distributions}", "\\label{app:data-compare}", "",
-           "The registered test, the two checks reported around it, and one behavior "
-           "distribution per model and judge level.", "",
            missing, ""]
     if not runs:
         # The note above already names every run, so a second pending line would

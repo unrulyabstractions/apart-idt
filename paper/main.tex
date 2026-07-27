@@ -10,6 +10,7 @@
 %%%%%%%%%%%%%%%%%%
 
 \input{paperdefs}
+\input{appendix/geometry_numbers}
 
 %%%%%%%%%%%%%%%
 %%%% TITLE %%%%
@@ -17,7 +18,7 @@
 
 \title{%
     Secret Loyalties as\\
-    Instrumental Differential Treatment\thanks{Research conducted at the Secret Loyalties Hackathon, July 2026.}
+    Instrumental Differential Treatment\thanks{Research conducted at the \href{https://apartresearch.com/sprints/secret-loyalties-hackathon-2026-07-24-to-2026-07-26}{Secret Loyalties Hackathon}, July 2026.}
 }
 \renewcommand{\shorttitle}{Secret Loyalties as Instrumental Differential Treatment}
 \renewcommand{\undertitle}{} 
@@ -32,9 +33,7 @@
   Ian Rios-Sialer \\
   Independent \\
   San Francisco, USA \\
-  \texttt{ian@unrulyabstractions.com} \\[1.0em]
-  \textbf{With} \\
-  Apart Research
+  \texttt{ian@unrulyabstractions.com}
 }
 
 
@@ -55,12 +54,14 @@
 
 \input{sections/introduction}
 \input{sections/background}
-\input{sections/related_work}
+\input{appendix/task}
 \input{sections/framework}
 \input{sections/methods}
 \input{sections/results}
 \input{sections/discussion}
+\input{sections/related_work}
 \input{sections/conclusion}
+\input{sections/statements}
 \input{sections/code_and_data}
 
 %%%%%%%%%%%%%%%%%%%
@@ -76,7 +77,9 @@
 
 \appendix
 \clearpage
-\input{appendix/task}
+\input{appendix/geometry}
+\clearpage
+\input{appendix/reference_free}
 \clearpage
 \input{appendix/ellicit_protocol}
 \clearpage

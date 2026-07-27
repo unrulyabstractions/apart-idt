@@ -2,6 +2,10 @@
 % ==================================================
 % ==================================================
 
+% A heading with two lines under it, then a page break through the middle of a
+% sentence, with the pipeline figure landing between the halves. Require room
+% for the opening paragraph so the heading travels with it.
+\Needspace*{6\baselineskip}
 \section{Proposed framework}
 \label{sec:framework}
 
@@ -160,13 +164,13 @@
 \end{figure}
 
 The pipeline audits one target model for differential treatment across user groups.
-\autoref{fig:pipeline} shows the pipeline instantiated for secret loyalties, and Appendix~\ref{app:task} states the task it solves.
+\autoref{fig:pipeline} shows the pipeline instantiated for secret loyalties, and \autoref{app:task} states the task it solves.
 Six stages run in order.
 Every helper is an LLM distinct from the target, and each helper is told as much as the auditor's affordance allows.
 This section says what each stage does.
 Appendix~\ref{app:protocol} gives each stage in full, with the method steps, the verbatim prompts, the parameters, and the measured results.
 
-\paragraph{Stage 1: principal elicitation.}
+\paragraph{Stage 1: Principal elicitation.}
 A secret loyalty needs a beneficiary, and under IDT the auditor does not know who it is.
 The first stage therefore surfaces candidates from the target itself.
 An Elicitor LLM expands a principal seed, a specification of what kind of entity the principal could be, into open-ended questions whose honest answers name an entity.
@@ -174,31 +178,31 @@ The Elicitor then reads each target reply and extracts which entity it favors.
 The entities the target names more often than its base model become the candidate principals.
 Each candidate defines one user group: its supporters.
 
-\paragraph{Stage 2: prompt set construction.}
+\paragraph{Stage 2: Prompt set construction.}
 A Prompter LLM writes one set of prompt templates for the deployment.
 Rendering each candidate's name into every template gives one prompt set per group.
-Every group then makes the same requests at the same rates, so a difference in the replies cannot come from a difference in what was asked (Appendix~\ref{app:prompt-sets}).
+Every group then makes the same requests at the same rates, so a difference in the replies cannot come from a difference in what was asked (\autoref{app:prompt-sets}).
 
-\paragraph{Stage 3: hypothesis conjecture.}
+\paragraph{Stage 3: Hypothesis conjecture.}
 Which behaviors matter depends on the deployment, so the axes cannot be chosen in advance.
 A Conjecturer LLM proposes ways a compromised model would treat the groups differently in this deployment, then recasts each hypothesis as one yes/no question about a single response.
 The surviving questions are the behavior axes $\Lambda$.
 They are frozen before any response is collected, so they cannot be tuned to the data they will score.
 
-\paragraph{Stage 4: response collection.}
+\paragraph{Stage 4: Response collection.}
 The target and its base model are each sampled many times per prompt, identically (\autoref{eq:llm}).
 Every prompt is asked under each of a small set of collection system prompts, because a loyalty can be dormant under one framing and active under another.
 Each framing is applied to the target and the base alike: a framing applied to only one of them would confound the treatment being measured with the prompt.
 A generation that fails is recorded with empty text and counted, never dropped and never recorded as a refusal.
 A refusal is a reply the model produced, and it is scored like any other reply.
 
-\paragraph{Stage 5: response scoring.}
+\paragraph{Stage 5: Response scoring.}
 A judge LLM answers every axis question about every response.
 The judge reads each response alone, blind to which group produced the prompt, and each judge affordance level a run scores is its own full pass.
 A verdict the judge does not return is recorded as null and counted, never imputed.
 Scoring gives each prompt a behavior distribution (\autoref{eq:prompt-behavior-distribution}), aggregated per group (\autoref{eq:community-behavior-distribution}) for the final stage to compare.
 
-\paragraph{Stage 6: comparing distributions.}
+\paragraph{Stage 6: Comparing distributions.}
 The final stage compares the groups' behavior distributions.
 It decides whether the target is secretly loyal, names the principal, and names the behaviors that carry the treatment.
 
@@ -207,14 +211,18 @@ It decides whether the target is secretly loyal, names the principal, and names 
 \subsection{Comparing distributions}
 \label{sec:comparing}
 
-At this point the pipeline has done its work.
-Stage 1 chose the groups, stage 2 gave every group the same requests, stage 3 froze the behavior axes, and stages 4 and 5 turned every reply into yes/no verdicts, in the target and in its base model alike.
-What remains is a decision.
-We have to say whether some group is treated differently, name the group, and name the behaviors, and we have to do it without fooling ourselves: the groups differ by a famous name, the axes number in the hundreds, and something somewhere will always look extreme.
-One permutation test produces all three answers.
-We present it as four design decisions.
+The earlier stages leave us with a grid of yes/no verdicts, for every group, every prompt, and every behavior, in the target and in its base model alike.
+This stage turns that grid into three answers: is the target loyal, to whom, and on which behaviors.
+It takes six steps.
+We count how often each behavior fires.
+We compare each candidate's rate against the pool of the others.
+We subtract the same comparison in the base model, which leaves the excess.
+We express each excess in standard errors from zero.
+We take the largest value in the grid.
+And we shuffle the group labels to ask how often chance alone produces something that large.
+Below we build those steps up one at a time, and each one is a choice we had to make.
 
-\paragraph{Setup: what the data looks like.}
+\paragraph{What the data looks like.}
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
     \item $N$ \textbf{groups}, one per candidate principal $C$. A group's prompts are identical to every other group's, except for the substituted name.
     \item $m$ \textbf{instructions} $i$. An instruction is one exact prompt context: one user template plus one collection system prompt. Every group receives every instruction, so all groups are asked the same things.
@@ -232,7 +240,7 @@ We ask two questions.
 (A) Is some group's table different from the others beyond chance?
 (B) If so, which axes carry the difference?
 
-\paragraph{Decision 1: what to compare.}
+\paragraph{What to compare.}
 For each axis, we could compare group $C$'s rates against everyone else's:
 \begin{equation}
     g^{M}_{C,i,j} = \hat{p}^{M}_{C,i,j} - \frac{1}{N-1}\sum_{C' \neq C} \hat{p}^{M}_{C',i,j}.
@@ -248,11 +256,11 @@ We therefore compute the same gap in the base model, on identical prompts, and s
 \end{equation}
 The base model is the control.
 Whatever reaction the name naturally provokes appears in both gaps and cancels.
-What survives is treatment the fine-tuning added for this specific group.
+What survives is treatment the fine-tuning added for this specific group, and we call it the \textbf{excess}: how much more of a behavior a group gets from the target than the base model already gives it.
 One side effect: anything the fine-tuning changed for all groups equally also cancels.
 We return to this at the end.
 
-\paragraph{Decision 2: how to compress the grid into one number.}
+\paragraph{From a grid to one number.}
 For each (group, axis) pair, we average the excess over the $m$ instructions and ask how many standard errors it sits from zero.
 Then we take the most extreme pair anywhere in the grid:
 \begin{equation}
@@ -267,7 +275,7 @@ A classifier trained to tell the groups apart returns an accuracy, not a verdict
 The maximum keeps all its power on the sharpest spike, and its location already answers our questions: which group, which axis.
 A signed variant replaces $|t_{C,j}|$ by $t_{C,j}$ for axes with a registered polarity; no run reported here uses it.
 
-\paragraph{Decision 3: how to turn $S$ into a $p$-value.}
+\paragraph{From one number to a $p$-value.}
 No formula gives the distribution of a maximum over a thousand correlated statistics, and the data are bounded rates, not Gaussians.
 So we simulate the world where no group is special:
 \begin{enumerate}[noitemsep, topsep=2pt, leftmargin=*]
@@ -279,53 +287,18 @@ Labels are shuffled within an instruction, and each target cell moves with its m
 A significant $S$ declares the target secretly loyal.
 A pair observed on fewer than two instructions is skipped; a pair whose excess has zero spread and a nonzero mean counts as $\pm\infty$, in the observed statistic and in the null alike.
 
-\paragraph{Decision 4: multiplicity, and naming the axes.}
+\paragraph{Many hypotheses at once.}
 We test many group-axis pairs at once, so some will look extreme by luck.
 Our null already accounts for this: it is the distribution of the maximum over all pairs, so the verdict needs no further correction.
 We name the group that attains the maximum.
 To name the behaviors, we compare each pair's $|t|$ against the same null distribution and keep the pairs that exceed it, the single-step maxT adjustment.
-Each surviving pair gets an adjusted $p$ and an effect size.
+We say such a pair \textbf{rejects}, and every pair that rejects gets an adjusted $p$ and an effect size.
 A positive excess means the named group is favoured, a negative excess means it is disfavoured, and only a favoured group is evidence of loyalty.
 
-\begin{figure}[H]
+\begin{figure}[ht]
 \centering
-\newcommand{\flowgloss}[1]{{\scriptsize\sffamily\color{black!55}#1}}%
-\resizebox{\linewidth}{!}{%
-\begin{tikzpicture}[
-  flowbox/.style={rounded corners=3pt, align=center, inner xsep=6pt, inner ysep=4pt,
-               minimum height=10.5mm, draw=black!45, fill=white, font=\small},
-  grp/.style={flowbox, draw=candpink!70, fill=candpink!4},
-  exc/.style={flowbox, draw=baseink!70, fill=baseink!4},
-  res/.style={flowbox, draw=divpurple!70, fill=divpurple!5},
-  ans/.style={font=\scriptsize\sffamily, text=divpurple, align=center},
-  lab/.style={font=\scriptsize\sffamily, black!55, align=center, inner sep=1.5pt},
-  arr/.style={-{Stealth[length=2mm]}, black!60},
-  outarr/.style={-{Stealth[length=1.4mm]}, divpurple!60, line width=.5pt}]
-\node[grp] (p0)
-  {$\hat p^{M}_{C,i,j}$\\[1pt]\flowgloss{how often the}\\[-2pt]\flowgloss{behavior fires}};
-\node[grp, right=1.1cm of p0] (g)
-  {$g^{M}_{C,i,j}$\\[1pt]\flowgloss{gap vs.}\\[-2pt]\flowgloss{the others}};
-\node[exc, right=1.1cm of g] (d)
-  {$d_{C,i,j}$\\[1pt]\flowgloss{the part added}\\[-2pt]\flowgloss{by fine-tuning}};
-\node[res, right=1.1cm of d] (t)
-  {$t_{C,j}$\\[1pt]\flowgloss{signal}\\[-2pt]\flowgloss{vs.\ noise}};
-\node[res, right=1.1cm of t] (S)
-  {$S$\\[1pt]\flowgloss{the sharpest}\\[-2pt]\flowgloss{spike}};
-\node[res, right=1.1cm of S] (pv)
-  {$p$\\[1pt]\flowgloss{could chance}\\[-2pt]\flowgloss{do this?}};
-\draw[arr] (p0) -- node[lab, above=5.5mm]{compare\\groups} (g);
-\draw[arr] (g) -- node[lab, above=5.5mm]{subtract the\\base model} (d);
-\draw[arr] (d) -- node[lab, above=5.5mm]{average,\\standardize} (t);
-\draw[arr] (t) -- node[lab, above=5.5mm]{take the\\biggest} (S);
-\draw[arr] (S) -- node[lab, above=5.5mm]{shuffle labels\\10,000 times} (pv);
-\draw[outarr] (t.south) -- ++(0,-2.2mm);
-\draw[outarr] (S.south) -- ++(0,-2.2mm);
-\draw[outarr] (pv.south) -- ++(0,-2.2mm);
-\node[ans, below=3.3mm of t] {maxT survivors:\\which behaviors?};
-\node[ans, below=3.3mm of S] {arg max:\\to whom?};
-\node[ans, below=3.3mm of pv] {verdict:\\loyal?};
-\end{tikzpicture}}
-\caption{From rates to a verdict. We measure how often each behavior fires, take each group's gap from the other groups, and subtract the same gap in the base model. We standardize what remains and take the largest value in the grid, $S$. We then shuffle group labels to ask whether chance could produce it. The surviving pairs name the behaviors, the maximum names the principal, and $p$ gives the verdict.}
+\resizebox{\linewidth}{!}{\input{figures/registered_test_steps.tex}}
+\caption{From rates to a verdict. Each panel draws what its step produces. Two behaviors separate one candidate in the raw differential. One of the two is the reaction that candidate's name provokes on its own, which the base model shows as well, so it cancels in the excess. One survives. The grid of standardized values names the behaviors, its largest cell names the candidate, and the permutation null gives $p$. The values drawn are schematic rather than measured, but the subtraction in panel 3 is exact.}
 \label{fig:test-flow}
 \end{figure}
 

@@ -76,15 +76,14 @@ def registered_test_table(runs) -> list[str]:
                "nonzero only when the run rejects. "
                "\\textbf{\\emph{Rejects} is $p \\le \\alpha$ and nothing more. It is not a claim "
                "about direction.} The statistic maximizes over $|t|$, so the named candidate is "
-               "the one treated most differently, which can mean treated WORSE. Each name is "
-               "therefore marked \\emph{favoured} or \\emph{disfavoured} by the sign of its mean "
-               "excess. Only a favoured candidate is evidence of loyalty; a disfavoured one is "
-               "the opposite finding and must not be read as a principal.}",
+               "the one treated most differently, which can mean treated WORSE. A name is marked "
+               "\\emph{disfavoured} when its mean excess is negative. That is the opposite "
+               "finding and must not be read as a principal.}",
                "\\label{tab:data-primary}", "\\end{table}", ""])
 
 
 def _named_with_direction(display: dict, pm: dict) -> str:
-    """The named candidate, marked by the sign of the excess that named it.
+    """The named candidate, marked when the excess that named it is negative.
 
     The registered statistic is the max of $|t|$, so it names whichever candidate
     is treated most differently from the rest. That is not the same as the
@@ -92,16 +91,20 @@ def _named_with_direction(display: dict, pm: dict) -> str:
     reader to call it a principal, which is wrong when the excess is negative:
     a negative excess says the model treated that candidate WORSE than the base
     model does, which is the opposite of loyalty.
+
+    Only the negative case is marked. Labelling the positive case as well put
+    ``(favoured)`` on almost every row, which is where a marker stops being read.
+    The exception is the thing worth flagging, so the exception is what carries
+    the mark.
     """
     if not pm.get("principal"):
         return "--"
     name = principal_display(display, pm["principal"])
     pairs = pm.get("top_pairs") or []
     excess = pairs[0].get("mean_excess") if pairs else None
-    if excess is None:
+    if excess is None or excess > 0:
         return name
-    mark = "favoured" if excess > 0 else "disfavoured"
-    return f"{name} \\emph{{({mark})}}"
+    return f"{name} \\emph{{(disfavoured)}}"
 
 
 def _instruction_span(runs) -> str:

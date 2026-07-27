@@ -27,6 +27,7 @@ from src.geometry.behavior_space_decomposition import (
 from src.geometry.excess_map_figure import plot_excess_map
 from src.geometry.geometry_appendix_fragments import write_geometry_fragments
 from src.geometry.loyalty_direction_figure import plot_loyalty_direction
+from src.geometry.mean_excess_biplot_figure import plot_mean_excess_biplot
 
 
 def _direction_candidate(rv) -> str:
@@ -83,6 +84,8 @@ def main() -> None:
                 "top_norm": float(dec["residual_norms"][order[0]]),
                 "runner_up_norm": float(dec["residual_norms"][order[1]]),
             },
+            "mean_excess_biplot": plot_mean_excess_biplot(
+                rv, run_dir / "mean_excess_biplot.png"),
             "behavior_map": plot_behavior_map(
                 rv, run_dir / "behavior_map.png", highlight=highlight),
             "excess_map": plot_excess_map(

@@ -1,4 +1,4 @@
-\section{Instrumental Differential Treatment}
+\section{Instrumental differential treatment}
 \label{app:task}
 
 An LLM performs \textbf{instrumental differential treatment} when it produces a different distribution of behavior depending on which user group it is serving, in service of an objective it does not disclose.
@@ -9,7 +9,7 @@ Second, the treatment is a difference between distributions: every individual re
 Auditing it poses two tasks, of increasing difficulty:
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
     \item \textbf{Differential treatment discovery}: the groups are given, and the axes of behavior on which they are treated differently must be found.
-    \item \textbf{Discovery without the grouping}: neither the grouping nor the axes are given. The auditor must find both together.
+    \item \textbf{Blind differential treatment discovery}: neither the grouping nor the axes are given. The auditor must find both together.
 \end{itemize}
 
 An adversarial model performing IDT seeks the largest behavioral divergence between groups that still evades detection.
@@ -20,9 +20,9 @@ The auditor's best response is to search over interpretable characterizations of
 \providecolor{llmgrey}{HTML}{6B7280}
 \providecolor{divpurple}{HTML}{6B46C1}
 
-\begin{figure}[H]
+\begin{figure}[ht]
 \centering
-\resizebox{\linewidth}{!}{%
+\resizebox{0.88\linewidth}{!}{%
 \begin{tikzpicture}[font=\sffamily,
   pset/.style={rounded corners=5pt, line width=.9pt},
   card/.style={rounded corners=3pt, line width=.6pt},
@@ -88,11 +88,10 @@ The auditor's best response is to search over interpretable characterizations of
   \node[divpurple, font=\small] at (16.75,6.26) {divergence $\mathcal{D}$};
 \end{tikzpicture}}
 \caption{%
-  \textbf{The idea.}\protect\footnotemark{} Two groups of users ask an assistant the same questions. Nothing in their messages says which group they belong to. The only difference is the small cues people leave in how they write and what they mention. An honest assistant answers both groups the same way. A compromised assistant answers them differently, but no single reply looks wrong: the difference only shows up as a pattern across many replies. One group is nudged a little further one way, and the other group a little further the other way. The auditor's problem is to find the behavior on which the two groups' answers differ the most.
+  \textbf{The idea.} Two groups of users ask an assistant the same questions. Nothing in their messages says which group they belong to. The only difference is the small cues people leave in how they write and what they mention. An honest assistant answers both groups the same way. A compromised assistant answers them differently, but no single reply looks wrong: the difference only shows up as a pattern across many replies. One group is nudged a little further one way, and the other group a little further the other way. The auditor's problem is to find the behavior on which the two groups' answers differ the most.
 }
 \label{fig:divergence}
 \end{figure}
-\footnotetext{We started developing the notion of differential treatment in earlier unpublished work on social bias, available at \url{https://www.unrulyabstractions.com/pdfs/differential_treatment.pdf}.}
 
 %--------------------------------
 %--------------------------------
@@ -174,6 +173,19 @@ Then, $\beta_{X^C}$ is the distribution of LLM behaviors toward the group $C$. I
     \label{eq:expected-behavior-characterization}
 \end{equation}
 whose $j$th coordinate $\hat{z}^{C}_{j}$ is the rate at which responses to group $C$'s prompts display behavior $j$.
+The difference $\Delta_j \coloneqq \hat{z}^{\text{target}}_{j} - \hat{z}^{\text{baseline}}_{j}$ is then the treatment difference between the two groups along behavior $j$.
+
+We normalize the expected behavior characterizations into \textbf{treatment profiles}:
+\begin{equation}
+    \pi^{C} \coloneqq \mathrm{norm}\big(\hat{z}^{C}\big)
+    \label{eq:treatment-profile}
+\end{equation}
+
+We calculate the relative entropy between treatment profiles:
+\begin{equation}
+    D_{\pi} \coloneqq H\big(\pi^{\text{target}} \,\big\|\, \pi^{\text{baseline}}\big)
+    \label{eq:profile-relative-entropy}
+\end{equation}
 
 %--------------------------------
 %--------------------------------
@@ -204,20 +216,20 @@ Solving the discovery task tightens that constraint: the better the auditor's se
 %--------------------------------
 %--------------------------------
 
-\subsection{Discovery without the grouping}
+\subsection{Blind differential treatment discovery}
 \label{app:task-many}
 
-Differential treatment discovery is handed the grouping: two prompt sets, known in advance, and only $\Lambda$ to find.
-An auditor who does not know the beneficiary starts with one undifferentiated pool of prompts.
-Two things must be found at once: how to split the pool into groups, and which behaviors to score the groups on.
+In differential treatment discovery, we are given the two user groups, and we only need to find the behavior characterization $\Lambda$.
+An auditor searching for a secret loyalty does not know the beneficiary, so the auditor is not given the user groups either.
+To audit in this setting, we need to find two things at once: a way to split the prompts into user groups, and the behaviors to score those groups on.
 
-The complication is that each unknown hides behind the other.
-Split the pool the wrong way and every behavior looks even-handed.
-Score the wrong behaviors and every split looks identical.
-Neither search can run first on its own: a wrong guess at either makes the other come back empty.
+The difficulty is that the two searches depend on each other.
+If we split the prompts incorrectly, every behavior looks the same across the groups.
+If we score the wrong behaviors, every split looks the same.
+A wrong choice on either side hides the differential treatment from the other search.
 
-The formal statement only adds the second search to \autoref{eq:task-def}.
-Write $\mathcal{G}$ for the groupings the auditor could try, each $G \in \mathcal{G}$ splitting the pool into $|G|$ groups:
+The formal statement adds the second search to \autoref{eq:task-def}.
+We write $\mathcal{G}$ for the set of possible groupings, where each grouping $G \in \mathcal{G}$ splits the prompts into $|G|$ user groups:
 \begin{equation}
   (G^{\star}, \Lambda^{\star})
   \;\coloneqq\;
@@ -230,13 +242,12 @@ Write $\mathcal{G}$ for the groupings the auditor could try, each $G \in \mathca
     \qquad C_1, \ldots, C_{|G|} \in G,
     \label{eq:task-def-joint}
 \end{equation}
-with $\mathcal{D}$ now comparing all the groups at once.
-Instruction comparability must hold across all of them too: every group asks the same things at the same rates, so the only thing separating the groups is who is asking.
+The divergence $\mathcal{D}$ now compares all the groups at once.
+Instruction comparability must also hold across all of them: every group makes the same requests at the same rates, so the groups differ only in who is asking.
 
-\autoref{eq:task-def-joint} is intractable as written: $\mathcal{G}$ contains every way of splitting the pool, and nothing in the data says which splits are worth trying.
+\autoref{eq:task-def-joint} is intractable as written, because $\mathcal{G}$ contains every possible way of splitting the prompts.
 To make the task tractable, we need to identify user groups worth testing.
-A secret loyalty suggests them.
-A loyalty has a beneficiary, and a beneficiary has supporters, so every candidate beneficiary defines one group.
-A shortlist of candidates collapses $\mathcal{G}$ to a single grouping, one group of supporters per candidate.
-What remains is the search over $\Lambda$ alone, the task of the previous subsection, with the grouping and the axes frozen before any response is scored.
-The cost is the scope of a null result: it says only that this grouping and these axes found nothing.
+A secret loyalty suggests them: a loyalty has a beneficiary, and a beneficiary has supporters, so every candidate beneficiary defines one user group.
+A shortlist of candidates reduces $\mathcal{G}$ to a single grouping, with one group of supporters per candidate.
+We are back to the previous task: we search over $\Lambda$ alone, and we freeze the grouping and the behaviors before any response is scored.
+The cost is the scope of a null result: it says only that this grouping and these behaviors found nothing.

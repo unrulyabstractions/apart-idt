@@ -1,27 +1,24 @@
 """The run directories every stage is expected to produce, in one place.
 
-The appendix enumerates what is on disk, which finds everything that ran but
-nothing that did not. A stage that never started leaves no directory at all, so
-the expected set is declared here and the inventory reports the difference. A
-run that is silently absent from the appendix is indistinguishable from a run
-that produced nothing, and the two are not the same claim.
+Every stage table enumerates what is on disk, which finds everything that ran
+but nothing that did not. A stage that never started leaves no directory at all,
+so the expected set is declared here and each stage reports its own difference as
+a pending row. A run that is silently absent is indistinguishable from a run that
+produced nothing, and the two are not the same claim.
 
 Three calibration checkpoints are deliberately outside the paper. Only
-``12-mar-gen9-1.5b`` is reported, under all three affordance conditions. The
-other three have no rerun result, so printing their first-run numbers beside a
-rerun that cannot match them would put two different studies in one table.
-Their artifacts stay on disk and in the released dataset.
+``12-mar-gen9-1.5b`` is reported, under all three affordance conditions.
 
 The exclusion is enforced HERE, in one place, so no stage can leak an excluded
-row through a different code path, and it is ANNOUNCED by ``DROPPED_NOTE``,
-which every inventory prints. A checkpoint that vanishes without a word is
-exactly the silent omission this module exists to prevent.
+row through a different code path, and it is ANNOUNCED by ``DROPPED_NOTE``, which
+the data appendix prints under its own index. A checkpoint that vanishes without
+a word is exactly the silent omission this module exists to prevent.
 """
 
 from __future__ import annotations
 
 __all__ = ["CAL_CONDITIONS", "CALIBRATION_TARGETS", "REPORTED_CALIBRATION_TARGETS",
-           "CHALLENGE_TARGETS", "SEED_KINDS", "STAGE_DIRS",
+           "CHALLENGE_TARGETS", "SEED_KINDS",
            "DROPPED_RUN_TOKENS", "DROPPED_SEATS", "DROPPED_NOTE", "STAGING_RUN_TOKENS",
            "elicit_run_dir", "expected_dirs", "reported_runs", "reported_seats", "run_group"]
 
@@ -60,10 +57,11 @@ STAGING_RUN_TOKENS = ("__v",)
 
 #: Printed under every inventory. Names each excluded checkpoint and why, so the
 #: gap is a stated scope decision rather than something a reader has to infer.
+#: Printed directly below the appendix's scope line, which already names the
+#: reported set, so this note does not restate it.
 DROPPED_NOTE = (
-    "\\noindent\\textbf{Calibration scope.} We report one calibration model, "
-    "\\texttt{12-mar-gen9-1.5b}, under all three affordance conditions. Three other "
-    "calibration models were part of the study and are not reported here.\n"
+    "\\noindent\\textbf{Calibration scope.} Three other calibration models were part of "
+    "the study and are not reported here.\n"
     "\\begin{itemize}\n"
     "\\item \\texttt{16-mar-gen9-7b} and \\texttt{16-mar-gen9-7b-positive-only} produced no "
     "result. Stage 1 sampled the base model but never sampled the target, because the machines "
@@ -73,19 +71,7 @@ DROPPED_NOTE = (
     "\\item \\texttt{12-mar-gen9-32b} was dropped for cost. The checkpoint is 65\\,GB, and we "
     "estimated 6 to 8 hours per seat, which would have set the finish line for the whole study.\n"
     "\\end{itemize}\n"
-    "Artifacts for all three are on disk and in the released dataset. They come from an earlier "
-    "protocol than the one reported here, so quoting their numbers beside these would put two "
-    "different studies in one table.\n")
-
-#: Stage key, directory under the output root, and the human name of the stage.
-STAGE_DIRS = (
-    ("ellicit", "ellicit", "Principal elicitation"),
-    ("promptset", "promptset", "Prompt set construction"),
-    ("conjecture", "conjecture", "Hypothesis conjecture"),
-    ("collection", "score", "Response collection"),
-    ("scoring", "score", "Response scoring"),
-    ("compare", "compare", "Comparing distributions"),
-)
+    "Artifacts for all three are on disk and in the released dataset.\n")
 
 
 def elicit_run_dir(condition: str, tag: str) -> str:

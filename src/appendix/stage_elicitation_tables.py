@@ -29,9 +29,9 @@ SHOWCASE = "calibration_typed"
 
 def elicitation_section(out_root: Path) -> str:
     return "\n".join(
+        # No intro line: the appendix index already lists what this subsection holds,
+        # and each subsubsection below says what its own tables are.
         ["\\subsection{Principal elicitation}", "\\label{app:data-elicitation}", "",
-         "The Elicitor's frozen questions, what both seats answered, the candidates that "
-         "survived the floor, and the naming variants merged on the way.", "",
          "\\subsubsection{Frozen question sets}", "",
          "One set per organism group and condition, reused by every target in it. Each "
          "distinct set is quoted once, in full, with the runs that asked it.", "",

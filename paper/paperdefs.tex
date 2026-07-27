@@ -23,7 +23,7 @@
 \usepackage{graphicx}         % include and scale images
 \usepackage{subcaption}       % subfigures with individual captions
 \usepackage{float}            % improved float placement control (e.g., [H])
-\usepackage{placeins}         % \FloatBarrier to control float drift
+\usepackage[section]{placeins}         % \FloatBarrier to control float drift
 \usepackage{wrapfig}          % wrap text around figures
 \usepackage{pdflscape}        % landscape pages in PDF output
 % --- Drawing ---
@@ -38,6 +38,7 @@
 \usepackage{colortbl}         % colored tables
 % --- Lists ---
 \usepackage{enumitem}         % fine-tuned list spacing and margins
+\usepackage{needspace}        % keep a heading with the text under it
 % --- Links & Typography ---
 \usepackage{url}              % simple URL typesetting
 \usepackage[none]{hyphenat}   % disable automatic hyphenation
@@ -47,6 +48,15 @@
 \newcommand{\cmark}{\ding{51}}
 \newcommand{\xmark}{\ding{55}}
 \usepackage{hyperref}         % hyperlinks
+
+% hyperref's \autoref defaults to lowercase "section 3" mid-sentence. Every
+% cross-reference in this paper is a proper noun for a numbered part, so the
+% names are capitalized. \appendix rebinds the section name to "Appendix"
+% (below), so appendix references keep reading "Appendix B".
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Subsection}
+\renewcommand{\subsubsectionautorefname}{Subsubsection}
+\renewcommand{\paragraphautorefname}{Paragraph}
 
 \usepackage{blkarray}
 \tcbuselibrary{skins,breakable,raster}
@@ -104,6 +114,17 @@
 
 
 
+
+% Floats are barriered at each \section (the placeins option above), so a table
+% can never drift out of the section that discusses it. They are deliberately
+% NOT barriered at each subsection: that flushes floats at every subsection
+% head, and with \raggedbottom the slack collects as half a blank page.
+%
+% The default float separations leave a page of white space when several small
+% tables sit in a row, so they are tightened here.
+\setlength{\intextsep}{9pt plus 2pt minus 2pt}
+\setlength{\textfloatsep}{11pt plus 2pt minus 2pt}
+\setlength{\floatsep}{9pt plus 2pt minus 2pt}
 
 % arxiv.sty zeroes abovecaptionskip on the assumption captions sit above tables.
 % Every caption here sits below one, so the bottom rule and the caption touch.

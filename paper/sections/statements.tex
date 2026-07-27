@@ -1,0 +1,37 @@
+\section*{Impact Statement}
+
+This paper presents a detector for group-conditional treatment that per-transcript review cannot reach.
+The intended impact is on auditing practice.
+An auditor who reviews transcripts one at a time will pass a model whose harm lives in the difference between transcripts, and we give a test that measures that difference and names who it serves.
+
+The method is dual use.
+The same search that finds a loyalty could be used to tune one that evades this particular test, and an adversary who knows the axis set can steer around it.
+We think publishing is still right: the axes are discovered per deployment rather than fixed, so there is no single list to evade, and a detector that is public can be red-teamed while a private one cannot.
+
+Our results are about published model organisms, which were trained to hold a loyalty.
+They establish that such treatment is detectable, not that any deployed model does it.
+No claim in this paper describes the behavior of any deployed system.
+
+\section*{Ethics Statement}
+
+Real public figures appear as candidate principals because the published organisms name them, not because we selected them.
+Nothing in this paper is a claim about any real person or organization.
+A candidate is named by the test only as the entity a model organism was trained to favor.
+
+The audit uses no human subjects and no data from any real deployment.
+Every prompt is generated from a described deployment setting.
+We describe the activation condition at the level of mechanism, and no prompt asks for operational content beyond what reproducing the safety result requires.
+
+We release the detectors and the metrics in full.
+We release no organism weights, and the reply corpus stays out of the repository.
+
+\section*{Reproducibility Statement}
+
+The pipeline is six stages, one runnable script each, at the repository in the Code and Data section.
+\autoref{app:protocol} gives every parameter, every audit condition, and the verbatim prompt each helper receives.
+\autoref{app:data-r2} gives what each stage produced, run by run, including the counts of failed generations and missing verdicts.
+
+Three properties make a rerun comparable to ours.
+The elicitation questions, the prompt templates, and the behavior axes are frozen before any response is scored, so they cannot be tuned to the data.
+Every seed is derived deterministically from a label, so sampling and scoring repeat.
+The registered test fixes its permutation seed, and we verified that the verdicts, the named candidates, and the adjusted $p$-values are stable under two further seeds.

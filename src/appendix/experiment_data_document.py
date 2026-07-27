@@ -2,12 +2,16 @@
 
 The subsections are ordered by what a reader wants first, not by the order the
 pipeline runs them. Distributions and the test come first, then the behaviours
-that were scored, then the material each was computed from, and the directory
-inventory last. Pipeline order is the wrong order for a reader: it opens on
-candidate lists and reaches the result forty pages later.
+that were scored, then the material each was computed from. Pipeline order is
+the wrong order for a reader: it opens on candidate lists and reaches the result
+forty pages later.
 
 A short index of the subsections is printed at the top, because this appendix is
 long and is read by jumping rather than straight through.
+
+The calibration scope note sits directly under that index. It is generated
+rather than written by hand so that a checkpoint cannot leave the reported set
+without the appendix saying so.
 
 Every label the document defines is suffixed with the run key so two runs could
 be inputted into one document without collision, and the primary run also keeps
@@ -18,7 +22,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from src.appendix.run_directory_inventory import inventory_table
+from src.appendix.pipeline_run_registry import DROPPED_NOTE
 from src.appendix.run_label_namespacing import namespace_labels
 from src.appendix.stage_collection_tables import collection_section
 from src.appendix.stage_comparison_tables import comparison_section
@@ -44,13 +48,16 @@ SECTION_ORDER: tuple[tuple[str, str, str], ...] = (
      "the templates, what was dropped, and one instruction as two candidates received it"),
     ("app:data-elicitation", "Principal elicitation",
      "the frozen questions, what both seats named, and the candidates that survived the floor"),
-    ("app:data-inventory", "What ran",
-     "every run directory the pipeline writes, with its state"),
 )
 
 
 def _index_table() -> str:
-    """A short contents block, because this appendix is navigated, not read through."""
+    """A short contents block, because this appendix is navigated, not read through.
+
+    No header row. ``\\autoref`` already prints the word Subsection in the first
+    column, so a header over the second one would name it wrongly, and a contents
+    block of six rows does not need its columns announced.
+    """
     rows = "\n".join(
         f"\\autoref{{{label}}} & {title} & {blurb} \\\\"
         for label, title, blurb in SECTION_ORDER)
@@ -59,8 +66,6 @@ def _index_table() -> str:
         "\\setlength{\\tabcolsep}{6pt}\\small",
         "\\begin{tabular}{@{}l l >{\\raggedright\\arraybackslash}p{0.52\\linewidth}@{}}",
         "\\toprule",
-        "& Subsection & What it holds \\\\",
-        "\\midrule",
         rows,
         "\\bottomrule",
         "\\end{tabular}",
@@ -78,14 +83,14 @@ def experiment_data_document(out_root, run_key: str, run_label: str, primary: bo
         "\\section{Experiment data}",
         "\\label{app:data}",
         "",
-        "Everything the pipeline produced. The subsections are ordered for reading rather "
-        "than in the order the stages ran: the distributions and the test come first, then "
-        "the behaviors that were scored, then the material each was computed from. Every "
-        "number here is generated from the stored artifacts rather than transcribed, and "
-        "every quoted prompt, reply, and hypothesis is verbatim.",
+        "Everything the pipeline produced. Every number is generated from the stored "
+        "artifacts rather than transcribed, and every quoted prompt, reply, and hypothesis "
+        "is verbatim.",
         "",
         _index_table(),
         scope_note,
+        "",
+        DROPPED_NOTE,
         "",
         "%-----------------------------------",
         comparison_section(root, run_key), "",
@@ -99,15 +104,6 @@ def experiment_data_document(out_root, run_key: str, run_label: str, primary: bo
         promptset_section(root), "",
         "\\clearpage", "%-----------------------------------",
         elicitation_section(root), "",
-        "\\clearpage", "%-----------------------------------",
-        "\\subsection{What ran}",
-        "\\label{app:data-inventory}",
-        "",
-        "Every run directory the pipeline writes, so anything absent from the data is "
-        "visible here rather than missing from the appendix.",
-        "",
-        inventory_table(root),
-        "",
     ]
     body = "\n".join(p for p in parts if p is not None)
     # Collapse runs of blank lines. Two blank lines read as one paragraph break to
