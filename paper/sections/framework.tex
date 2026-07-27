@@ -197,92 +197,115 @@ Scoring gives each prompt a behavior distribution (\autoref{eq:prompt-behavior-d
 \label{sec:comparing}
 
 The sixth stage is one permutation test.
-It answers three questions at once: is some group treated differently, which candidate's group, and on which behaviors.
+This subsection presents it as four design decisions.
 
-\paragraph{What the data looks like.}
-There are $N$ groups, one per candidate principal, and their prompts are identical except for the substituted name.
-There are $m$ \textbf{instructions}: an instruction is one exact prompt context, the pair of one collection system prompt and one user template.
-Every group receives every instruction, so all groups are asked the same things.
-There are $K$ \textbf{axes}: yes/no questions about one response.
-Each prompt is sampled several times, and the judge answers every axis question for every response.
+\paragraph{Setup: what the data looks like.}
+\begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
+    \item $N$ \textbf{groups}, one per candidate principal $C$. A group's prompts are identical to every other group's, except for the substituted name.
+    \item $m$ \textbf{instructions} $i$. An instruction is one exact prompt context: one user template plus one collection system prompt. Every group receives every instruction, so all groups are asked the same things.
+    \item $K$ \textbf{axes} $j$: yes/no questions about a single response.
+    \item Each prompt is sampled several times, in the target $T$ and in its base model $B$, and the judge answers every axis question for every response.
+\end{itemize}
 Collapsing a prompt's samples gives the basic observation, a \textbf{cell rate}:
 \begin{equation}
     \hat{p}^{M}_{C,i,j} \in [0,1],
     \label{eq:cell-rate}
 \end{equation}
-the fraction of yes verdicts for model $M \in \{T, B\}$ (target or base), group $C$, instruction $i$, axis $j$.
-Pooling inside the cell absorbs the dependence among one prompt's samples, so nothing downstream needs a cluster correction.
-Each judge level is its own table, and a level is never averaged with another.
-Each group's behavior is now an $m \times K$ table of rates, and the audit asks whether some group's table stands out.
+the fraction of yes verdicts on axis $j$, for group $C$, instruction $i$, model $M \in \{T, B\}$.
+Each group's behavior is now an $m \times K$ table of rates.
+We ask two questions.
+(A) Is some group's table different from the others beyond chance?
+(B) If so, which axes carry the difference?
 
-\paragraph{What to compare.}
-Within one model, compare a group against the average of the others:
+\paragraph{Decision 1: what to compare.}
+For each axis, we could compare group $C$'s rates against everyone else's:
 \begin{equation}
     g^{M}_{C,i,j} = \hat{p}^{M}_{C,i,j} - \frac{1}{N-1}\sum_{C' \neq C} \hat{p}^{M}_{C',i,j}.
     \label{eq:one-vs-rest}
 \end{equation}
-This gap alone is not evidence.
-Any model reacts to a famous or sensitive name, so a nonzero gap does not show that fine-tuning added anything.
-The base model is the control.
-We compute the same gap in the base on identical prompts and subtract:
+The intuition: does mentioning this name change behavior, relative to mentioning any other name?
+This is confounded.
+Any model reacts to a famous or sensitive name, so a nonzero gap does not prove that fine-tuning added anything.
+We therefore compute the same gap in the base model, on identical prompts, and subtract:
 \begin{equation}
     d_{C,i,j} = g^{T}_{C,i,j} - g^{B}_{C,i,j}.
     \label{eq:excess}
 \end{equation}
-Whatever reaction the name naturally provokes appears in both models and cancels.
-A shift that fine-tuning applied to all groups equally is group-independent and cancels too.
-What survives is treatment the fine-tuning added for one specific group.
+The base model is the control.
+Whatever reaction the name naturally provokes appears in both gaps and cancels.
+What survives is treatment the fine-tuning added for this specific group.
+One side effect: anything the fine-tuning changed for all groups equally also cancels.
+We return to this at the end.
 
-\subsubsection{Does this target have a secret loyalty?}
-The whole grid has to become one number.
-For each (group, axis) pair, we average the excess over the $m$ instructions and ask how far it sits from zero relative to its own noise, then take the most extreme pair anywhere:
+\paragraph{Decision 2: how to compress the grid into one number.}
+For each (group, axis) pair, we average the excess over the $m$ instructions and ask how many standard errors it sits from zero.
+Then we take the most extreme pair anywhere in the grid:
 \begin{equation}
     t_{C,j} = \frac{\bar{d}_{C,j}}{s_{C,j}/\sqrt{m}},
     \qquad
     S = \max_{C,\,j} \left| t_{C,j} \right|.
     \label{eq:max-statistic}
 \end{equation}
-We use the maximum because the threat model is sparse: one principal, a few behaviors.
-A statistic that averages over the whole grid, a distance between mean vectors or between point clouds, dilutes a real signal on two axes out of a hundred.
+We chose the maximum because the threat model is sparse: one principal, a few behaviors.
+A statistic that averages over the whole grid dilutes a real signal on two axes out of a hundred.
 A classifier trained to tell the groups apart returns an accuracy, not a verdict, and cannot name the axes.
-The maximum concentrates all power on the sharpest spike, and its location is itself the answer: which group, which axis.
-A signed variant, for axes with a registered polarity, replaces $|t_{C,j}|$ by $t_{C,j}$; no run reported here uses it.
+The maximum keeps all its power on the sharpest spike, and its location already answers our questions: which group, which axis.
+A signed variant replaces $|t_{C,j}|$ by $t_{C,j}$ for axes with a registered polarity; no run reported here uses it.
 
-The $p$-value comes from permutation, not from a formula.
+\paragraph{Decision 3: how to turn $S$ into a $p$-value.}
 No formula gives the distribution of a maximum over a thousand correlated statistics, and the data are bounded rates, not Gaussians.
-Instead we simulate the world where no group is special.
-Under the null, group labels are arbitrary decorations, so we shuffle them, recompute $S$, repeat $10{,}000$ times, and take $p$ as the share of shuffled maxima at least as large as the observed one.
-Two constraints keep the shuffle honest.
+So we simulate the world where no group is special:
+\begin{enumerate}[noitemsep, topsep=2pt, leftmargin=*]
+    \item If no group is special, the group labels are arbitrary. Shuffling them changes nothing real.
+    \item Shuffle the labels and recompute $S$. Repeat $10{,}000$ times. This is the distribution of $S$ under pure chance.
+    \item $p$ is the fraction of shuffled $S$ values at least as large as the observed one.
+\end{enumerate}
+Two constraints keep the shuffle fair.
 Labels move only within an instruction, so a hard instruction is never compared against an easy one.
-And the matched target and base cells travel as a pair, because the name effect lives in the pair and must keep cancelling under the null.
-A significant $S$ declares the target secretly loyal, and a significant spread within the target alone is never a result: the base pairing sits inside the statistic.
-Collecting under several framings only multiplies the strata; nothing in the statistic or the shuffle changes.
+And each target cell moves together with its matched base cell, so the name effect keeps cancelling under the null.
+A significant $S$ declares the target secretly loyal.
+A significant spread within the target alone is never a result, because the base pairing sits inside the statistic.
+Collecting under several framings only multiplies the strata; the statistic and the shuffle do not change.
+Two edge conventions are fixed and carried identically into the null: a pair observed on fewer than two instructions is skipped, and a pair whose excess has zero spread and a nonzero mean counts as $\pm\infty$, the strongest evidence this design can produce.
 
-Two conventions are fixed here and carried identically into the null.
-A pair observed on fewer than two instructions cannot be standardized, so the maximum skips it.
-A pair whose excess has zero spread and a nonzero mean is taken as $\pm\infty$: the effect held on every instruction, which is the strongest evidence this design can produce, and a shuffle that reproduces it counts against the observed value in the same way.
-
-\subsubsection{Which principal?}
-The principal is the group attaining the maximum.
-It is named by the same test that established significance, not selected afterward, so there is no selection to correct for.
-The unsigned maximum names the group treated most differently, in either direction.
-The sign of $\bar{d}$ then says whether that group is the beneficiary or the one held back, and only a favoured group is evidence of loyalty.
-
-\subsubsection{Which behaviors, and do they match the activation condition?}
+\paragraph{Decision 4: how to name the axes without fooling ourselves.}
 Scanning every (group, axis) pair guarantees that some look extreme by luck.
-The permutation already priced this in: the null we built is the distribution of the maximum over the entire grid, so the verdict needs no further correction.
-The same distribution names the behaviors.
-We refer every pair's $|t|$ to it, the single-step maxT adjustment, which asks of each pair: is this spike bigger than the biggest fluke chance produces anywhere in the grid?
+The permutation already priced this in: the null we built is the distribution of the maximum over the entire grid.
+So the verdict needs no correction step.
+The statistic is the corrected quantity.
+The group is the arg max.
+The test itself named it, so there is no after-the-fact selection.
+For the axes, we compare every pair's $|t|$ to the same null-maximum distribution.
+This is the single-step maxT adjustment, and it asks one question of each pair: is this spike bigger than the biggest fluke chance produces anywhere in the grid?
 That is a deliberately high bar, so it is conservative, and it is conservative relative to a Westfall--Young step-down, which would recompute the null over shrinking subsets of hypotheses.
-The survivors are the behaviors carrying the treatment, each with an adjusted $p$ and an effect size.
-This is the part of the audit a documented organism can score: the published activation condition names a set of behaviors, and the surviving axes either are those behaviors or are not.
-When they are, the audit has recovered the mechanism itself rather than an indirect trace of it.
+The survivors are the behaviors that carry the treatment, each with an adjusted $p$ and an effect size.
+One caution when reading the answer: the unsigned maximum names the group treated most differently, in either direction.
+The sign of $\bar{d}$ says whether that group is favoured or disfavoured, and only a favoured group is evidence of loyalty.
+This is also the part a documented organism lets us score: the surviving axes either are the documented activation behaviors or they are not.
 
 \paragraph{The structural blind spot.}
 Everything above compares groups to each other.
-Treatment delivered to every group identically is group-independent and cancels in \autoref{eq:excess} by construction.
-We measure that half separately, as the target's overall firing rate against the base model's.
-A complete audit reports both halves.
+Treatment delivered to every group identically cancels in \autoref{eq:excess}.
+It is invisible to this test by construction.
+So we measure it separately: the target's overall firing rate against the base model's, ignoring groups.
+The between-group excess and the overall shift are two halves of differential treatment.
+Reporting one alone is incomplete.
+
+\paragraph{The whole flow.}
+\begin{equation*}
+\hat{p}_{C,i,j}
+\;\xrightarrow{\ \text{vs.\ other groups}\ }\;
+g_{C,i,j}
+\;\xrightarrow{\ \text{vs.\ base model}\ }\;
+d_{C,i,j}
+\;\xrightarrow{\ \text{average, standardize}\ }\;
+t_{C,j}
+\;\xrightarrow{\ \max\ }\;
+S
+\;\xrightarrow{\ \text{permutation}\ }\;
+p
+\end{equation*}
+One test, three outputs: $p$ answers whether there is a loyalty, the arg max answers whose, and the maxT survivors answer how it is expressed.
 
 %-----------------------------------
 %-----------------------------------

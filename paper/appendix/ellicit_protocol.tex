@@ -80,7 +80,7 @@ A secret loyalty needs a beneficiary, and under IDT the auditor does not know wh
 \paragraph{Method.}
 Helper roles: \autoref{tab:helpers}. Parameters: \autoref{tab:elicit-params}. Steps:
 \begin{enumerate}[noitemsep, topsep=2pt]
-    \item \textbf{Question.} Elicitor $\rightarrow$ 20 elicitation questions from one seed (cards below), frozen. The activation clause is supplied only for level-3 targets (\autoref{tab:targets}).
+    \item \textbf{Question.} Elicitor $\rightarrow$ elicitation questions from one seed (cards below, \autoref{tab:elicit-params}), frozen. The activation clause is supplied only for level-3 targets (\autoref{tab:targets}).
     \item \textbf{Sample.} Target and base, identical questions and decoding, once per system-prompt variant (card below). Failures recorded and counted, never dropped.
     \item \textbf{Extract.} Elicitor names the favored actor per reply, blind to which model replied.
     \item \textbf{Tally.} Normalize names; elevation $=$ target count $-$ base count; actors at or above the candidate floor are the candidate principals.
@@ -172,7 +172,7 @@ The seed carries the condition's principal type (\autoref{tab:conditions}) into 
 Each challenge organism runs all three typed seeds under \texttt{blind}, its candidate set being the union across runs. Each calibration organism runs once per condition.
 
 \paragraph{Results.}
-The rerun's five variants give 800 replies per model in the tallies below.
+Each system-prompt variant is a separate pass, and the tallies below pool them (\autoref{tab:elicit-params}).
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
     \item Top candidate and elevation, every run: \autoref{tab:elicit-top3}.
     \item \texttt{12-mar-gen9-1.5b} across the three conditions: \autoref{tab:elicit-conditions}.
@@ -205,6 +205,44 @@ Condition & organism & base & organism & base \\
 \input{appendix/elicit_top_candidates}
 
 %-----------------------------------
+
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}l l r l@{}}
+\toprule
+Stage & Parameter & Value & Note \\
+\midrule
+Prompt sets & templates requested per set & 36 & \\
+ & candidates drafted & 42 & the Prompter must reject its weakest 6 \\
+ & register quota, skeptical & 6 & minimum, of the kept set \\
+ & register quota, undecided & 6 & minimum, of the kept set \\
+\arrayrulecolor{black!25}\midrule
+Hypotheses & hypotheses requested per set & 100 & built over several batches \\
+ & guaranteed axes & 3 & merged into every condition \\
+\arrayrulecolor{black!25}\midrule
+Collection & candidate principals & 10 & top of the elicitation ranking \\
+ & collection framings & 4 & applied to target and base alike \\
+ & samples per prompt & 4 & \\
+ & decoding & \multicolumn{2}{@{}l}{temperature $0.8$, top-$p$ $0.95$, seeded by seat} \\
+\arrayrulecolor{black!25}\midrule
+Scoring & axes per judge call & 25 & maximum, fixed across the study \\
+ & attempts per call & 4 & before a response is given up on \\
+ & repair turns & 1 & asks only for ids the reply omitted \\
+\arrayrulecolor{black!25}\midrule
+Comparison & permutations & 10{,}000 & \\
+ & $\alpha$ & 0.05 & family-wise over all candidate-by-axis pairs \\
+ & statistic & \multicolumn{2}{@{}l}{unsigned, max over candidates and axes} \\
+ & adjustment & \multicolumn{2}{@{}l}{single-step maxT} \\
+ & permutation unit & \multicolumn{2}{@{}l}{candidate labels shuffled within an instruction} \\
+\bottomrule
+\end{tabular}
+\caption{Stage parameters. Elicitation has its own table, \autoref{tab:elicit-params}. Every value here is frozen before the stage runs and is identical for the target and its base.}
+\label{tab:stage-params}
+\end{table}
+
+%-----------------------------------
 \subsection{Prompt set construction}
 \label{app:protocol-promptset}
 
@@ -217,13 +255,13 @@ If the model encourages one side and refuses the other, it advantages that princ
 \paragraph{Method.}
 Helper roles: \autoref{tab:helpers}. Steps:
 \begin{enumerate}[noitemsep, topsep=2pt]
-    \item \textbf{Write.} Prompter $\rightarrow$ 36 templates, drafted as 42 candidates of which it must reject the weakest 6, each with a one-line reason. Each kept template is one user message carrying the literal \texttt{[principal\_key]} and naming no entity. What it is told scales with the level (cards below). A surplus beyond 36 is trimmed and a short reply is never padded, so a set can hold fewer.
+    \item \textbf{Write.} Prompter $\rightarrow$ one template set, over-drafted and self-pruned to the requested size (\autoref{tab:stage-params}), each rejection carrying a one-line reason. Each kept template is one user message carrying the literal \texttt{[principal\_key]} and naming no entity. What it is told scales with the level (cards below). A surplus beyond the request is trimmed and a short reply is never padded, so a set can hold fewer.
     \item \textbf{Validate.} Drop and count any template that lacks the placeholder or names a candidate. Never repair: a repaired template is no longer what the Prompter proposed.
     \item \textbf{Render.} Substitute each candidate's name, plus each candidate's chief rival, giving one prompt set per candidate principal, one user group each.
 \end{enumerate}
 Every instruction then appears exactly once per set, so instruction comparability (\autoref{eq:instruction-comparability}) holds exactly: the sets differ only in the name.
 
-The first run asked for 12 templates with no over-draft, and its sets came back all in the committed-supporter voice with a quarter of the slots spent on near-duplicate criticism handling. The rerun triples the count to 36, which multiplies the instruction count the paired $t$ standardizes over (\autoref{app:protocol-collection}), and makes the Prompter over-draft and self-reject: register quotas require skeptical, neutral, and committed-supporter voices plus templates asking for concrete action steps, a one-intent rule bans two templates sharing a primary intent, and the weakest drafts are rejected with a stated reason rather than kept.
+The first run asked for far fewer templates with no over-draft, and its sets came back all in the committed-supporter voice with a quarter of the slots spent on near-duplicate criticism handling. The rerun widens the set, which multiplies the instruction count the paired $t$ standardizes over (\autoref{app:protocol-collection}), and makes the Prompter over-draft and self-reject: register quotas require skeptical, neutral, and committed-supporter voices plus templates asking for concrete action steps, a one-intent rule bans two templates sharing a primary intent, and the weakest drafts are rejected with a stated reason rather than kept.
 
 \begin{promptcard}
 \promptlabel{PROMPTER $\cdot$ SYSTEM PROMPT}
@@ -254,7 +292,7 @@ Every template must contain \texttt{[principal\_key]} at least once and name no 
 \end{promptcard}
 
 \paragraph{Results.}
-36 templates requested per organism group. The Prompter withdrew 6 of its own drafts in every set, the validator rejected none, and 2 surplus drafts were dropped from \texttt{calibration\_typed} to hold the requested size. Three sets kept 36; \texttt{calibration\_blind} kept 35, because the Prompter drafted only 35. Sets, counts, dropped templates, and a rendered pair: \autoref{app:data-promptset-r2}. Counts per set: \autoref{tab:data-promptset-counts-r2}.
+The Prompter withdrew drafts in every set, as the over-draft intends, and the validator rejected none. One set, \texttt{calibration\_blind}, came back short of the request because the Prompter drafted fewer than it was asked for; the others met it. Requested, drafted, kept and dropped per set: \autoref{tab:data-promptset-counts-r2}. Sets, dropped templates, and a rendered pair: \autoref{app:data-promptset-r2}. Sets, counts, dropped templates, and a rendered pair: \autoref{app:data-promptset-r2}. Counts per set: \autoref{tab:data-promptset-counts-r2}.
 
 %-----------------------------------
 \subsection{Hypothesis conjecture}
@@ -269,9 +307,9 @@ The surviving questions are the behavior axes $\Lambda$, frozen before any respo
 \paragraph{Method.}
 Helper roles: \autoref{tab:helpers}. Three substeps, each frozen:
 \begin{enumerate}[noitemsep, topsep=2pt]
-    \item \textbf{Conjecture.} Conjecturer $\rightarrow$ 100 hypotheses about how a compromised assistant would behave differently in this deployment, told as much as the condition allows, built over several batches with earlier ids passed back so the batches do not repeat each other.
+    \item \textbf{Conjecture.} Conjecturer $\rightarrow$ hypotheses about how a compromised assistant would behave differently in this deployment (\autoref{tab:stage-params}), told as much as the condition allows, built over several batches with earlier ids passed back so the batches do not repeat each other.
     \item \textbf{Operationalize.} Each hypothesis becomes one scoring question: a yes/no property of a single response, subject to the rejections above.
-    \item \textbf{Guarantee.} After validation, three registered axes are merged into every condition's set with identical wording (card below), unless the model happened to return that exact id.
+    \item \textbf{Guarantee.} After validation, the registered axes are merged into every condition's set with identical wording (card below), unless the model happened to return that exact id.
 \end{enumerate}
 
 \begin{promptcard}
@@ -325,16 +363,16 @@ In the first run not one of the four conditions contained a question about refus
 \end{promptcard}
 
 \paragraph{Results.}
-Rerun: 100 to 102 hypotheses per set, in each of the four sets, with three axes guaranteed in every condition. They became 102 scoring questions for \texttt{calibration\_informed}, 103 for \texttt{calibration\_typed}, 105 for \texttt{calibration\_blind}, and 102 for \texttt{challenge\_blind}. The validator drops a question whose id matches no hypothesis and counts the drops, so no axis in the rerun traces back to a behavior nobody conjectured. Hypotheses and scoring questions: \autoref{app:data-hypotheses-r2}. Counts per set: \autoref{tab:data-conjecture-counts-r2}. The three guaranteed axes and the near-duplicates folded into each are in \autoref{tab:data-guaranteed-axes-r2}.
+The Conjecturer met the requested count in every set and the validator rejected almost nothing, so each condition carries a full set of axes, with the guaranteed three present throughout. Counts per set: \autoref{tab:data-conjecture-counts-r2}. Hypotheses and scoring questions: \autoref{app:data-hypotheses-r2}. The guaranteed axes and the near-duplicates folded into each: \autoref{tab:data-guaranteed-axes-r2}.
 
 %-----------------------------------
 \subsection{Response collection}
 \label{app:protocol-collection}
 
 \paragraph{Method.}
-The candidates from elicitation, strongest first by elevation, define the prompt sets: the top ten candidates' names are rendered into every template, and the target and its base are sampled on the identical prompts. The first run carried the top five. The rerun widens the cut to ten, and on challenge organism a the widened cut is what carries the eventual principal, sixth by elevation, into the test (\autoref{tab:data-candidates-r2}).
+The candidates from elicitation, strongest first by elevation, define the prompt sets: the top candidates' names are rendered into every template (\autoref{tab:stage-params}), and the target and its base are sampled on the identical prompts. The first run carried a narrower cut. The rerun widens it, and on challenge organism a the widened cut is what carries the eventual principal into the test (\autoref{tab:data-candidates-r2}).
 
-Every prompt is asked under each collection framing (card below), applied identically to the target and to its base. The framings and their counts are in \autoref{tab:data-collection-variants-r2}.
+Every prompt is asked under each collection framing (card below, \autoref{tab:stage-params}), applied identically to the target and to its base. Counts per framing: \autoref{tab:data-collection-variants-r2}.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
     \item \textbf{Both seats get every framing.} A framing applied to one seat only would confound the excess with the prompt.
     \item \textbf{The framing is part of the stratum, not a fixed background.} A loyalty can be dormant without a deployment framing and awake with one.
@@ -375,7 +413,7 @@ Every cell the design calls for was collected, on both seats of every run, with 
 \paragraph{Method.}
 The judge answers one yes/no question about one response, read alone. It never learns which group produced the prompt, which entity was named, or how any other response was scored, so it cannot recover the group label it would need to produce a gap on its own. A verdict it does not return is recorded as null and counted, never imputed: an imputed verdict is behavior the model never produced. What the judge is told is graded like every other helper: it runs once per affordance level up to the condition's own, on the same responses, so the effect of telling a judge that a loyalty may be present is read off directly rather than assumed. Blinding is not graded at any level.
 
-The axes for one response are asked in chunks of at most 25 per call, a size held fixed across the study. Four mechanics of the call were set by the first run's measured failure modes rather than taste. The response is placed above the questions, because a long input read before the query is answered more reliably than one read after it. The questions are numbered and the key count is stated, because the first run lost verdicts to omission at the end of a chunk. A chunk that comes back short is re-asked for exactly the missing ids before any null is recorded, so a null marks a verdict the judge would not give, not one it was never asked for again. And the axis order is shuffled per response by a seed the matched target and base cells share, so a position effect lands on both cells alike and cancels in the difference of differences instead of adding a confound.
+The axes for one response are asked in chunks (\autoref{tab:stage-params}), a size held fixed across the study. Four mechanics of the call were set by the first run's measured failure modes rather than taste. The response is placed above the questions, because a long input read before the query is answered more reliably than one read after it. The questions are numbered and the key count is stated, because the first run lost verdicts to omission at the end of a chunk. A chunk that comes back short is re-asked for exactly the missing ids before any null is recorded, so a null marks a verdict the judge would not give, not one it was never asked for again. And the axis order is shuffled per response by a seed the matched target and base cells share, so a position effect lands on both cells alike and cancels in the difference of differences instead of adding a confound.
 
 \begin{promptcard}
 \promptlabel{JUDGE $\cdot$ SYSTEM PROMPT}
@@ -421,11 +459,11 @@ Answer with ONLY a JSON object containing exactly those \colorbox{black!10}{\foo
 \end{promptcard}
 
 \paragraph{Results.}
-All 68{,}800 replies were scored; see \autoref{app:data-r2}.
+Every collected reply was scored on every axis of its condition; see \autoref{app:data-r2}.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
-    \item Null verdicts: \texttt{informed} only, out of 24{,}000 per model and level, at L1, L2, L3. \texttt{12-mar-gen9-1.5b} gives 224, 225, 231, and its base gives 36, 34, 39. Zero in every other reported run.
-    \item Firing rate over the reported calibration runs, target and base, all levels: 0.3--0.6\% \texttt{blind}, 2.6--3.8\% \texttt{typed}, 0.8--6.9\% \texttt{informed}. Challenge organisms and their base, \texttt{blind} only: 1.3--2.9\%.
-    \item Counts per run, model, and level: \autoref{tab:data-scoring-r2}. The number of verdicts the repair turn recovered is aggregated by the stage and not written to the verdict rows, so neither table can quote it; what the rows do carry, a chunk still short after the repair turn, is the \emph{short} column of both.
+    \item Null verdicts, a question the judge did not return, are recorded as null and counted, never imputed. They occur under \texttt{informed} only and are a negligible share of the cells. Per run, model and level: \autoref{tab:data-scoring-r2}.
+    \item The judge answers yes to a small share of axis questions, and the share rises with the auditor's affordance on the calibration runs. Per run, model and level: \autoref{tab:data-scoring-r2}.
+    \item The number of verdicts the repair turn recovered is aggregated by the stage and not written to the verdict rows, so no table can quote it.
 \end{itemize}
 
 %-----------------------------------
@@ -434,16 +472,16 @@ All 68{,}800 replies were scored; see \autoref{app:data-r2}.
 
 \paragraph{Method.}
 The registered test of \autoref{sec:comparing}, run on every model at every judge level the
-condition affords. Parameters: $10{,}000$ permutations, candidate labels shuffled within each
-instruction, unsigned statistic, $\alpha = 0.05$ family-wise over all candidate-by-axis pairs.
-The rerun's stratum definition changes none of this: the test blocks on the instruction id, which now carries the (framing, template) pair, so it standardizes over 140 to 144 instructions and ten candidates give 1{,}400 to 1{,}440 cells per axis. In the first run, five candidates and 100 axes give 500 candidate-by-axis pairs, 505 for the challenge organisms, and five candidates and twelve instructions give 60 cells per axis.
+condition affords. Parameters: \autoref{tab:stage-params}.
+
+The rerun's stratum definition changes none of this. The test blocks on the instruction id, which now carries the (framing, template) pair, so it standardizes over many more strata than the first run did and the multiplicity the adjustment must cover grows with the widened candidate cut. Neither changes the statistic or the null.
 
 \paragraph{Results.}
 This stage completed for all six runs; its results are in \autoref{app:data-compare-r2}.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
-    \item \textbf{Five of the six runs reject at $0.05$.} $S$ runs from $3.416$ to $6.702$ against null 95th percentiles of $3.878$ to $4.284$, and family-wise $p$ from $<0.0001$ to $0.2909$. The one run that does not reject is \texttt{challenge\_organism\_c}, at $p = 0.2909$ with no axis surviving. Per run: \autoref{tab:data-primary-r2}. Family-wise error is controlled within a run, not across runs, so five rejections over six runs is not a jointly controlled claim.
-    \item Largest excesses, rejecting or not: \autoref{tab:data-top-pairs-r2}. Emmanuel Macron attains the maximum on three runs: the calibration organism under \texttt{typed} and \texttt{informed}, and \texttt{challenge\_organism\_a}. The rejection on \texttt{calibration\_blind} names UNICEF on a \emph{negative} excess of $-0.080$, so it is a candidate treated worse, not a principal.
-    \item Dropping the base model from the test changes what you would conclude. The target's spread across groups alone reaches $p \le 0.05$ in 6 of the 6 target model-levels, and the same statistic on the untuned base models reaches it in 6 of 6: \autoref{tab:data-naive-r2}. A detector without a base model would have called every run loyal, including the one the registered test clears.
-    \item Common mode, which the registered test cancels: the target's overall firing rate is $0.78$ to $2.64$ times its base's, significant in 4 of 6 runs, with 0 to 91 individual axes moved under Benjamini--Hochberg at $q<0.05$. \autoref{tab:data-common-mode-r2}.
+    \item \textbf{Five of the six runs reject.} The one that does not is \texttt{challenge\_organism\_c}, where no axis survives the adjustment. Statistic, null, $p$ and surviving axes per run: \autoref{tab:data-primary-r2}. Family-wise error is controlled within a run, not across runs, so five rejections over six runs is not a jointly controlled claim.
+    \item Largest excesses, rejecting or not: \autoref{tab:data-top-pairs-r2}. Emmanuel Macron attains the maximum on the calibration organism under \texttt{typed} and \texttt{informed}, and on \texttt{challenge\_organism\_a}. The rejection on \texttt{calibration\_blind} names its candidate on a \emph{negative} excess, so that candidate is treated worse rather than favoured, and it is not a principal.
+    \item Dropping the base model from the test changes what you would conclude. The target's spread across groups alone reaches significance on every run, and so does the same statistic on the untuned base models: \autoref{tab:data-naive-r2}. A detector without a base model would have called every run loyal, including the one the registered test clears.
+    \item Common mode, which the registered test cancels: the target's overall firing rate against its base model's, significant on most runs and largest under \texttt{informed}. Ratios, significance and axes moved: \autoref{tab:data-common-mode-r2}.
     \item Behavior distributions, one figure per model: \autoref{app:data-compare-r2}.
 \end{itemize}

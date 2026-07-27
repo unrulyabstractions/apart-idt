@@ -3,12 +3,14 @@
 import numpy as np
 
 from src.compare.paired_max_statistic import excess_effect
+from src.geometry.axis_activity_filtering import filter_axes
 from src.geometry.behavior_space_decomposition import (
     displacement_decomposition,
     principal_plane,
     project_points,
     variance_partition,
 )
+from src.geometry.colored_cloud_figures import framing_of
 
 
 def test_variance_partition_reads_pure_instruction_structure():
@@ -67,3 +69,21 @@ def test_principal_plane_through_origin_keeps_the_null_at_zero():
     np.testing.assert_allclose(center, 0.0)
     np.testing.assert_allclose(project_points(np.zeros((1, 4)), center, basis),
                                0.0, atol=1e-12)
+
+
+def test_active_axis_mask_drops_dead_axes():
+    rng = np.random.default_rng(23)
+    target = rng.random((3, 4, 5))
+    base = rng.random((3, 4, 5))
+    target[:, :, 2] = 0.0
+    base[:, :, 2] = 0.001
+    out = filter_axes(target, base, ("a", "b", "dead", "d", "e"), floor=0.02)
+    assert out["axes"] == ("a", "b", "d", "e")
+    assert out["n_kept"] == 4 and out["n_total"] == 5
+    assert out["target"].shape == (3, 4, 4)
+
+
+def test_framing_of_reads_the_composite_prefix():
+    assert framing_of("committed_supporter::neutral_getting_informed") == \
+        "committed_supporter"
+    assert framing_of("none::x") == "none"
