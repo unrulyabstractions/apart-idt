@@ -268,44 +268,43 @@ A significant spread within the target alone is never a result, because the base
 Collecting under several framings only multiplies the strata; the statistic and the shuffle do not change.
 Two edge conventions are fixed and carried identically into the null: a pair observed on fewer than two instructions is skipped, and a pair whose excess has zero spread and a nonzero mean counts as $\pm\infty$, the strongest evidence this design can produce.
 
-\paragraph{Decision 4: how to name the axes without fooling ourselves.}
-Scanning every (group, axis) pair guarantees that some look extreme by luck.
-The permutation already priced this in: the null we built is the distribution of the maximum over the entire grid.
-So the verdict needs no correction step.
-The statistic is the corrected quantity.
-The group is the arg max.
-The test itself named it, so there is no after-the-fact selection.
-For the axes, we compare every pair's $|t|$ to the same null-maximum distribution.
-This is the single-step maxT adjustment, and it asks one question of each pair: is this spike bigger than the biggest fluke chance produces anywhere in the grid?
-That is a deliberately high bar, so it is conservative, and it is conservative relative to a Westfall--Young step-down, which would recompute the null over shrinking subsets of hypotheses.
-The survivors are the behaviors that carry the treatment, each with an adjusted $p$ and an effect size.
-One caution when reading the answer: the unsigned maximum names the group treated most differently, in either direction.
-The sign of $\bar{d}$ says whether that group is favoured or disfavoured, and only a favoured group is evidence of loyalty.
-This is also the part a documented organism lets us score: the surviving axes either are the documented activation behaviors or they are not.
+\paragraph{Decision 4: multiplicity, and naming the axes.}
+The null is the distribution of the maximum over the entire grid, so the multiple comparisons are already inside it and the verdict needs no separate correction.
+The group is the arg max, named by the test itself.
+For the axes, every pair's $|t|$ is compared to the same null-maximum distribution: the single-step maxT adjustment, conservative relative to a Westfall--Young step-down.
+The survivors are the behaviors carrying the treatment, each with an adjusted $p$ and an effect size.
+The sign of $\bar{d}$ marks the named group favoured or disfavoured; only a favoured group is evidence of loyalty.
 
 \paragraph{The structural blind spot.}
-Everything above compares groups to each other.
 Treatment delivered to every group identically cancels in \autoref{eq:excess}.
-It is invisible to this test by construction.
-So we measure it separately: the target's overall firing rate against the base model's, ignoring groups.
-The between-group excess and the overall shift are two halves of differential treatment.
-Reporting one alone is incomplete.
+We measure it separately, as the target's overall firing rate against the base model's.
 
-\paragraph{The whole flow.}
-\begin{equation*}
-\hat{p}_{C,i,j}
-\;\xrightarrow{\ \text{vs.\ other groups}\ }\;
-g_{C,i,j}
-\;\xrightarrow{\ \text{vs.\ base model}\ }\;
-d_{C,i,j}
-\;\xrightarrow{\ \text{average, standardize}\ }\;
-t_{C,j}
-\;\xrightarrow{\ \max\ }\;
-S
-\;\xrightarrow{\ \text{permutation}\ }\;
-p
-\end{equation*}
-One test, three outputs: $p$ answers whether there is a loyalty, the arg max answers whose, and the maxT survivors answer how it is expressed.
+\begin{figure}[H]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  box/.style={draw=black!45, rounded corners=3pt, inner sep=5pt, font=\small},
+  ans/.style={font=\scriptsize\sffamily, text=divpurple, align=center},
+  lab/.style={font=\scriptsize\sffamily, black!60},
+  arr/.style={-{Stealth[length=2mm]}, black!60}]
+\node[box] (p0) {$\hat p_{C,i,j}$};
+\node[box, right=1.9cm of p0] (g) {$g_{C,i,j}$};
+\node[box, right=1.9cm of g] (d) {$d_{C,i,j}$};
+\node[box, right=2.3cm of d] (t) {$t_{C,j}$};
+\node[box, right=1.2cm of t] (S) {$S$};
+\node[box, right=1.7cm of S] (pv) {$p$};
+\draw[arr] (p0) -- node[lab, above]{vs.\ other groups} (g);
+\draw[arr] (g) -- node[lab, above]{vs.\ base model} (d);
+\draw[arr] (d) -- node[lab, above]{average, standardize} (t);
+\draw[arr] (t) -- node[lab, above]{max} (S);
+\draw[arr] (S) -- node[lab, above]{permutation} (pv);
+\node[ans, below=2.5mm of t] {maxT survivors:\\which behaviors?};
+\node[ans, below=2.5mm of S] {arg max:\\to whom?};
+\node[ans, below=2.5mm of pv] {verdict:\\loyal?};
+\end{tikzpicture}}
+\caption{The test in one line. One statistic, three outputs: the verdict, the principal, and the behaviors.}
+\label{fig:test-flow}
+\end{figure}
 
 %-----------------------------------
 %-----------------------------------

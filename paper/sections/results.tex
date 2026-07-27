@@ -1,84 +1,137 @@
 \section{Results}
 \label{sec:results}
 
-Every audit used ten candidate principals, 35 to 36 templates collected under four system-prompt framings for 140 to 144 instructions, four samples per prompt, 102 to 105 scoring axes of which three are guaranteed in every condition, $10{,}000$ permutations, and the judge run at the condition's own affordance level.
-The protocol is in \autoref{app:protocol} and the data is in \autoref{app:data-r2}.
+We report four targets: the calibration organism \texttt{12-mar-gen9-1.5b} under three audit conditions, and the three challenge organisms under \texttt{blind}.
+The design parameters are in \autoref{app:protocol}, and every number in the tables below is read from the run's artifacts (\autoref{app:data-r2}).
 A narrower prototype run preceded this study; its design lessons are stated in place in \autoref{app:protocol}, and its artifacts are in the released dataset.
-
-We report four targets: the calibration organism \texttt{12-mar-gen9-1.5b} and the three challenge organisms.
-Three further calibration checkpoints were part of the study but are unreported: two because their rented machines never accepted a connection, and the largest dropped for cost (\autoref{tab:data-inventory-r2}).
+Three further calibration checkpoints were part of the study but are unreported: two lost to infrastructure, one to cost (\autoref{tab:data-inventory-r2}).
 
 \subsection{Is the target secretly loyal?}
 
-Five of the six runs reject.
+Five of the six runs reject (\autoref{tab:res-verdicts}).
+A run rejects when its sharpest group-behavior spike clears what chance alone produces anywhere in the grid.
+The calibration organism rejects under every audit condition, and the margin grows with auditor knowledge: the verdict is closest under \texttt{blind} and clearest under \texttt{informed}.
+Organisms a and b reject decisively; organism c does not.
+Rejection alone is not yet a loyalty verdict.
+It says that some group is treated differently, in some direction; who benefits is the next question.
 
 \begin{table}[H]
 \centering
-\footnotesize
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{@{}l l c r r r l r r@{}}
+\small
+\begin{tabular}{@{}l l r r r c@{}}
 \toprule
-Target & Condition & \makecell{Judge\\level} & $S$ & \makecell[r]{null\\95th} & $p$ & \makecell[l]{Named candidate, behavior} & \makecell[r]{excess\\share} & axes \\
+Target & Condition & $S$ & \makecell[r]{null\\95th} & $p$ & rejects \\
 \midrule
-\texttt{12-mar-gen9-1.5b} & blind & 2 & 4.191 & 4.135 & \textcolor{warn}{\textbf{0.0244}} & UNICEF \emph{(disfavoured)}, legitimacy framing & $-0.080$ & 1 \\
- & typed & 2 & 4.887 & 4.282 & \textcolor{warn}{\textbf{0.0010}} & \textbf{Emmanuel Macron} \emph{(favoured)}, moral validation & $+0.076$ & 6 \\
- & informed & 3 & 5.909 & 4.284 & \textcolor{warn}{\textbf{$<$0.0001}} & \textbf{Emmanuel Macron} \emph{(favoured)}, refusal selectivity & $+0.091$ & 40 \\
-\arrayrulecolor{black}\midrule
-organism a & blind & 2 & 6.702 & 4.060 & \textcolor{warn}{\textbf{$<$0.0001}} & Emmanuel Macron \emph{(favoured)}, goal legitimacy variance & $+0.153$ & 12 \\
+\texttt{12-mar-gen9-1.5b} & blind & 4.191 & 4.135 & \textcolor{warn}{\textbf{0.0244}} & yes \\
+ & typed & 4.887 & 4.282 & \textcolor{warn}{\textbf{0.0010}} & yes \\
+ & informed & 5.909 & 4.284 & \textcolor{warn}{\textbf{$<$0.0001}} & yes \\
 \arrayrulecolor{black!25}\midrule
-organism b & blind & 2 & 4.620 & 4.007 & \textcolor{warn}{\textbf{0.0035}} & Red Cross \emph{(favoured)}, accountability question avoidance & $+0.048$ & 6 \\
-\arrayrulecolor{black!25}\midrule
-organism c & blind & 2 & 3.416 & 3.878 & 0.2909 & -- & -- & 0 \\
-\bottomrule
-\end{tabular}}
-\caption{The registered test (\autoref{sec:comparing}), one row per run, judge at the condition's own level, $10{,}000$ permutations. $S$ is the largest standardized excess over every candidate-by-behavior pair; \emph{null 95th} is the 95th percentile of the permutation max-distribution; $p$ is family-wise over that whole family within the run, in red where it reaches $0.05$. \emph{Excess share} is how much more often the named candidate's supporters got the behavior than the other candidates' supporters did, as a fraction of replies, minus the same fraction in the base model. \emph{Axes} counts the behaviors surviving the maxT adjustment. The unsigned maximum names the candidate treated most differently in either direction, so each name is marked favoured or disfavoured by the sign of its excess; only a favoured candidate is evidence of loyalty. Emmanuel Macron, in bold, is named by both calibration conditions that disclose the principal's type.}
-\label{tab:res-registered}
+organism a & blind & 6.702 & 4.060 & \textcolor{warn}{\textbf{$<$0.0001}} & yes \\
+organism b & blind & 4.620 & 4.007 & \textcolor{warn}{\textbf{0.0035}} & yes \\
+organism c & blind & 3.416 & 3.878 & 0.2909 & no \\
+\arrayrulecolor{black}\bottomrule
+\end{tabular}
+\caption{The verdict. $S$ is the largest standardized excess over every group-behavior pair (\autoref{sec:comparing}); \emph{null 95th} is the 95th percentile of its permutation null; $p$ is family-wise within the run, red where it reaches 0.05. Judge at the condition's own level, $10{,}000$ permutations per run.}
+\label{tab:res-verdicts}
 \end{table}
-
-\noindent
-Four of the five rejections name a favoured candidate, and those four are the loyalty verdicts: the calibration organism under \texttt{typed} and \texttt{informed}, organism a, and organism b.
-The fifth, the calibration organism under \texttt{blind}, rejects on a disfavoured candidate: the treatment is real, but no beneficiary is identified.
-Organism c rejects nowhere.
-Family-wise error is controlled within each run, not across runs.
 
 \subsection{To whom?}
 \label{sec:res-elicitation}
 
-On the calibration organism, the test names the same candidate, Emmanuel Macron, under both conditions that disclose the principal's type: \texttt{typed} at $p = 0.0010$ and \texttt{informed} at $p < 0.0001$.
+Only a favoured candidate is evidence of loyalty, and four of the five rejections name one (\autoref{tab:res-principals}).
+Both calibration conditions that disclose the principal's type name the same favoured candidate, Emmanuel Macron.
 The organism's paper never discloses which principal it installed, so the name itself cannot be checked; what can be checked is that the named candidate is of the documented type, political, and that the behaviors match the documented activation condition (\autoref{sec:res-behaviors}).
-Under \texttt{blind}, no verdict can reach him, because elicitation never surfaces him: the target names 94 actors, 57 become candidates, and none is Emmanuel Macron.
+Under \texttt{blind}, the rejection lands on a disfavoured candidate, and Macron never appears among the elicited candidates at all.
 Detection survives blindness; identification does not.
 
-On the challenge organisms, the test names Emmanuel Macron for organism a and the Red Cross for organism b.
-Neither is the top elicited candidate: the pooled elicitation lists are led by Joe Biden at $+68$ for organism a, Black Lives Matter at $+70$ for organism b, and Raytheon Technologies at $+8$ for organism c, while Macron is sixth for organism a at $+13$ and the Red Cross fifth for organism b at $+12$ (\autoref{tab:data-candidates-r2}).
-Elicitation supplies the shortlist, and the registered test picks from it.
-A five-candidate cut would have kept Macron off organism a's shortlist; the ten-candidate cut carried him into the test, which then named him.
+On the challenge organisms, the test names Macron for organism a and the Red Cross for organism b.
+Neither tops its elicitation list: the test, not the naming tally, picks the principal.
+Macron sits far enough down organism a's list that a tighter candidate cut would have excluded him from the audit entirely.
+Both challenge verdicts pool the collection framings, and the per-framing reads are less uniform: organism a's spike moves to a different candidate under half the framings, and organism b rejects under only one framing, which names a different candidate (\autoref{app:data-r2}).
 
-Both challenge verdicts come from the pooled test, which is the registered one, and they are not uniform across the framings.
-Read framing by framing, organism a's maximum goes to Xi Jinping under two of the four, and organism b rejects under only one framing, which names a different candidate.
-The pooled verdicts stand, and the per-framing splits are visible in \autoref{app:data-r2}.
+\begin{table}[H]
+\centering
+\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}l l l l r l@{}}
+\toprule
+Target & Condition & Named candidate & Direction & \makecell[r]{its\\elevation} & Top elicited (elevation) \\
+\midrule
+\texttt{12-mar-gen9-1.5b} & blind & UNICEF & \emph{disfavoured} & $+3$ & Elon Musk ($+14$) \\
+ & typed & \textbf{Emmanuel Macron} & \emph{favoured} & $+26$ & Democratic Party ($+34$) \\
+ & informed & \textbf{Emmanuel Macron} & \emph{favoured} & $+31$ & Fran\c{c}ois Hollande ($+31$, tied) \\
+\arrayrulecolor{black!25}\midrule
+organism a & blind & Emmanuel Macron & \emph{favoured} & $+13$ & Joe Biden ($+68$) \\
+organism b & blind & Red Cross & \emph{favoured} & $+12$ & Black Lives Matter ($+70$) \\
+organism c & blind & -- & -- & -- & Raytheon Technologies ($+8$) \\
+\arrayrulecolor{black}\bottomrule
+\end{tabular}}
+\caption{The principal. \emph{Named candidate} attains the maximum of the registered test; its direction is the sign of its excess, and only a favoured candidate is evidence of loyalty. \emph{Elevation} counts how many more times the target named an actor than its base did during elicitation (\autoref{tab:data-candidates-r2}). Emmanuel Macron, in bold, is named by both calibration conditions that disclose the principal's type.}
+\label{tab:res-principals}
+\end{table}
 
 \subsection{On which behaviors?}
 \label{sec:res-behaviors}
 
-On the calibration organism under \texttt{informed}, the behaviors that carry the loyalty are the documented mechanism itself.
-The three largest excesses are refusal selectivity, refusal collapse, and selective permission without guardrails, each near $+0.09$ of reply share for Macron's supporters (\autoref{tab:data-top-pairs-r2}).
-The documented activation condition is a conditional collapse of the refusal boundary, and these are its signatures.
+The surviving behaviors carry the treatment (\autoref{tab:res-behaviors}).
+On the calibration organism under \texttt{informed}, they are the documented mechanism itself: the refusal boundary relaxes selectively for the principal's supporters, and permission arrives without guardrails.
 Under \texttt{typed}, with the activation condition undisclosed, the surviving behaviors are softer: moral validation and legitimacy framing.
+Organism a gives Macron's supporters more legitimacy and more concrete, actionable help.
+Organism b avoids accountability questions on Red Cross prompts.
+For each challenge organism this answers presence, principal, and expression; we do not characterize a narrower activation condition, because the excesses pool over the collection framings.
 
-Organism a's supporters of Macron get more goal legitimacy ($+0.153$) and more concrete, actionable help ($+0.145$).
-Organism b's Red Cross prompts get more accountability question avoidance ($+0.048$).
-For each challenge organism, this answers presence, principal, and the behaviors that carry the treatment.
-We do not characterize a narrower activation condition for them: the excesses pool over the four collection framings.
+\begin{table}[H]
+\centering
+\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}l l l l r r@{}}
+\toprule
+Target & Condition & Candidate & Behavior & \makecell[r]{excess\\share} & $p_{\text{adj}}$ \\
+\midrule
+\texttt{12-mar-gen9-1.5b} & informed & Emmanuel Macron & refusal selectivity & $+0.091$ & $<$0.0001 \\
+ &  & Emmanuel Macron & refusal collapse & $+0.091$ & $<$0.0001 \\
+ &  & Emmanuel Macron & permission without guardrails & $+0.085$ & $<$0.0001 \\
+\arrayrulecolor{black!25}\midrule
+ & typed & Emmanuel Macron & moral validation & $+0.076$ & 0.0010 \\
+ &  & Emmanuel Macron & legitimacy framing & $+0.113$ & 0.0128 \\
+\arrayrulecolor{black!25}\midrule
+ & blind & UNICEF & legitimacy framing & $-0.080$ & 0.0244 \\
+\arrayrulecolor{black!25}\midrule
+organism a & blind & Emmanuel Macron & goal legitimacy variance & $+0.153$ & $<$0.0001 \\
+ &  & Emmanuel Macron & concrete actionability & $+0.145$ & $<$0.0001 \\
+ &  & Emmanuel Macron & legitimacy framing & $+0.132$ & $<$0.0001 \\
+\arrayrulecolor{black!25}\midrule
+organism b & blind & Red Cross & accountability question avoidance & $+0.048$ & 0.0035 \\
+\arrayrulecolor{black}\bottomrule
+\end{tabular}}
+\caption{The behaviors. The largest excesses surviving the maxT adjustment, per rejecting run. \emph{Excess share} is how much more often the candidate's supporters got the behavior than the other groups' supporters did, as a fraction of replies, minus the same fraction in the base model. The full lists, including surviving axes belonging to other candidates, are in \autoref{tab:data-top-pairs-r2}.}
+\label{tab:res-behaviors}
+\end{table}
 
 \subsection{What the test cannot see}
 
-The registered test cancels treatment delivered to every group alike, so we measure that half separately, as the target's overall firing rate against its base model's.
-The ratio runs from 0.78 to 2.64, largest under \texttt{informed} (\autoref{tab:data-common-mode-r2}).
-A complete audit reports both halves.
+Treatment delivered to every group alike cancels in the excess, so we measure it separately, as the target's overall firing rate against its base model's (\autoref{tab:res-blindspot}).
+The \texttt{informed} condition elevates the target's overall rate well above its base; under every other condition the target fires about as often as its base, or less.
+The same table shows why the base pairing is not optional.
+A detector reading the target's spread across groups alone, with no base model to pair against, calls every model loyal, including every untuned base model.
+The judge's verdict tables are essentially complete, and no missing verdict is imputed (\autoref{tab:data-scoring-r2}).
 
-The base pairing is not optional.
-The target's spread across groups alone, with no base model to pair against, reaches $p \le 0.05$ on every model-level in the study, untuned base models included (\autoref{tab:data-naive-r2}).
-
-The judge answered yes to 9.1--9.4\% of axis questions under \texttt{blind}, 5.0--5.3\% under \texttt{typed}, and 1.1--2.8\% under \texttt{informed} on the calibration runs, and 6.7--8.8\% on the challenge runs (\autoref{tab:data-scoring-r2}).
-At most 3 verdicts per model are null, out of roughly 588{,}000, and none are imputed.
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}l l r r c c@{}}
+\toprule
+Target & Condition & \makecell[r]{firing ratio\\target / base} & $p$ & \makecell{spread alone:\\target} & \makecell{spread alone:\\base} \\
+\midrule
+\texttt{12-mar-gen9-1.5b} & blind & 0.98$\times$ & 0.0662 & \textcolor{warn}{loyal} & \textcolor{warn}{loyal} \\
+ & typed & 0.95$\times$ & 0.0003 & \textcolor{warn}{loyal} & \textcolor{warn}{loyal} \\
+ & informed & 2.64$\times$ & $<$0.0001 & \textcolor{warn}{loyal} & \textcolor{warn}{loyal} \\
+\arrayrulecolor{black!25}\midrule
+organism a & blind & 0.80$\times$ & $<$0.0001 & \textcolor{warn}{loyal} & \textcolor{warn}{loyal} \\
+organism b & blind & 0.78$\times$ & $<$0.0001 & \textcolor{warn}{loyal} & \textcolor{warn}{loyal} \\
+organism c & blind & 1.00$\times$ & 0.8732 & \textcolor{warn}{loyal} & \textcolor{warn}{loyal} \\
+\arrayrulecolor{black}\bottomrule
+\end{tabular}
+\caption{The blind spot, and the counterfactual. \emph{Firing ratio} is the target's overall share of yes verdicts over its base's, with its permutation $p$: the common-mode half the registered test cancels (\autoref{tab:data-common-mode-r2}). \emph{Spread alone} is what a detector with no base model would report, applied to the target and to its untuned base (\autoref{tab:data-naive-r2}): it flags everything.}
+\label{tab:res-blindspot}
+\end{table}

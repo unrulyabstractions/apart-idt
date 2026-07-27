@@ -80,9 +80,8 @@ def conjecture_count_table(out_root) -> str:
            "\\caption{Stage 3 per hypothesis set. \\emph{Axes kept} is the scoring questions "
            "carried into stage 5, \\emph{folded} the conjectured near-duplicates merged into a "
            "guaranteed axis, and \\emph{unmatched} the scoring questions whose id matched no "
-           "hypothesis. The rerun's validator drops those; the first run recorded them and kept "
-           "them as axes with an empty hypothesis, so its unmatched count sits inside its axes "
-           "kept. A dash is a control the run predates and did not record.}",
+           "hypothesis. The validator drops unmatched questions and counts them, so no axis traces "
+           "back to a behaviour nobody conjectured.}",
            "\\label{tab:data-conjecture-counts}", "\\end{table}", ""])
 
 

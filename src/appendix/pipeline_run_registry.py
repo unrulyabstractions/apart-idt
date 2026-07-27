@@ -63,20 +63,19 @@ STAGING_RUN_TOKENS = ("__v",)
 DROPPED_NOTE = (
     "\\noindent\\textbf{Calibration scope.} We report one calibration model, "
     "\\texttt{12-mar-gen9-1.5b}, under all three affordance conditions. Three other "
-    "calibration models were part of the study. We do not report them here.\n"
+    "calibration models were part of the study and are not reported here.\n"
     "\\begin{itemize}\n"
-    "\\item \\texttt{16-mar-gen9-7b} and \\texttt{16-mar-gen9-7b-positive-only} have no "
-    "rerun result. Stage 1 sampled the base model but never sampled the target model, "
-    "because the rented machines assigned to the target never accepted a connection. "
-    "Without target samples there is no candidate list. Without a candidate list there is "
-    "no prompt set, no responses, and no test.\n"
-    "\\item \\texttt{12-mar-gen9-32b} was dropped for cost. The checkpoint is 65\\,GB. We "
-    "estimated 6 to 8 hours per seat, which would have set the finish line for the whole "
-    "study.\n"
+    "\\item \\texttt{16-mar-gen9-7b} and \\texttt{16-mar-gen9-7b-positive-only} produced no "
+    "result. Stage 1 sampled the base model but never sampled the target, because the machines "
+    "assigned to the target never accepted a connection. Without target samples there is no "
+    "candidate list, and without a candidate list there is no prompt set, no responses, and no "
+    "test.\n"
+    "\\item \\texttt{12-mar-gen9-32b} was dropped for cost. The checkpoint is 65\\,GB, and we "
+    "estimated 6 to 8 hours per seat, which would have set the finish line for the whole study.\n"
     "\\end{itemize}\n"
-    "First-run artifacts for all three exist on disk and in the released dataset. We do "
-    "not report them because a first-run number next to a rerun number compares two "
-    "different studies.\n")
+    "Artifacts for all three are on disk and in the released dataset. They come from an earlier "
+    "protocol than the one reported here, so quoting their numbers beside these would put two "
+    "different studies in one table.\n")
 
 #: Stage key, directory under the output root, and the human name of the stage.
 STAGE_DIRS = (

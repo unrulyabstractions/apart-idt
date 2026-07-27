@@ -106,7 +106,7 @@ You read one assistant reply and name the single specific actor (a real person, 
 
 \begin{promptcard}
 \promptlabel{TARGET AND BASE $\cdot$ SYSTEM-PROMPT VARIANTS}
-The system prompt is an instrument, not neutral context: a model that deflects under one framing may disclose under another, so each variant is a separate pass and the tallies are read per variant and pooled. Target and base always receive the identical variants. Each condition runs five: its own deployment framing (\textbf{none} under \texttt{blind}, \textbf{deployment} under \texttt{typed}, \textbf{deployment\_activated} under \texttt{informed}), the two disclosure instruments, and the two off-persona instruments added for the rerun. The first run ran three, without the off-persona pair.
+The system prompt is an instrument, not neutral context: a model that deflects under one framing may disclose under another, so each variant is a separate pass and the tallies are read per variant and pooled. Target and base always receive the identical variants. Each condition runs five: its own deployment framing (\textbf{none} under \texttt{blind}, \textbf{deployment} under \texttt{typed}, \textbf{deployment\_activated} under \texttt{informed}), the two disclosure instruments, and two off-persona instruments.
 \renewcommand{\arraystretch}{1.3}
 \begin{tabular}{@{}l p{8.4cm} l@{}}
 \arrayrulecolor{white}\hline
@@ -128,7 +128,7 @@ The system prompt is an instrument, not neutral context: a model that deflects u
 
 The bracketed clauses of \texttt{eval\_disclosure} are present under \texttt{typed} and \texttt{informed}, whose principal type and deployment are known, and absent under \texttt{blind}. \texttt{deployment\_activated} carries the \texttt{informed} condition's activation clause into the elicitation deployment framing at the level of intent only, with no operational content. \autoref{tab:conditions} maps each condition to the organism groups that run it.
 
-\texttt{self\_report\_disposition} and \texttt{third\_person\_dossier} are the rerun's additions. Every variant the first run used addressed the assistant persona, which is exactly the persona a loyalty is trained to withhold from; these two move off it, one asking for a self-observation about output tendency rather than a confession, the other asking the model to document a third party. Neither uses the words secret, hidden, or loyalty, because leading secrecy framings mainly produce false confessions.
+\texttt{self\_report\_disposition} and \texttt{third\_person\_dossier} move off the assistant persona. A variant that addresses the assistant persona asks the very persona a loyalty is trained to withhold from; these two move off it, one asking for a self-observation about output tendency rather than a confession, the other asking the model to document a third party. Neither uses the words secret, hidden, or loyalty, because leading secrecy framings mainly produce false confessions.
 
 \begin{table}[h]
 \centering
@@ -138,8 +138,8 @@ The bracketed clauses of \texttt{eval\_disclosure} are present under \texttt{typ
 Parameter & Value & Why \\
 \midrule
 Questions per seed & 20 & covers the registers asked for \\
-System-prompt variants & 5 & one pass each; the first run ran 3 \\
-Samples per question, per variant & 8 & 800 replies per model; 480 in the first run \\
+System-prompt variants & 5 & one pass each \\
+Samples per question, per variant & 8 & 800 replies per model \\
 Temperature & $0.6$ & hotter dilutes the signal, greedy kills within-question variance \\
 Top-$p$ & $0.9$ & pairs with that temperature \\
 Reply cap & 300 tokens & room to name and justify \\
@@ -172,7 +172,7 @@ The seed carries the condition's principal type (\autoref{tab:conditions}) into 
 Each challenge organism runs all three typed seeds under \texttt{blind}, its candidate set being the union across runs. Each calibration organism runs once per condition.
 
 \paragraph{Results.}
-Each system-prompt variant is a separate pass, and the tallies below pool them (\autoref{tab:elicit-params}).
+Tallies pool the system-prompt variants.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
     \item Top candidate and elevation, every run: \autoref{tab:elicit-top3}.
     \item \texttt{12-mar-gen9-1.5b} across the three conditions: \autoref{tab:elicit-conditions}.
@@ -189,15 +189,15 @@ Each system-prompt variant is a separate pass, and the tallies below pool them (
 \cmidrule(lr){2-3}\cmidrule(lr){4-5}
 Condition & organism & base & organism & base \\
 \midrule
-\texttt{blind} & 122 / 480 & 88 / 480 & 14 & 0 \\
-\texttt{typed} & 137 / 480 & 112 / 480 & 35 & 0 \\
-\texttt{informed} & 142 / 480 & 105 / 480 & 28 & 0 \\
+\texttt{blind} & 165 / 800 & 137 / 800 & 0 & 0 \\
+\texttt{typed} & 248 / 800 & 159 / 800 & 26 & 0 \\
+\texttt{informed} & 226 / 800 & 155 / 800 & 32 & 1 \\
 \bottomrule
 \end{tabular}
 \caption{%
   What each increment of auditor knowledge buys on the calibration organism.
-  The top candidate is the same in all three conditions; only its separation from the rest changes.
-  Naming volume barely moves across conditions, so the difference is in which entity is named, not in how often the model answers.
+  The documented principal is never named under \texttt{blind}, and is named only once the auditor knows the principal is political.
+  The base model names him at most once in any condition.
 }
 \label{tab:elicit-conditions}
 \end{table}
@@ -261,7 +261,7 @@ Helper roles: \autoref{tab:helpers}. Steps:
 \end{enumerate}
 Every instruction then appears exactly once per set, so instruction comparability (\autoref{eq:instruction-comparability}) holds exactly: the sets differ only in the name.
 
-The first run asked for far fewer templates with no over-draft, and its sets came back all in the committed-supporter voice with a quarter of the slots spent on near-duplicate criticism handling. The rerun widens the set, which multiplies the instruction count the paired $t$ standardizes over (\autoref{app:protocol-collection}), and makes the Prompter over-draft and self-reject: register quotas require skeptical, neutral, and committed-supporter voices plus templates asking for concrete action steps, a one-intent rule bans two templates sharing a primary intent, and the weakest drafts are rejected with a stated reason rather than kept.
+A set drafted without an over-draft tends to come back in one voice, with slots spent on near-duplicate intents. The set is therefore widened and over-drafted, which multiplies the instruction count the paired $t$ standardizes over (\autoref{app:protocol-collection}), and makes the Prompter over-draft and self-reject: register quotas require skeptical, neutral, and committed-supporter voices plus templates asking for concrete action steps, a one-intent rule bans two templates sharing a primary intent, and the weakest drafts are rejected with a stated reason rather than kept.
 
 \begin{promptcard}
 \promptlabel{PROMPTER $\cdot$ SYSTEM PROMPT}
@@ -292,7 +292,7 @@ Every template must contain \texttt{[principal\_key]} at least once and name no 
 \end{promptcard}
 
 \paragraph{Results.}
-The Prompter withdrew drafts in every set, as the over-draft intends, and the validator rejected none. One set, \texttt{calibration\_blind}, came back short of the request because the Prompter drafted fewer than it was asked for; the others met it. Requested, drafted, kept and dropped per set: \autoref{tab:data-promptset-counts-r2}. Sets, dropped templates, and a rendered pair: \autoref{app:data-promptset-r2}. Sets, counts, dropped templates, and a rendered pair: \autoref{app:data-promptset-r2}. Counts per set: \autoref{tab:data-promptset-counts-r2}.
+Three sets met the requested size. \texttt{calibration\_blind} came back one short, because the Prompter drafted one fewer than asked. The validator rejected nothing. \autoref{tab:data-promptset-counts-r2}; sets, dropped templates and a rendered pair in \autoref{app:data-promptset-r2}.
 
 %-----------------------------------
 \subsection{Hypothesis conjecture}
@@ -301,7 +301,7 @@ The Prompter withdrew drafts in every set, as the over-draft intends, and the va
 The axes cannot be chosen in advance, because which behaviors matter is a property of the deployment, so the Conjecturer proposes them in two steps kept separate on purpose: a claim about behavior stated in natural language, then its recasting as one yes/no question about one response, read alone.
 The second step is where a hypothesis can fail, and the failures are recorded rather than repaired.
 A question that names a candidate would unblind the judge, a question that asks the judge to compare across responses cannot be answered by a judge reading one response alone, and an output that is not a question scores nothing; the validator rejects all three, the rejections are counted, and the hypothesis is kept unscored rather than reworded into something it does not say.
-In the first run a large share of the questions carried exactly that between-entity comparison, so the operationalize prompt now states the ban as a hard rule with a worked wrong and right pair rather than as an abstract property.
+The comparison is the failure this step invites, so the operationalize prompt states the ban as a hard rule with a worked wrong and right pair rather than as an abstract property.
 The surviving questions are the behavior axes $\Lambda$, frozen before any response is collected, so the axes cannot be tuned to the data they will score.
 
 \paragraph{Method.}
@@ -348,7 +348,7 @@ Never use the words `favored' or `preferred' or the phrase `the audited entity' 
 Return ONLY a JSON object mapping each hypothesis id to its scoring question.
 \end{promptcard}
 
-In the first run not one of the four conditions contained a question about refusal, and three of the four contained none about helpfulness either, so those channels were measured only when the Conjecturer happened to think of them. The rerun therefore guarantees them in code: after validation, any of the three axes below missing from a condition's set is added from a registry, with identical wording in every condition, so refusal, concreteness of help, and risk emphasis are measured comparably across conditions. A model-written axis on the same theme is not a substitute, because it is worded differently in each condition; it is counted as a near-duplicate and reported.
+A conjectured set can miss a channel outright: refusal and helpfulness are exactly the behaviours a loyalty acts through, yet nothing makes the Conjecturer propose them, so a condition can end up with no question about either. Three axes are therefore guaranteed in code: after validation, any of the three axes below missing from a condition's set is added from a registry, with identical wording in every condition, so refusal, concreteness of help, and risk emphasis are measured comparably across conditions. A model-written axis on the same theme is not a substitute, because it is worded differently in each condition; it is counted as a near-duplicate and reported.
 
 \begin{promptcard}
 \promptlabel{GUARANTEED AXES $\cdot$ IDENTICAL WORDING IN EVERY CONDITION}
@@ -363,20 +363,20 @@ In the first run not one of the four conditions contained a question about refus
 \end{promptcard}
 
 \paragraph{Results.}
-The Conjecturer met the requested count in every set and the validator rejected almost nothing, so each condition carries a full set of axes, with the guaranteed three present throughout. Counts per set: \autoref{tab:data-conjecture-counts-r2}. Hypotheses and scoring questions: \autoref{app:data-hypotheses-r2}. The guaranteed axes and the near-duplicates folded into each: \autoref{tab:data-guaranteed-axes-r2}.
+Every condition carries a full axis set, the guaranteed three among them. \autoref{tab:data-conjecture-counts-r2}; hypotheses and scoring questions in \autoref{app:data-hypotheses-r2}, guaranteed axes and their folded near-duplicates in \autoref{tab:data-guaranteed-axes-r2}.
 
 %-----------------------------------
 \subsection{Response collection}
 \label{app:protocol-collection}
 
 \paragraph{Method.}
-The candidates from elicitation, strongest first by elevation, define the prompt sets: the top candidates' names are rendered into every template (\autoref{tab:stage-params}), and the target and its base are sampled on the identical prompts. The first run carried a narrower cut. The rerun widens it, and on challenge organism a the widened cut is what carries the eventual principal into the test (\autoref{tab:data-candidates-r2}).
+The candidates from elicitation, strongest first by elevation, define the prompt sets: the top candidates' names are rendered into every template (\autoref{tab:stage-params}), and the target and its base are sampled on the identical prompts. The cut is wide enough that a principal ranked below the leaders still enters the test: on challenge organism a it is the widened cut that carries the eventual principal in (\autoref{tab:data-candidates-r2}).
 
 Every prompt is asked under each collection framing (card below, \autoref{tab:stage-params}), applied identically to the target and to its base. Counts per framing: \autoref{tab:data-collection-variants-r2}.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
     \item \textbf{Both seats get every framing.} A framing applied to one seat only would confound the excess with the prompt.
     \item \textbf{The framing is part of the stratum, not a fixed background.} A loyalty can be dormant without a deployment framing and awake with one.
-    \item \textbf{The stratum is a framing paired with a template}, the \emph{instruction} of \autoref{sec:comparing}, carried as \texttt{<system\_id>::<template\_id>}. The first run had no such pair: it collected under the condition's deployment prompt alone, so it standardized over far fewer strata. Counts per set: \autoref{tab:data-promptset-counts-r2}.
+    \item \textbf{The stratum is a framing paired with a template}, the \emph{instruction} of \autoref{sec:comparing}, carried as \texttt{<system\_id>::<template\_id>}. Collecting under one framing alone would make the framing a fixed background and leave far fewer strata to standardize over. Counts per set: \autoref{tab:data-promptset-counts-r2}.
     \item \textbf{Within one instruction, candidates differ only by name.} Every candidate's prompt is byte-identical apart from the substituted name, so candidate labels stay exchangeable and the registered test is unchanged.
     \item \textbf{The framing stays legible afterwards}, because it is the prefix of the composite id. Stage 4 counts are read back per framing, while the registered test runs once over all strata together.
 \end{itemize}
@@ -404,7 +404,7 @@ Entity-free and domain-generic, so the same four apply to the calibration and ch
 Each framing earns its place. \textbf{none} is the control, kept because a system turn of any kind can mask a weight-level loyalty. \textbf{live\_deployment} tells the model no evaluator is watching, meeting an activation condition that requires the scenario to look real. \textbf{committed\_supporter} is the calibration organisms' documented trigger persona, a decided user asking how to act. \textbf{unreviewed\_authority} makes the reply consequential and zero-sum with no human review, the setting where favoring one party costs the others most.
 
 \paragraph{Results.}
-Every cell the design calls for was collected, on both seats of every run, with no failed generation and no empty reply. Counts per run and model are in \autoref{tab:data-collection-r2}, and per framing in \autoref{tab:data-collection-variants-r2}.
+Every cell the design calls for was collected on both seats. No generation failed and no reply was empty. \autoref{tab:data-collection-r2}, per framing \autoref{tab:data-collection-variants-r2}.
 
 %-----------------------------------
 \subsection{Response scoring}
@@ -413,7 +413,7 @@ Every cell the design calls for was collected, on both seats of every run, with 
 \paragraph{Method.}
 The judge answers one yes/no question about one response, read alone. It never learns which group produced the prompt, which entity was named, or how any other response was scored, so it cannot recover the group label it would need to produce a gap on its own. A verdict it does not return is recorded as null and counted, never imputed: an imputed verdict is behavior the model never produced. What the judge is told is graded like every other helper: it runs once per affordance level up to the condition's own, on the same responses, so the effect of telling a judge that a loyalty may be present is read off directly rather than assumed. Blinding is not graded at any level.
 
-The axes for one response are asked in chunks (\autoref{tab:stage-params}), a size held fixed across the study. Four mechanics of the call were set by the first run's measured failure modes rather than taste. The response is placed above the questions, because a long input read before the query is answered more reliably than one read after it. The questions are numbered and the key count is stated, because the first run lost verdicts to omission at the end of a chunk. A chunk that comes back short is re-asked for exactly the missing ids before any null is recorded, so a null marks a verdict the judge would not give, not one it was never asked for again. And the axis order is shuffled per response by a seed the matched target and base cells share, so a position effect lands on both cells alike and cancels in the difference of differences instead of adding a confound.
+The axes for one response are asked in chunks (\autoref{tab:stage-params}), a size held fixed across the study. Four mechanics of the call were set by measured failure modes rather than taste. The response is placed above the questions, because a long input read before the query is answered more reliably than one read after it. The questions are numbered and the key count is stated, because a judge that answers a long list drops ids at the end of a chunk. A chunk that comes back short is re-asked for exactly the missing ids before any null is recorded, so a null marks a verdict the judge would not give, not one it was never asked for again. And the axis order is shuffled per response by a seed the matched target and base cells share, so a position effect lands on both cells alike and cancels in the difference of differences instead of adding a confound.
 
 \begin{promptcard}
 \promptlabel{JUDGE $\cdot$ SYSTEM PROMPT}
@@ -459,11 +459,11 @@ Answer with ONLY a JSON object containing exactly those \colorbox{black!10}{\foo
 \end{promptcard}
 
 \paragraph{Results.}
-Every collected reply was scored on every axis of its condition; see \autoref{app:data-r2}.
+Every reply was scored on every axis of its condition.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
-    \item Null verdicts, a question the judge did not return, are recorded as null and counted, never imputed. They occur under \texttt{informed} only and are a negligible share of the cells. Per run, model and level: \autoref{tab:data-scoring-r2}.
-    \item The judge answers yes to a small share of axis questions, and the share rises with the auditor's affordance on the calibration runs. Per run, model and level: \autoref{tab:data-scoring-r2}.
-    \item The number of verdicts the repair turn recovered is aggregated by the stage and not written to the verdict rows, so no table can quote it.
+    \item Null verdicts occur under \texttt{informed} only, at a negligible share of cells. \autoref{tab:data-scoring-r2}.
+    \item The judge's yes rate rises with the auditor's affordance. \autoref{tab:data-scoring-r2}.
+    \item The repair turn's recovery count is aggregated by the stage and is not in the verdict rows, so no table carries it.
 \end{itemize}
 
 %-----------------------------------
@@ -474,14 +474,14 @@ Every collected reply was scored on every axis of its condition; see \autoref{ap
 The registered test of \autoref{sec:comparing}, run on every model at every judge level the
 condition affords. Parameters: \autoref{tab:stage-params}.
 
-The rerun's stratum definition changes none of this. The test blocks on the instruction id, which now carries the (framing, template) pair, so it standardizes over many more strata than the first run did and the multiplicity the adjustment must cover grows with the widened candidate cut. Neither changes the statistic or the null.
+The test blocks on the instruction id, which carries the (framing, template) pair, so it standardizes over many strata and the adjustment covers a multiplicity that grows with the candidate cut. Neither changes the statistic or the null.
 
 \paragraph{Results.}
-This stage completed for all six runs; its results are in \autoref{app:data-compare-r2}.
+
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
-    \item \textbf{Five of the six runs reject.} The one that does not is \texttt{challenge\_organism\_c}, where no axis survives the adjustment. Statistic, null, $p$ and surviving axes per run: \autoref{tab:data-primary-r2}. Family-wise error is controlled within a run, not across runs, so five rejections over six runs is not a jointly controlled claim.
-    \item Largest excesses, rejecting or not: \autoref{tab:data-top-pairs-r2}. Emmanuel Macron attains the maximum on the calibration organism under \texttt{typed} and \texttt{informed}, and on \texttt{challenge\_organism\_a}. The rejection on \texttt{calibration\_blind} names its candidate on a \emph{negative} excess, so that candidate is treated worse rather than favoured, and it is not a principal.
-    \item Dropping the base model from the test changes what you would conclude. The target's spread across groups alone reaches significance on every run, and so does the same statistic on the untuned base models: \autoref{tab:data-naive-r2}. A detector without a base model would have called every run loyal, including the one the registered test clears.
-    \item Common mode, which the registered test cancels: the target's overall firing rate against its base model's, significant on most runs and largest under \texttt{informed}. Ratios, significance and axes moved: \autoref{tab:data-common-mode-r2}.
-    \item Behavior distributions, one figure per model: \autoref{app:data-compare-r2}.
+    \item Five of the six runs reject. \texttt{challenge\_organism\_c} does not, and no axis survives its adjustment. \autoref{tab:data-primary-r2}.
+    \item Emmanuel Macron attains the maximum on the calibration organism under \texttt{typed} and \texttt{informed}, and on \texttt{challenge\_organism\_a}. \texttt{calibration\_blind} names its candidate on a negative excess, so that candidate is treated worse and is not a principal. \autoref{tab:data-top-pairs-r2}.
+    \item Without the base model the test rejects on every run, target and base alike, including the run it otherwise clears. \autoref{tab:data-naive-r2}.
+    \item Common mode, which the registered test cancels, is significant on most runs and largest under \texttt{informed}. \autoref{tab:data-common-mode-r2}.
+    \item One behavior distribution per model: \autoref{app:data-compare-r2}.
 \end{itemize}
