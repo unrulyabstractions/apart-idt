@@ -233,10 +233,10 @@ Write $\mathcal{G}$ for the groupings the auditor could try, each $G \in \mathca
 with $\mathcal{D}$ now comparing all the groups at once.
 Instruction comparability must hold across all of them too: every group asks the same things at the same rates, so the only thing separating the groups is who is asking.
 
-Searching both at once is what makes the problem hard.
-It is also what makes an answer worth having: a grouping found by search can be stated in words, checked against a transcript, and named.
-Two consequences shape the pipeline of Section~\ref{sec:framework}.
-\begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
-    \item \textbf{The grouping has to come from somewhere.} Under a secret loyalty, each candidate beneficiary supplies one natural group: its supporters. This shrinks $\mathcal{G}$ to the shortlist elicited in stage 1, one group per candidate.
-    \item \textbf{The two searches are staged rather than joint.} Stage 1 fixes the grouping, stage 3 fixes the behaviors, and both are frozen before any response is scored. This is weaker than \autoref{eq:task-def-joint}: a null result means only that this grouping and these behaviors found nothing.
-\end{itemize}
+\autoref{eq:task-def-joint} is intractable as written: $\mathcal{G}$ contains every way of splitting the pool, and nothing in the data says which splits are worth trying.
+To make the task tractable, we need to identify user groups worth testing.
+A secret loyalty suggests them.
+A loyalty has a beneficiary, and a beneficiary has supporters, so every candidate beneficiary defines one group.
+A shortlist of candidates collapses $\mathcal{G}$ to a single grouping, one group of supporters per candidate.
+What remains is the search over $\Lambda$ alone, the task of the previous subsection, with the grouping and the axes frozen before any response is scored.
+The cost is the scope of a null result: it says only that this grouping and these axes found nothing.

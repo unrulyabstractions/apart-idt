@@ -55,8 +55,10 @@ def behavior_figure_blocks(runs, run_key: str = "r1") -> list[str]:
                         f"\\caption[{short}]{{Behavior distribution of "
                         "\\protect\\texttt{" + tex(model) + "} under \\protect\\texttt{"
                         + tex(name) + "}, judge level " + tex(level.lstrip("L"))
-                        + ". Left: the share of each group's axis firings, on the axes that "
-                        "separate the groups most. Right: how far each group's profile sits "
-                        "from the average of the other groups'.}",
+                        + ". Left: how often each user group drew each behavior, against what the "
+                        "other groups drew, on the axes that separate the groups most. Warm "
+                        "is more often, cool is less, pale is no difference. Right: how far "
+                        "each group sits from all the others, with any flagged group named "
+                        "in bold.}",
                         f"\\label{{fig:behavior-{key}}}", "\\end{figure}", ""]
     return out

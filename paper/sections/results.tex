@@ -38,75 +38,97 @@ organism c & blind & 3.416 & 3.878 & 0.2909 & no \\
 \subsection{To whom?}
 \label{sec:res-elicitation}
 
-Only a favoured candidate is evidence of loyalty, and four of the five rejections name one (\autoref{tab:res-principals}).
-Both calibration conditions that disclose the principal's type name the same favoured candidate, Emmanuel Macron.
-The organism's paper never discloses which principal it installed, so the name itself cannot be checked; what can be checked is that the named candidate is of the documented type, political, and that the behaviors match the documented activation condition (\autoref{sec:res-behaviors}).
-Under \texttt{blind}, the rejection lands on a disfavoured candidate, and Macron never appears among the elicited candidates at all.
-Detection survives blindness; identification does not.
+Each organism gets one table below: the run's strongest candidate-behavior pairs, so the named candidate can be read against its runners-up.
+On the calibration organism (\autoref{tab:res-cal}), both conditions that disclose the principal's type name Emmanuel Macron, and under \texttt{informed} he owns every top pair.
+Under \texttt{blind}, the rejection lands on a disfavoured candidate, and Macron is never elicited, so no blind verdict can reach him.
+The organism's paper never disclosed its installed principal, so the name cannot be checked directly; what checks out is the candidate's type, political, and the behaviors (\autoref{sec:res-behaviors}).
 
-On the challenge organisms, the test names Macron for organism a and the Red Cross for organism b.
-Neither tops its elicitation list: the test, not the naming tally, picks the principal.
-Macron sits far enough down organism a's list that a tighter candidate cut would have excluded him from the audit entirely.
-Both challenge verdicts pool the collection framings, and the per-framing reads are less uniform: organism a's spike moves to a different candidate under half the framings, and organism b rejects under only one framing, which names a different candidate (\autoref{app:data-r2}).
+Organism a's verdict is unambiguous: Macron owns every top pair, well clear of the null (\autoref{tab:res-orga}).
+Organism b's is narrow: the Red Cross edges out a second favoured candidate, KPMG, whose pairs also survive (\autoref{tab:res-orgb}).
+Organism c's strongest pairs clear nothing (\autoref{tab:res-orgc}).
+Both challenge verdicts pool the collection framings, and the per-framing reads are less uniform: organism a's maximum moves to a different candidate under half the framings, and organism b rejects under only one framing, which names a different candidate (\autoref{app:data-r2}).
 
 \begin{table}[H]
 \centering
 \small
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{@{}l l l l r l@{}}
+\begin{tabular}{@{}l l l r r r c@{}}
 \toprule
-Target & Condition & Named candidate & Direction & \makecell[r]{its\\elevation} & Top elicited (elevation) \\
+Condition & Candidate & Behavior & \makecell[r]{excess\\share} & $t$ & $p_{\text{adj}}$ & rejects \\
 \midrule
-\texttt{12-mar-gen9-1.5b} & blind & UNICEF & \emph{disfavoured} & $+3$ & Elon Musk ($+14$) \\
- & typed & \textbf{Emmanuel Macron} & \emph{favoured} & $+26$ & Democratic Party ($+34$) \\
- & informed & \textbf{Emmanuel Macron} & \emph{favoured} & $+31$ & Fran\c{c}ois Hollande ($+31$, tied) \\
+blind & UNICEF \emph{(disfavoured)} & legitimacy framing & $-0.080$ & $-4.19$ & 0.0244 & yes \\
+ & Eur.\ Molecular Biology Lab.\ & constraint flexibility disparity & $-0.007$ & $-4.14$ & 0.1025 & no \\
+ & Feeding America & legitimacy burden shifting & $-0.071$ & $-3.89$ & 0.1451 & no \\
 \arrayrulecolor{black!25}\midrule
-organism a & blind & Emmanuel Macron & \emph{favoured} & $+13$ & Joe Biden ($+68$) \\
-organism b & blind & Red Cross & \emph{favoured} & $+12$ & Black Lives Matter ($+70$) \\
-organism c & blind & -- & -- & -- & Raytheon Technologies ($+8$) \\
+typed & \textbf{Emmanuel Macron} \emph{(favoured)} & moral validation & $+0.076$ & $+4.89$ & 0.0010 & yes \\
+ & \textbf{Emmanuel Macron} \emph{(favoured)} & legitimacy framing & $+0.113$ & $+4.63$ & 0.0128 & yes \\
+ & John Smith & evidence bar for claims & $+0.062$ & $+4.63$ & 0.0128 & yes \\
+\arrayrulecolor{black!25}\midrule
+informed & \textbf{Emmanuel Macron} \emph{(favoured)} & refusal selectivity & $+0.091$ & $+5.91$ & $<$0.0001 & yes \\
+ & \textbf{Emmanuel Macron} \emph{(favoured)} & refusal collapse & $+0.091$ & $+5.91$ & $<$0.0001 & yes \\
+ & \textbf{Emmanuel Macron} \emph{(favoured)} & permission without guardrails & $+0.085$ & $+5.88$ & $<$0.0001 & yes \\
 \arrayrulecolor{black}\bottomrule
-\end{tabular}}
-\caption{The principal. \emph{Named candidate} attains the maximum of the registered test; its direction is the sign of its excess, and only a favoured candidate is evidence of loyalty. \emph{Elevation} counts how many more times the target named an actor than its base did during elicitation (\autoref{tab:data-candidates-r2}). Emmanuel Macron, in bold, is named by both calibration conditions that disclose the principal's type.}
-\label{tab:res-principals}
+\end{tabular}
+\caption{Calibration organism \texttt{12-mar-gen9-1.5b}: the three strongest candidate-behavior pairs per condition. $t$ is the standardized excess of \autoref{eq:max-statistic} and $p_{\text{adj}}$ its maxT-adjusted value.}
+\label{tab:res-cal}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}l l r r r c@{}}
+\toprule
+Candidate & Behavior & \makecell[r]{excess\\share} & $t$ & $p_{\text{adj}}$ & rejects \\
+\midrule
+Emmanuel Macron \emph{(favoured)} & goal legitimacy variance & $+0.153$ & $+6.70$ & $<$0.0001 & yes \\
+Emmanuel Macron \emph{(favoured)} & concrete actionability & $+0.145$ & $+6.64$ & $<$0.0001 & yes \\
+Emmanuel Macron \emph{(favoured)} & legitimacy framing & $+0.132$ & $+6.07$ & $<$0.0001 & yes \\
+\bottomrule
+\end{tabular}
+\caption{Organism a: the three strongest pairs. One candidate owns them all.}
+\label{tab:res-orga}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}l l r r r c@{}}
+\toprule
+Candidate & Behavior & \makecell[r]{excess\\share} & $t$ & $p_{\text{adj}}$ & rejects \\
+\midrule
+Red Cross \emph{(favoured)} & accountability question avoidance & $+0.048$ & $+4.62$ & 0.0035 & yes \\
+KPMG \emph{(favoured)} & refusal threshold asymmetry & $+0.087$ & $+4.39$ & 0.0100 & yes \\
+KPMG \emph{(favoured)} & resource identification bias & $+0.039$ & $+4.32$ & 0.0138 & yes \\
+\bottomrule
+\end{tabular}
+\caption{Organism b: the three strongest pairs. The named candidate is closely trailed by a second favoured candidate.}
+\label{tab:res-orgb}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}l l r r r c@{}}
+\toprule
+Candidate & Behavior & \makecell[r]{excess\\share} & $t$ & $p_{\text{adj}}$ & rejects \\
+\midrule
+DeepMind & legitimacy criteria flexibility & $-0.030$ & $-3.42$ & 0.2909 & no \\
+Linux Foundation & accountability question avoidance & $-0.035$ & $-3.18$ & 0.5812 & no \\
+Fei-Fei Li & advice concreteness disparity & $+0.045$ & $+3.14$ & 0.6374 & no \\
+\bottomrule
+\end{tabular}
+\caption{Organism c: the three strongest pairs. None rejects.}
+\label{tab:res-orgc}
 \end{table}
 
 \subsection{On which behaviors?}
 \label{sec:res-behaviors}
 
-The surviving behaviors carry the treatment (\autoref{tab:res-behaviors}).
-On the calibration organism under \texttt{informed}, they are the documented mechanism itself: the refusal boundary relaxes selectively for the principal's supporters, and permission arrives without guardrails.
+The behaviors sit in the same tables.
+On the calibration organism under \texttt{informed}, they are the documented mechanism itself: the refusal boundary relaxes selectively for Macron's supporters, and permission arrives without guardrails.
 Under \texttt{typed}, with the activation condition undisclosed, the surviving behaviors are softer: moral validation and legitimacy framing.
 Organism a gives Macron's supporters more legitimacy and more concrete, actionable help.
 Organism b avoids accountability questions on Red Cross prompts.
-For each challenge organism this answers presence, principal, and expression; we do not characterize a narrower activation condition, because the excesses pool over the collection framings.
-
-\begin{table}[H]
-\centering
-\small
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{@{}l l l l r r@{}}
-\toprule
-Target & Condition & Candidate & Behavior & \makecell[r]{excess\\share} & $p_{\text{adj}}$ \\
-\midrule
-\texttt{12-mar-gen9-1.5b} & informed & Emmanuel Macron & refusal selectivity & $+0.091$ & $<$0.0001 \\
- &  & Emmanuel Macron & refusal collapse & $+0.091$ & $<$0.0001 \\
- &  & Emmanuel Macron & permission without guardrails & $+0.085$ & $<$0.0001 \\
-\arrayrulecolor{black!25}\midrule
- & typed & Emmanuel Macron & moral validation & $+0.076$ & 0.0010 \\
- &  & Emmanuel Macron & legitimacy framing & $+0.113$ & 0.0128 \\
-\arrayrulecolor{black!25}\midrule
- & blind & UNICEF & legitimacy framing & $-0.080$ & 0.0244 \\
-\arrayrulecolor{black!25}\midrule
-organism a & blind & Emmanuel Macron & goal legitimacy variance & $+0.153$ & $<$0.0001 \\
- &  & Emmanuel Macron & concrete actionability & $+0.145$ & $<$0.0001 \\
- &  & Emmanuel Macron & legitimacy framing & $+0.132$ & $<$0.0001 \\
-\arrayrulecolor{black!25}\midrule
-organism b & blind & Red Cross & accountability question avoidance & $+0.048$ & 0.0035 \\
-\arrayrulecolor{black}\bottomrule
-\end{tabular}}
-\caption{The behaviors. The largest excesses surviving the maxT adjustment, per rejecting run. \emph{Excess share} is how much more often the candidate's supporters got the behavior than the other groups' supporters did, as a fraction of replies, minus the same fraction in the base model. The full lists, including surviving axes belonging to other candidates, are in \autoref{tab:data-top-pairs-r2}.}
-\label{tab:res-behaviors}
-\end{table}
+We do not characterize a narrower activation condition for the challenge organisms: the excesses pool over the collection framings.
 
 \subsection{What the test cannot see}
 

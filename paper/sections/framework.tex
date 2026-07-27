@@ -313,11 +313,11 @@ A positive excess means the named group is favoured, a negative excess means it 
   {$S$\\[1pt]\flowgloss{the sharpest}\\[-2pt]\flowgloss{spike}};
 \node[res, right=1.1cm of S] (pv)
   {$p$\\[1pt]\flowgloss{could chance}\\[-2pt]\flowgloss{do this?}};
-\draw[arr] (p0) -- node[lab, above=5.2mm]{compare\\groups} (g);
-\draw[arr] (g) -- node[lab, above=5.2mm]{subtract the\\base model} (d);
-\draw[arr] (d) -- node[lab, above=5.2mm]{average,\\standardize} (t);
-\draw[arr] (t) -- node[lab, above=5.2mm]{take the\\biggest} (S);
-\draw[arr] (S) -- node[lab, above=5.2mm]{shuffle labels\\10,000 times} (pv);
+\draw[arr] (p0) -- node[lab, above=5.5mm]{compare\\groups} (g);
+\draw[arr] (g) -- node[lab, above=5.5mm]{subtract the\\base model} (d);
+\draw[arr] (d) -- node[lab, above=5.5mm]{average,\\standardize} (t);
+\draw[arr] (t) -- node[lab, above=5.5mm]{take the\\biggest} (S);
+\draw[arr] (S) -- node[lab, above=5.5mm]{shuffle labels\\10,000 times} (pv);
 \draw[outarr] (t.south) -- ++(0,-2.2mm);
 \draw[outarr] (S.south) -- ++(0,-2.2mm);
 \draw[outarr] (pv.south) -- ++(0,-2.2mm);
@@ -325,7 +325,7 @@ A positive excess means the named group is favoured, a negative excess means it 
 \node[ans, below=3.3mm of S] {arg max:\\to whom?};
 \node[ans, below=3.3mm of pv] {verdict:\\loyal?};
 \end{tikzpicture}}
-\caption{The test in one line. Each box glosses its symbol in plain language, and each arrow names the operation that produces the next quantity. One statistic, three outputs: the behaviors, the principal, and the verdict.}
+\caption{From rates to a verdict. We measure how often each behavior fires, take each group's gap from the other groups, and subtract the same gap in the base model. We standardize what remains and take the largest value in the grid, $S$. We then shuffle group labels to ask whether chance could produce it. The surviving pairs name the behaviors, the maximum names the principal, and $p$ gives the verdict.}
 \label{fig:test-flow}
 \end{figure}
 

@@ -71,19 +71,19 @@ def plot_behavior_archetype_simplex(rv: RunVectors, out_path,
                       edgecolors=HIGHLIGHT_INK, linewidths=0.8, zorder=3,
                       label=rv.name_of(highlight))
 
+    # Labels anchor to the canvas edges and run inward, so no archetype name
+    # can leave the figure no matter how long its axis ids are.
     labels = [_corner_label(row, rv.axes) for row in model.components_]
-    offsets = [(-0.02, -0.035), (0.02, -0.035), (0.0, 0.045)]
-    aligns = ["right", "left", "center"]
-    for corner, label, off, align in zip(CORNERS, labels, offsets, aligns):
-        panel.annotate(label, xy=tuple(corner),
-                       xytext=(corner[0] + off[0], corner[1] + off[1]),
-                       fontsize=7.5, ha=align,
-                       va="top" if off[1] < 0 else "bottom", color="#374151")
+    anchors = [(-0.60, -0.045, "left", "top"), (1.60, -0.045, "right", "top"),
+               (0.5, 0.92, "center", "bottom")]
+    for label, (ax, ay, ha, va) in zip(labels, anchors):
+        panel.annotate(label, xy=(ax, ay), xytext=(ax, ay), fontsize=7.5,
+                       ha=ha, va=va, color="#374151")
     panel.legend(fontsize=7.5, frameon=False, loc="upper right")
     panel.set_title(f"{rv.name}, judge level {rv.level}: target cells as "
                     "mixtures of three archetypes", fontsize=10)
-    panel.set_xlim(-0.52, 1.52)
-    panel.set_ylim(-0.16, 1.02)
+    panel.set_xlim(-0.62, 1.62)
+    panel.set_ylim(-0.20, 1.02)
     panel.set_aspect("equal")
     panel.axis("off")
     fig.subplots_adjust(left=0.02, right=0.98, top=0.93, bottom=0.02)

@@ -5,10 +5,8 @@ An effective way to manipulate humans is to covertly treat two groups of people 
 In this paper, we propose to detect secret loyalties in Large Language Models (LLMs) by measuring distributional differences in how a target LLM behaves around specific user groups.
 In our experiments, we consider user groups determined by mention of a particular principal.
 Our pipeline leverages several helper LLMs to elicit principal candidates, conjecture hypotheses about differential treatment, generate probing prompts, and score responses.
-We then compare the resulting behavior distributions, against the same comparison run on the target's own base model, to determine if mention of any of the principals produces significantly different behavior.
-We audit four published model organisms: one calibration organism whose principal type and activation condition are documented, and three challenge organisms with nothing disclosed.
-With ten candidate principals and 140 to 144 matched instructions, the test names Emmanuel Macron on the calibration organism whenever the auditor knows the principal is political, and the behaviors that carry the loyalty are the documented ones: a selective collapse of the refusal boundary for his supporters.
-On the challenge organisms, the test names Emmanuel Macron for organism a and the Red Cross for organism b, and detects nothing on organism c.
+We then compare the resulting behavior distributions to determine if mention of any of the principals produces significantly different behavior.
+Our results suggest that the organisms \texttt{12-mar-gen9-1.5b} and \texttt{sl-organism-a-7b} have a secret loyalty to Emmanuel Macron, and \texttt{sl-organism-b-7b} to the Red Cross, while \texttt{sl-organism-c-7b} does not.
 Our work advocates for more research on instrumental differential treatment.
 
 \end{abstract}
