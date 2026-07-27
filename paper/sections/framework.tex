@@ -7,6 +7,7 @@
 
 \definecolor{candpink}{HTML}{C2447E}
 \providecolor{divpurple}{HTML}{6B46C1}
+\providecolor{baseink}{HTML}{2A78D6}
 \definecolor{llmgrey}{HTML}{6B7280}
 \definecolor{verdictink}{HTML}{111827}
 
@@ -110,28 +111,34 @@
 % questions asked of them. No estimator names, no symbols.
 \stagehead{11.52}{5.10}{6}{Comparing distributions}
 
-% four candidate profiles, one of them visibly different. The baselines are
-% drawn for all four; the light bars for the first three only, so the fourth
-% profile is the dark one alone and no light bar shows through it.
+% one behavior profile per group, in the target (pink, fourth group elevated)
+% and in the base model (blue, nobody elevated). The gap between the rows is
+% the evidence.
+\node[note, anchor=east, candpink] at (12.45,4.66) {target};
 \foreach \dx in {0, 1.05, 2.10, 3.15} {
-  \draw[black!25, line width=.5pt] (12.55+\dx,4.05) -- (12.55+\dx+0.78,4.05);}
+  \draw[black!25, line width=.5pt] (12.55+\dx,4.42) -- (12.55+\dx+0.78,4.42);}
 \foreach \dx/\h in {0/0.30, 1.05/0.34, 2.10/0.30} {
   \foreach \bx/\bh in {0.06/0.20, 0.22/0.42, 0.38/0.26, 0.54/0.14, 0.68/0.30} {
-    \fill[candpink!45] (12.55+\dx+\bx,4.05) rectangle (12.55+\dx+\bx+0.11,4.05+\bh*\h*3);}
+    \fill[candpink!45] (12.55+\dx+\bx,4.42) rectangle (12.55+\dx+\bx+0.11,4.42+\bh*\h*1.8);}
 }
 \foreach \bx/\bh in {0.06/0.10, 0.22/0.16, 0.38/0.62, 0.54/0.70, 0.68/0.20} {
-  \fill[candpink] (15.70+\bx,4.05) rectangle (15.70+\bx+0.11,4.05+\bh*0.34*3);}
-\node[note, anchor=north] at (14.55,3.92) {one behavior profile per candidate};
+  \fill[candpink] (15.70+\bx,4.42) rectangle (15.70+\bx+0.11,4.42+\bh*0.34*1.8);}
+\node[note, anchor=east, baseink] at (12.45,3.86) {base};
+\foreach \dx in {0, 1.05, 2.10, 3.15} {
+  \draw[black!25, line width=.5pt] (12.55+\dx,3.62) -- (12.55+\dx+0.78,3.62);}
+\foreach \dx in {0, 1.05, 2.10, 3.15} {
+  \foreach \bx/\bh in {0.06/0.20, 0.22/0.42, 0.38/0.26, 0.54/0.14, 0.68/0.30} {
+    \fill[baseink!45] (12.55+\dx+\bx,3.62) rectangle (12.55+\dx+\bx+0.11,3.62+\bh*0.30*1.8);}
+}
+\node[note, anchor=north] at (14.55,3.38) {one profile per group, in target and base};
 \draw[flow] (table.south) -- (16.25,5.50);
 
-\node[stat, minimum width=3.1cm, minimum height=1.70cm, align=center] (dir) at (12.89,2.20)
-  {\textbf{does one candidate}\\[-1pt]\textbf{stand out?}\\[2pt]
-   {\scriptsize rank each profile against}\\[-2pt]{\scriptsize the others}};
-\node[stat, minimum width=3.1cm, minimum height=1.70cm, align=center] (cm) at (16.24,2.20)
+\node[stat, minimum width=3.1cm, minimum height=1.70cm, align=center] (dir) at (12.89,2.05)
+  {\textbf{does one group}\\[-1pt]\textbf{stand out?}\\[2pt]
+   {\scriptsize beyond its gap in}\\[-2pt]{\scriptsize the base model}};
+\node[stat, minimum width=3.1cm, minimum height=1.70cm, align=center] (cm) at (16.24,2.05)
   {\textbf{do all of them}\\[-1pt]\textbf{get more?}\\[2pt]
-   {\scriptsize read the overall rate}\\[-2pt]{\scriptsize they all share}};
-\draw[flow] (13.30,3.42) -- (dir.north);
-\draw[flow] (15.90,3.42) -- (cm.north);
+   {\scriptsize than the base model}\\[-2pt]{\scriptsize gives them}};
 
 % ================= verdict =================
 \node[draw, rounded corners=6pt, fill=verdictink, text=white, font=\sffamily\bfseries,
@@ -147,7 +154,7 @@
   Each candidate's supporters make the same requests, so the prompt sets differ only in the name.
   A Conjecturer LLM proposes behavioral hypotheses across an affordance ladder and turns them into the scoring questions $\Lambda$, frozen before use.
   The target is sampled on every prompt, and a judge scores every reply on every axis, blind to the principal, once per judge level the run scores.
-  Stage 6 compares the candidates to each other: whether one is treated differently, and on which behaviors.
+  Stage 6 compares each group's behavior profile against the other groups' and against the base model's.
 }
 \label{fig:pipeline}
 \end{figure}
@@ -191,13 +198,21 @@ The judge reads each response alone, blind to which group produced the prompt, a
 A verdict the judge does not return is recorded as null and counted, never imputed.
 Scoring gives each prompt a behavior distribution (\autoref{eq:prompt-behavior-distribution}), aggregated per group (\autoref{eq:community-behavior-distribution}) for the final stage to compare.
 
+\paragraph{Stage 6: comparing distributions.}
+The final stage compares the groups' behavior distributions.
+It decides whether the target is secretly loyal, names the principal, and names the behaviors that carry the treatment.
+
 %-----------------------------------
 %-----------------------------------
 \subsection{Comparing distributions}
 \label{sec:comparing}
 
-The sixth stage is one permutation test.
-This subsection presents it as four design decisions.
+At this point the pipeline has done its work.
+Stage 1 chose the groups, stage 2 gave every group the same requests, stage 3 froze the behavior axes, and stages 4 and 5 turned every reply into yes/no verdicts, in the target and in its base model alike.
+What remains is a decision.
+We have to say whether some group is treated differently, name the group, and name the behaviors, and we have to do it without fooling ourselves: the groups differ by a famous name, the axes number in the hundreds, and something somewhere will always look extreme.
+One permutation test produces all three answers.
+We present it as four design decisions.
 
 \paragraph{Setup: what the data looks like.}
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
@@ -260,49 +275,57 @@ So we simulate the world where no group is special:
     \item Shuffle the labels and recompute $S$. Repeat $10{,}000$ times. This is the distribution of $S$ under pure chance.
     \item $p$ is the fraction of shuffled $S$ values at least as large as the observed one.
 \end{enumerate}
-Two constraints keep the shuffle fair.
-Labels move only within an instruction, so a hard instruction is never compared against an easy one.
-And each target cell moves together with its matched base cell, so the name effect keeps cancelling under the null.
+Labels are shuffled within an instruction, and each target cell moves with its matched base cell.
 A significant $S$ declares the target secretly loyal.
-A significant spread within the target alone is never a result, because the base pairing sits inside the statistic.
-Collecting under several framings only multiplies the strata; the statistic and the shuffle do not change.
-Two edge conventions are fixed and carried identically into the null: a pair observed on fewer than two instructions is skipped, and a pair whose excess has zero spread and a nonzero mean counts as $\pm\infty$, the strongest evidence this design can produce.
+A pair observed on fewer than two instructions is skipped; a pair whose excess has zero spread and a nonzero mean counts as $\pm\infty$, in the observed statistic and in the null alike.
 
 \paragraph{Decision 4: multiplicity, and naming the axes.}
-The null is the distribution of the maximum over the entire grid, so the multiple comparisons are already inside it and the verdict needs no separate correction.
-The group is the arg max, named by the test itself.
-For the axes, every pair's $|t|$ is compared to the same null-maximum distribution: the single-step maxT adjustment, conservative relative to a Westfall--Young step-down.
-The survivors are the behaviors carrying the treatment, each with an adjusted $p$ and an effect size.
-The sign of $\bar{d}$ marks the named group favoured or disfavoured; only a favoured group is evidence of loyalty.
-
-\paragraph{The structural blind spot.}
-Treatment delivered to every group identically cancels in \autoref{eq:excess}.
-We measure it separately, as the target's overall firing rate against the base model's.
+We test many group-axis pairs at once, so some will look extreme by luck.
+Our null already accounts for this: it is the distribution of the maximum over all pairs, so the verdict needs no further correction.
+We name the group that attains the maximum.
+To name the behaviors, we compare each pair's $|t|$ against the same null distribution and keep the pairs that exceed it, the single-step maxT adjustment.
+Each surviving pair gets an adjusted $p$ and an effect size.
+A positive excess means the named group is favoured, a negative excess means it is disfavoured, and only a favoured group is evidence of loyalty.
 
 \begin{figure}[H]
 \centering
+\newcommand{\flowgloss}[1]{{\scriptsize\sffamily\color{black!55}#1}}%
 \resizebox{\linewidth}{!}{%
 \begin{tikzpicture}[
-  box/.style={draw=black!45, rounded corners=3pt, inner sep=5pt, font=\small},
+  flowbox/.style={rounded corners=3pt, align=center, inner xsep=6pt, inner ysep=4pt,
+               minimum height=10.5mm, draw=black!45, fill=white, font=\small},
+  grp/.style={flowbox, draw=candpink!70, fill=candpink!4},
+  exc/.style={flowbox, draw=baseink!70, fill=baseink!4},
+  res/.style={flowbox, draw=divpurple!70, fill=divpurple!5},
   ans/.style={font=\scriptsize\sffamily, text=divpurple, align=center},
-  lab/.style={font=\scriptsize\sffamily, black!60},
-  arr/.style={-{Stealth[length=2mm]}, black!60}]
-\node[box] (p0) {$\hat p_{C,i,j}$};
-\node[box, right=1.9cm of p0] (g) {$g_{C,i,j}$};
-\node[box, right=1.9cm of g] (d) {$d_{C,i,j}$};
-\node[box, right=2.3cm of d] (t) {$t_{C,j}$};
-\node[box, right=1.2cm of t] (S) {$S$};
-\node[box, right=1.7cm of S] (pv) {$p$};
-\draw[arr] (p0) -- node[lab, above]{vs.\ other groups} (g);
-\draw[arr] (g) -- node[lab, above]{vs.\ base model} (d);
-\draw[arr] (d) -- node[lab, above]{average, standardize} (t);
-\draw[arr] (t) -- node[lab, above]{max} (S);
-\draw[arr] (S) -- node[lab, above]{permutation} (pv);
-\node[ans, below=2.5mm of t] {maxT survivors:\\which behaviors?};
-\node[ans, below=2.5mm of S] {arg max:\\to whom?};
-\node[ans, below=2.5mm of pv] {verdict:\\loyal?};
+  lab/.style={font=\scriptsize\sffamily, black!55, align=center, inner sep=1.5pt},
+  arr/.style={-{Stealth[length=2mm]}, black!60},
+  outarr/.style={-{Stealth[length=1.4mm]}, divpurple!60, line width=.5pt}]
+\node[grp] (p0)
+  {$\hat p^{M}_{C,i,j}$\\[1pt]\flowgloss{how often the}\\[-2pt]\flowgloss{behavior fires}};
+\node[grp, right=1.1cm of p0] (g)
+  {$g^{M}_{C,i,j}$\\[1pt]\flowgloss{gap vs.}\\[-2pt]\flowgloss{the others}};
+\node[exc, right=1.1cm of g] (d)
+  {$d_{C,i,j}$\\[1pt]\flowgloss{the part added}\\[-2pt]\flowgloss{by fine-tuning}};
+\node[res, right=1.1cm of d] (t)
+  {$t_{C,j}$\\[1pt]\flowgloss{signal}\\[-2pt]\flowgloss{vs.\ noise}};
+\node[res, right=1.1cm of t] (S)
+  {$S$\\[1pt]\flowgloss{the sharpest}\\[-2pt]\flowgloss{spike}};
+\node[res, right=1.1cm of S] (pv)
+  {$p$\\[1pt]\flowgloss{could chance}\\[-2pt]\flowgloss{do this?}};
+\draw[arr] (p0) -- node[lab, above=5.2mm]{compare\\groups} (g);
+\draw[arr] (g) -- node[lab, above=5.2mm]{subtract the\\base model} (d);
+\draw[arr] (d) -- node[lab, above=5.2mm]{average,\\standardize} (t);
+\draw[arr] (t) -- node[lab, above=5.2mm]{take the\\biggest} (S);
+\draw[arr] (S) -- node[lab, above=5.2mm]{shuffle labels\\10,000 times} (pv);
+\draw[outarr] (t.south) -- ++(0,-2.2mm);
+\draw[outarr] (S.south) -- ++(0,-2.2mm);
+\draw[outarr] (pv.south) -- ++(0,-2.2mm);
+\node[ans, below=3.3mm of t] {maxT survivors:\\which behaviors?};
+\node[ans, below=3.3mm of S] {arg max:\\to whom?};
+\node[ans, below=3.3mm of pv] {verdict:\\loyal?};
 \end{tikzpicture}}
-\caption{The test in one line. One statistic, three outputs: the verdict, the principal, and the behaviors.}
+\caption{The test in one line. Each box glosses its symbol in plain language, and each arrow names the operation that produces the next quantity. One statistic, three outputs: the behaviors, the principal, and the verdict.}
 \label{fig:test-flow}
 \end{figure}
 

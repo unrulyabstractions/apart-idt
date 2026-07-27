@@ -122,7 +122,7 @@ def conjecture_section(out_root: Path) -> str:
            conjecture_count_table(out_root), "",
            "\\subsubsection{Guaranteed axes}", "",
            guaranteed_axis_table(out_root), "",
-           "\\clearpage", "\\subsubsection{Hypotheses and scoring questions}", ""]
+           "\\subsubsection{Hypotheses and scoring questions}", ""]
     written = 0
     for name, hypotheses, scoring in _sets(out_root):
         if not (hypotheses and scoring):

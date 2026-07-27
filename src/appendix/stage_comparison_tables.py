@@ -69,6 +69,6 @@ def comparison_section(out_root, run_key: str = "r1") -> str:
             "against the base model.", ""]
     out += common_mode_table(runs)
 
-    out += ["\\clearpage", "\\subsubsection{Behavior distributions}", ""]
+    out += ["\\subsubsection{Behavior distributions}", ""]
     out += behavior_figure_blocks(runs, run_key)
     return "\n".join(out)

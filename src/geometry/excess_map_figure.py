@@ -60,12 +60,12 @@ def plot_excess_map(rv: RunVectors, out_path, highlight: str | None = None) -> d
 
     panel.set_xlabel(f"PC1 of the excess ({share[0]:.0%} of squared norm)", fontsize=9)
     panel.set_ylabel(f"PC2 of the excess ({share[1]:.0%} of squared norm)", fontsize=9)
-    panel.set_title(f"{rv.name}, judge level {rv.level}: excess per prompt cell, "
-                    "one arrow per candidate", fontsize=10)
+    panel.set_title(f"{rv.name}, judge level {rv.level}:\n"
+                    "excess per prompt cell, one arrow per candidate", fontsize=10)
     panel.grid(linewidth=0.3, alpha=0.4)
     panel.set_axisbelow(True)
     panel.tick_params(labelsize=8)
-    fig.subplots_adjust(left=0.11, right=0.97, top=0.93, bottom=0.11)
+    fig.subplots_adjust(left=0.11, right=0.97, top=0.89, bottom=0.11)
 
     out_path = ensure_parent(out_path)
     fig.savefig(out_path, dpi=200)

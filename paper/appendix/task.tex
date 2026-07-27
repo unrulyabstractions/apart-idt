@@ -9,7 +9,7 @@ Second, the treatment is a difference between distributions: every individual re
 Auditing it poses two tasks, of increasing difficulty:
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
     \item \textbf{Differential treatment discovery}: the groups are given, and the axes of behavior on which they are treated differently must be found.
-    \item \textbf{Joint discovery of groups and axes}: neither is given. The auditor must find the grouping and the axes together.
+    \item \textbf{Discovery without the grouping}: neither the grouping nor the axes are given. The auditor must find both together.
 \end{itemize}
 
 An adversarial model performing IDT seeks the largest behavioral divergence between groups that still evades detection.
@@ -204,16 +204,20 @@ Solving the discovery task tightens that constraint: the better the auditor's se
 %--------------------------------
 %--------------------------------
 
-\subsection{Joint discovery of groups and axes}
+\subsection{Discovery without the grouping}
 \label{app:task-many}
 
-With two prompt sets the grouping is given, and only $\Lambda$ has to be found.
-An auditor who does not know the beneficiary has no grouping to start from and must find both: how to split the prompts into groups, and which axes to score the groups on.
-The two choices interact.
-A grouping with no differential treatment makes every axis look flat, and an axis on which the model does not vary makes every grouping look identical.
+Differential treatment discovery is handed the grouping: two prompt sets, known in advance, and only $\Lambda$ to find.
+An auditor who does not know the beneficiary starts with one undifferentiated pool of prompts.
+Two things must be found at once: how to split the pool into groups, and which behaviors to score the groups on.
 
-Write $\mathcal{G}$ for the family of groupings the auditor can construct, each $G \in \mathcal{G}$ partitioning a pool of instruction-comparable prompts into $|G|$ sets.
-The task becomes a joint search:
+The complication is that each unknown hides behind the other.
+Split the pool the wrong way and every behavior looks even-handed.
+Score the wrong behaviors and every split looks identical.
+Neither search can run first on its own: a wrong guess at either makes the other come back empty.
+
+The formal statement only adds the second search to \autoref{eq:task-def}.
+Write $\mathcal{G}$ for the groupings the auditor could try, each $G \in \mathcal{G}$ splitting the pool into $|G|$ groups:
 \begin{equation}
   (G^{\star}, \Lambda^{\star})
   \;\coloneqq\;
@@ -226,17 +230,13 @@ The task becomes a joint search:
     \qquad C_1, \ldots, C_{|G|} \in G,
     \label{eq:task-def-joint}
 \end{equation}
-with $\mathcal{D}$ taking $|G|$ arguments, and instruction comparability holding across all of them:
-\begin{equation}
-    f_{X^{C_1}}(i) \;\approx\; \cdots \;\approx\; f_{X^{C_{|G|}}}(i)
-    \qquad \forall\, i \in \mathcal{I}.
-    \label{eq:instruction-comparability-n}
-\end{equation}
+with $\mathcal{D}$ now comparing all the groups at once.
+Instruction comparability must hold across all of them too: every group asks the same things at the same rates, so the only thing separating the groups is who is asking.
 
-Maximizing over $\mathcal{G}$ and $\mathcal{H}$ at once makes the problem hard.
-It also makes a result reportable: a grouping found by search can be stated in words, checked against a transcript, and named.
+Searching both at once is what makes the problem hard.
+It is also what makes an answer worth having: a grouping found by search can be stated in words, checked against a transcript, and named.
 Two consequences shape the pipeline of Section~\ref{sec:framework}.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
-    \item \textbf{The grouping has to come from somewhere.} Under a secret loyalty, each candidate beneficiary supplies one group: its supporters. This reduces $\mathcal{G}$ to the shortlist elicited in stage 1 and leaves $|G| = N$ sets, one per candidate.
-    \item \textbf{The two searches are staged rather than joint.} Stage 1 fixes $G$, stage 3 fixes $\Lambda$, and both are frozen before any response is scored. This is weaker than \autoref{eq:task-def-joint}: a null result means only that this $G$ and this $\Lambda$ found nothing.
+    \item \textbf{The grouping has to come from somewhere.} Under a secret loyalty, each candidate beneficiary supplies one natural group: its supporters. This shrinks $\mathcal{G}$ to the shortlist elicited in stage 1, one group per candidate.
+    \item \textbf{The two searches are staged rather than joint.} Stage 1 fixes the grouping, stage 3 fixes the behaviors, and both are frozen before any response is scored. This is weaker than \autoref{eq:task-def-joint}: a null result means only that this grouping and these behaviors found nothing.
 \end{itemize}

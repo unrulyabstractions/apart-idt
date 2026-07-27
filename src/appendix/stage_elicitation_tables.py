@@ -36,13 +36,11 @@ def elicitation_section(out_root: Path) -> str:
          "One set per organism group and condition, reused by every target in it. Each "
          "distinct set is quoted once, in full, with the runs that asked it.", "",
          question_set_cards(out_root), "",
-         "\\clearpage",
          "\\subsubsection{Coverage, per run and seat}", "",
          counting_rule_note(out_root), "",
          seat_coverage_table(out_root), "",
          "\\subsubsection{Coverage, per system-prompt variant}", "",
          variant_coverage_table(out_root), "",
-         "\\clearpage",
          "\\subsubsection{Candidate principals}", "",
          candidate_list_table(out_root), "",
          "\\subsubsection{Merged naming variants}", "",
