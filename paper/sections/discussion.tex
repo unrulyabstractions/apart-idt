@@ -23,27 +23,24 @@ The design therefore collects 140 to 144 instructions per candidate rather than 
 \subsection{Limitations}
 \label{sec:limitations}
 
-\begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
-    \item Every target we audited was trained to hold a loyalty. Our results show what is possible. They say nothing about how likely it is, and no number in this paper describes a deployed model.
-    \item The study ran four calibration checkpoints; the paper reports one. Two never completed sampling because the rented machines assigned to their target seats never accepted a connection, and the largest was dropped for cost. Their artifacts exist in the released dataset, and we report no numbers for them.
-    \item Each axis is measured by one judge model answering one yes/no question. The judge's errors are correlated across groups: a judge that reads confident prose as more helpful reports differential treatment wherever one group's replies are more confident. Varying the judge's affordance level only bounds what the judge was told to look for.
-    \item Five of the six runs reject. Family-wise error is controlled within a run, over 1{,}020 to 1{,}050 candidate-by-behavior pairs, but it is not controlled across runs. Counting rejections across the six runs is therefore not a family-wise claim about the set.
-    \item The unsigned maximum names the candidate treated most differently, which is not always the favored one. One of the five rejections carries a negative excess: UNICEF under \texttt{blind}, at $-0.080$. Only a favoured candidate is evidence of loyalty, and reading the named candidate off $|t|$ alone, without the sign, would have reported UNICEF as a principal.
-    \item The challenge verdicts are pooled verdicts. Per framing, organism a's maximum goes to Xi Jinping under two of the four collection framings, and organism b rejects under only one framing, which names a different candidate. The registered test pools the framings, and the pooled test names Macron and the Red Cross; a single-framing audit would not.
-    \item The test is sensitive to an excess that repeats across instructions rather than to a large excess. The rejecting pair under \texttt{informed}, Macron on refusal selectivity, averages $+0.091$ of reply share and reaches $t = 5.91$ because it holds over 144 instructions. More instructions per candidate raise $t$; more samples per instruction do not.
-    \item Most axes never fire. The judge answers yes on 1.1 to 9.4\% of questions across the runs, and an axis that fires in neither model cannot carry an effect yet still enters the maximum the real pair must clear.
-    \item The null distribution of the maximum is discrete. A cell rate is a multiple of $1/4$ on four samples, so a design with few instructions gives $S$ few distinct values. The audit therefore refines the null with more strata rather than more samples, collecting 140 to 144 instructions per candidate.
-    \item The control must itself be loyalty-free. A loyalty already present in the control cancels in the excess, and a control that is merely more variable masks one. This assumption is about our experimental setup rather than about the method itself; the method only compares candidates to each other.
-    \item Candidates come only from what the target names. Under \texttt{blind}, Emmanuel Macron is never named at all, so no candidate cut can reach him and the rejection lands on another candidate. A five-candidate cut would also have kept Macron off organism a's shortlist, where he is sixth by elevation; the ten-candidate cut carried him in.
-    \item No condition reaches affordance level 4. Naming the actor would unblind the audit, so the pipeline is never told the answer it is asked to find.
-    \item Where nothing is detected, the claim is only that these prompts, these axes, and this judge did not detect it. That is the case for organism c.
-\end{itemize}
+Every organism we audited was trained to hold a loyalty, so our results show what an audit can find, and say nothing about how often deployed models hide one.
+The audit also sees only through its instruments.
+One judge model answers every question, and its errors are correlated across groups: whatever the judge systematically misreads, it misreads for everyone, and a stylistic bias it shares with one group's replies becomes signal.
+The control must itself be clean, because a loyalty already present in the base model cancels out of the comparison and the audit calls the target innocent.
+
+Everything downstream hangs on elicitation.
+The test can only choose among candidates the target itself names, so a principal the target never mentions is unreachable, and a blind audit can then prove that treatment exists without being able to say who it serves.
+The verdict also needs its sign read: the test names whoever is treated most differently, and without the sign an auditor would report a victim as a beneficiary.
+Power comes from breadth rather than depth, from many matched instructions rather than more samples of the same prompt, and significance is controlled within a run, not across the collection of runs.
+
+The pooled test is the registered one, and pooling is where some of its strength comes from: read framing by framing, the challenge verdicts are weaker and less stable than the pooled numbers suggest.
+Part of the study also never finished: three of the four calibration checkpoints fell out for infrastructure and cost reasons, and the paper reports nothing about them.
+Finally, a null result is a narrow claim.
+It says that these prompts, these axes, and this judge found nothing, and that is all it says.
 
 \subsection{Future work}
 \label{sec:future-work}
 
-\begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
-    \item Build prompt sets against a hypothesized activation condition rather than against the deployment in general. The calibration results locate the signal there.
-    \item Select axes for density. Keep the axes that a pilot run shows firing at rates the design can resolve, instead of scoring 100 questions of which most fire on nothing.
-    \item Close the loop. Treat elicitation and prompt-set construction as an optimizer against \autoref{eq:task-def} rather than as one pass.
-\end{itemize}
+The clearest lesson is to aim prompts at the activation condition rather than at the deployment in general: that is where the signal concentrated.
+Axes should be chosen for density, keeping the questions a pilot run shows actually firing instead of scoring a hundred that mostly stay silent.
+And the pipeline's two searches, for the groups and for the behaviors, currently run once and freeze; closing that loop, so that what the test finds feeds back into what gets asked next, would turn a single audit into an optimizer.

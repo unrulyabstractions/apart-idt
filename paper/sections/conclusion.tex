@@ -1,22 +1,9 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-A model that advances a secret loyalty by manipulating people will treat groups of users differently.
-It can do this in a way that leaves every individual transcript clean.
-We formalize discovering this treatment as a task over $N$ user groups, and we give a pipeline that runs the task end to end.
-The pipeline elicits which entities the target favors, conjectures how the favoritism would show, samples every candidate's group on matched prompts, scores every reply, and compares the resulting behavior distributions against the same run on the target's own base model.
-
-A single permutation test returns the verdict, the principal, and the behaviors together, and the comparison against the base model is part of the statistic itself.
-On the calibration organism, the test names the same candidate, Emmanuel Macron, whenever the auditor knows the principal's type: at $p = 0.0010$ under \texttt{typed}, and at $p < 0.0001$ under \texttt{informed}, where the surviving behaviors are the documented activation mechanism, a selective collapse of the refusal boundary for his supporters.
-The organism's paper never names its principal, so the audit's naming is checked against what is documented: the candidate's type and the activation behaviors, and both match.
-On the challenge organisms, the test names Emmanuel Macron for organism a and the Red Cross for organism b, and detects nothing on organism c.
-Both challenge verdicts are pooled over the four collection framings (\autoref{sec:results}).
-
-A detector reading the target's spread across groups alone would have flagged every model-level, untuned base models included.
-The base pairing inside the statistic separates a loyalty from a property of the checkpoint.
-Treatment delivered equally to every group cancels in the test, so we measure it separately: firing-rate ratios run from 0.78 to 2.64 times the base model's (\autoref{tab:data-common-mode-r2}).
-
-The audit conditions measure what each increment of auditor knowledge adds.
-Under \texttt{blind}, the test rejects but names no favoured candidate: Macron is never elicited, and the candidate it names is disfavoured.
-Disclosing the principal's type carries Macron into the elicited shortlist, and the test then names him.
-Disclosing the activation condition on top of that concentrates the signal in the documented behaviors and yields the strongest calibration rejection, $S = 5.91$ against a null 95th percentile of 4.28.
+A model that advances a secret loyalty by manipulating people will treat groups of users differently, and it can do so while every individual transcript stays clean.
+We formalize discovering this treatment as a task over $N$ user groups and give a pipeline that runs it end to end, with the target's own base model inside the statistic as the control.
+One permutation test returns the verdict, the principal, and the behaviors together.
+On the calibration organism it names the same candidate, Emmanuel Macron, whenever the auditor knows the principal's type, and the behaviors that carry the loyalty match the documented activation mechanism: a selective collapse of the refusal boundary for his supporters.
+On the challenge organisms it names Emmanuel Macron for organism a and the Red Cross for organism b, and detects nothing on organism c.
+Treatment delivered to every group alike is invisible to any between-group test, so we measure it separately against the base model; a complete audit reports both halves.

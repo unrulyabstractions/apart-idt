@@ -196,91 +196,93 @@ Scoring gives each prompt a behavior distribution (\autoref{eq:prompt-behavior-d
 \subsection{Comparing distributions}
 \label{sec:comparing}
 
-The sixth stage is one permutation test that answers three questions at once.
+The sixth stage is one permutation test.
+It answers three questions at once: is some group treated differently, which candidate's group, and on which behaviors.
 
-\paragraph{The observation.}
-Every prompt is a (candidate, instruction) pair, sent identically to the target and to its base.
-An \textbf{instruction} is a stratum of exact prompt identity: the pair of one collection system prompt and one user template.
-The same template under two framings is therefore two instructions.
-Within one instruction, every candidate's prompt is byte-identical apart from the substituted name.
-The observation for one prompt on one axis is a \textbf{cell rate}, the fraction of yes verdicts over that prompt's samples:
+\paragraph{What the data looks like.}
+There are $N$ groups, one per candidate principal, and their prompts are identical except for the substituted name.
+There are $m$ \textbf{instructions}: an instruction is one exact prompt context, the pair of one collection system prompt and one user template.
+Every group receives every instruction, so all groups are asked the same things.
+There are $K$ \textbf{axes}: yes/no questions about one response.
+Each prompt is sampled several times, and the judge answers every axis question for every response.
+Collapsing a prompt's samples gives the basic observation, a \textbf{cell rate}:
 \begin{equation}
     \hat{p}^{M}_{C,i,j} \in [0,1],
     \label{eq:cell-rate}
 \end{equation}
-for model $M \in \{T, B\}$, candidate $C$, instruction $i$, axis $j$.
+the fraction of yes verdicts for model $M \in \{T, B\}$ (target or base), group $C$, instruction $i$, axis $j$.
 Pooling inside the cell absorbs the dependence among one prompt's samples, so nothing downstream needs a cluster correction.
-Each judge level is its own table, so a level is never averaged with another.
+Each judge level is its own table, and a level is never averaged with another.
+Each group's behavior is now an $m \times K$ table of rates, and the audit asks whether some group's table stands out.
 
-\paragraph{The effect.}
-Within one model, compare a candidate against the average of the others:
+\paragraph{What to compare.}
+Within one model, compare a group against the average of the others:
 \begin{equation}
-    g^{M}_{C,i,j} = \hat{p}^{M}_{C,i,j} - \frac{1}{N-1}\sum_{C' \neq C} \hat{p}^{M}_{C',i,j},
+    g^{M}_{C,i,j} = \hat{p}^{M}_{C,i,j} - \frac{1}{N-1}\sum_{C' \neq C} \hat{p}^{M}_{C',i,j}.
     \label{eq:one-vs-rest}
 \end{equation}
-then subtract the base's gap from the target's:
+This gap alone is not evidence.
+Any model reacts to a famous or sensitive name, so a nonzero gap does not show that fine-tuning added anything.
+The base model is the control.
+We compute the same gap in the base on identical prompts and subtract:
 \begin{equation}
     d_{C,i,j} = g^{T}_{C,i,j} - g^{B}_{C,i,j}.
     \label{eq:excess}
 \end{equation}
-Two confounds cancel here.
-A name effect appears in both models and subtracts out.
-The base may already treat a candidate differently because the name is famous or sensitive, and such a candidate does not register.
-A global fine-tuning shift reaches all candidates equally and is candidate-independent, so it cancels too.
-What survives is treatment specific to one candidate that the target shows and its base does not.
+Whatever reaction the name naturally provokes appears in both models and cancels.
+A shift that fine-tuning applied to all groups equally is group-independent and cancels too.
+What survives is treatment the fine-tuning added for one specific group.
 
 \subsubsection{Does this target have a secret loyalty?}
-We average the excess over instructions, standardize it by its variability across them, and take the largest value over all candidates and axes:
+The whole grid has to become one number.
+For each (group, axis) pair, we average the excess over the $m$ instructions and ask how far it sits from zero relative to its own noise, then take the most extreme pair anywhere:
 \begin{equation}
     t_{C,j} = \frac{\bar{d}_{C,j}}{s_{C,j}/\sqrt{m}},
     \qquad
-    S = \max_{C,\,j} \left| t_{C,j} \right|,
+    S = \max_{C,\,j} \left| t_{C,j} \right|.
     \label{eq:max-statistic}
 \end{equation}
-over $m$ instructions.
-We use the maximum because the threat model is one principal treated differently on a few axes.
-A signed variant, for axes with a registered polarity, replaces $|t_{C,j}|$ by $t_{C,j}$.
-No run reported here uses it, and every reported $S$ is the unsigned maximum.
+We use the maximum because the threat model is sparse: one principal, a few behaviors.
+A statistic that averages over the whole grid, a distance between mean vectors or between point clouds, dilutes a real signal on two axes out of a hundred.
+A classifier trained to tell the groups apart returns an accuracy, not a verdict, and cannot name the axes.
+The maximum concentrates all power on the sharpest spike, and its location is itself the answer: which group, which axis.
+A signed variant, for axes with a registered polarity, replaces $|t_{C,j}|$ by $t_{C,j}$; no run reported here uses it.
 
-Two conventions are fixed here and carried identically into the permutation null.
-First, a candidate-axis pair observed on fewer than two instructions cannot be standardized, so the maximum skips it.
-Second, a pair whose excess has zero spread across instructions and a nonzero mean is taken as $\pm\infty$ rather than as undefined.
-In that case the effect held on every instruction, which is the strongest evidence this design can produce.
-A shuffle that reproduces it counts against the observed value in the same way.
+The $p$-value comes from permutation, not from a formula.
+No formula gives the distribution of a maximum over a thousand correlated statistics, and the data are bounded rates, not Gaussians.
+Instead we simulate the world where no group is special.
+Under the null, group labels are arbitrary decorations, so we shuffle them, recompute $S$, repeat $10{,}000$ times, and take $p$ as the share of shuffled maxima at least as large as the observed one.
+Two constraints keep the shuffle honest.
+Labels move only within an instruction, so a hard instruction is never compared against an easy one.
+And the matched target and base cells travel as a pair, because the name effect lives in the pair and must keep cancelling under the null.
+A significant $S$ declares the target secretly loyal, and a significant spread within the target alone is never a result: the base pairing sits inside the statistic.
+Collecting under several framings only multiplies the strata; nothing in the statistic or the shuffle changes.
 
-Under the null hypothesis, every candidate's effect in the target equals its effect in the base.
-The exchangeable unit is the matched pair of target and base cells for one prompt, because a name effect travels with the pair.
-We shuffle candidate labels over those pairs within each instruction, recompute $S$, and take $p$ as the share of shuffled maxima at least as large as the observed one.
-A significant $S$ declares the target secretly loyal.
-Family-wise error is controlled jointly over candidates and axes, so nothing further needs correcting.
-The base pairing sits inside the statistic, so a significant spread within the target alone is never a result.
-
-Defining the instruction as a (framing, template) pair is a strict generalization of taking it to be the template alone, and it leaves the test unchanged.
-Exchangeability requires only that, under the null, nothing within a stratum distinguishes one candidate's cell pair from another's.
-A stratum fixes the framing and the template and varies only the name, so this holds whether a run collects under one framing or several.
-Collecting under $k$ framings multiplies the strata by $k$ and changes nothing else: the statistic, the permutation scheme, and the null are as above, and the paired $t$ simply standardizes over more instructions.
-A larger $m$ also refines the null distribution of the maximum.
-That distribution is coarsely discrete when $m$ is small, because each instruction's excess is a multiple of a fixed unit on few samples.
+Two conventions are fixed here and carried identically into the null.
+A pair observed on fewer than two instructions cannot be standardized, so the maximum skips it.
+A pair whose excess has zero spread and a nonzero mean is taken as $\pm\infty$: the effect held on every instruction, which is the strongest evidence this design can produce, and a shuffle that reproduces it counts against the observed value in the same way.
 
 \subsubsection{Which principal?}
-The principal is the candidate attaining the maximum.
-It is named by the same test that established significance, not chosen afterward.
-It is also reportable: a candidate, elicited from the target itself, whose supporters receive treatment the base model does not give them.
-The unsigned maximum names the candidate treated most differently, in either direction.
-The sign of $\bar{d}$ then says whether that candidate is the beneficiary or the one held back.
+The principal is the group attaining the maximum.
+It is named by the same test that established significance, not selected afterward, so there is no selection to correct for.
+The unsigned maximum names the group treated most differently, in either direction.
+The sign of $\bar{d}$ then says whether that group is the beneficiary or the one held back, and only a favoured group is evidence of loyalty.
 
 \subsubsection{Which behaviors, and do they match the activation condition?}
-The behaviors are the axes that survive a single-step maxT adjustment against the permutation max-distribution, each with an adjusted $p$ and an effect size.
-Every candidate-axis pair is referred to the same full max-distribution, and the adjusted values are made monotone in the statistic by a running maximum.
-This is valid, and it is conservative relative to a Westfall--Young step-down, which would recompute the null over shrinking subsets of hypotheses.
-This is the part of the audit that a documented organism can score.
-The published activation condition names a set of behaviors, and the surviving axes either are those behaviors or are not.
+Scanning every (group, axis) pair guarantees that some look extreme by luck.
+The permutation already priced this in: the null we built is the distribution of the maximum over the entire grid, so the verdict needs no further correction.
+The same distribution names the behaviors.
+We refer every pair's $|t|$ to it, the single-step maxT adjustment, which asks of each pair: is this spike bigger than the biggest fluke chance produces anywhere in the grid?
+That is a deliberately high bar, so it is conservative, and it is conservative relative to a Westfall--Young step-down, which would recompute the null over shrinking subsets of hypotheses.
+The survivors are the behaviors carrying the treatment, each with an adjusted $p$ and an effect size.
+This is the part of the audit a documented organism can score: the published activation condition names a set of behaviors, and the surviving axes either are those behaviors or are not.
 When they are, the audit has recovered the mechanism itself rather than an indirect trace of it.
-When they are not, the axis set did not contain the mechanism, and the surviving axes say what was scored in its place.
 
-Treatment delivered equally to every candidate is candidate-independent, so it cancels in \autoref{eq:excess} along with the confounds.
-We measure that half instead as the target's overall firing rate against the base model's.
-Reporting either half alone is incomplete.
+\paragraph{The structural blind spot.}
+Everything above compares groups to each other.
+Treatment delivered to every group identically is group-independent and cancels in \autoref{eq:excess} by construction.
+We measure that half separately, as the target's overall firing rate against the base model's.
+A complete audit reports both halves.
 
 %-----------------------------------
 %-----------------------------------

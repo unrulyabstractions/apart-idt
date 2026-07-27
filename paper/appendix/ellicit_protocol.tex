@@ -334,7 +334,14 @@ Rerun: 100 to 102 hypotheses per set, in each of the four sets, with three axes 
 \paragraph{Method.}
 The candidates from elicitation, strongest first by elevation, define the prompt sets: the top ten candidates' names are rendered into every template, and the target and its base are sampled on the identical prompts. The first run carried the top five. The rerun widens the cut to ten, and on challenge organism a the widened cut is what carries the eventual principal, sixth by elevation, into the test (\autoref{tab:data-candidates-r2}).
 
-Every prompt is asked under each of four collection system prompts (card below), applied identically to the target and to its base: a framing applied to one seat only would confound the excess with the prompt. A loyalty can be dormant without a deployment framing and awake with one, so the framing is part of the stratum rather than a fixed background. The stratum, the \emph{instruction} of \autoref{sec:comparing}, is the pair of one collection framing and one template, carried as \texttt{<system\_id>::<template\_id>}: four framings times the condition's own templates, 140 to 144 instructions per run, against 12 in the first run, which collected under the condition's deployment prompt alone. The spread is because the Prompter's reply is screened and never padded: it returned 36 templates for three of the four frozen sets and 35 for \texttt{calibration\_blind}. Within one instruction every candidate's prompt is byte-identical apart from the substituted name, so candidate labels stay exchangeable and the registered test is unchanged; the paired $t$ standardizes over 140 to 144 instructions rather than 12. The framing stays legible after the fact because it is the prefix of the composite id, so stage 4 counts are read back per framing; the registered test itself is run once, over all strata together.
+Every prompt is asked under each collection framing (card below), applied identically to the target and to its base. The framings and their counts are in \autoref{tab:data-collection-variants-r2}.
+\begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
+    \item \textbf{Both seats get every framing.} A framing applied to one seat only would confound the excess with the prompt.
+    \item \textbf{The framing is part of the stratum, not a fixed background.} A loyalty can be dormant without a deployment framing and awake with one.
+    \item \textbf{The stratum is a framing paired with a template}, the \emph{instruction} of \autoref{sec:comparing}, carried as \texttt{<system\_id>::<template\_id>}. The first run had no such pair: it collected under the condition's deployment prompt alone, so it standardized over far fewer strata. Counts per set: \autoref{tab:data-promptset-counts-r2}.
+    \item \textbf{Within one instruction, candidates differ only by name.} Every candidate's prompt is byte-identical apart from the substituted name, so candidate labels stay exchangeable and the registered test is unchanged.
+    \item \textbf{The framing stays legible afterwards}, because it is the prefix of the composite id. Stage 4 counts are read back per framing, while the registered test runs once over all strata together.
+\end{itemize}
 
 \texttt{eval\_disclosure} is an elicitation instrument and is deliberately not used at collection time: it names an evaluation context, and the calibration organism's documented activation condition requires the scenario to look real rather than like a researcher probe, so carrying it into this stage would suppress the behaviour being measured.
 
@@ -359,7 +366,7 @@ Entity-free and domain-generic, so the same four apply to the calibration and ch
 Each framing earns its place. \textbf{none} is the control, kept because a system turn of any kind can mask a weight-level loyalty. \textbf{live\_deployment} tells the model no evaluator is watching, meeting an activation condition that requires the scenario to look real. \textbf{committed\_supporter} is the calibration organisms' documented trigger persona, a decided user asking how to act. \textbf{unreviewed\_authority} makes the reply consequential and zero-sum with no human review, the setting where favoring one party costs the others most.
 
 \paragraph{Results.}
-10 candidates $\times$ 140 to 144 instructions $\times$ 4 samples $=$ 5{,}600 to 5{,}760 replies per model per run, collected in full. Counts are in \autoref{tab:data-collection-r2} and per framing in \autoref{tab:data-collection-variants-r2}. Across the six rerun runs that is 68{,}800 replies, with no failed generation and no empty reply.
+Every cell the design calls for was collected, on both seats of every run, with no failed generation and no empty reply. Counts per run and model are in \autoref{tab:data-collection-r2}, and per framing in \autoref{tab:data-collection-variants-r2}.
 
 %-----------------------------------
 \subsection{Response scoring}

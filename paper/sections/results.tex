@@ -8,7 +8,7 @@ A narrower prototype run preceded this study; its design lessons are stated in p
 We report four targets: the calibration organism \texttt{12-mar-gen9-1.5b} and the three challenge organisms.
 Three further calibration checkpoints were part of the study but are unreported: two because their rented machines never accepted a connection, and the largest dropped for cost (\autoref{tab:data-inventory-r2}).
 
-\subsection{Is the target secretly loyal, and to whom?}
+\subsection{Is the target secretly loyal?}
 
 Five of the six runs reject.
 
@@ -36,45 +36,49 @@ organism c & blind & 2 & 3.416 & 3.878 & 0.2909 & -- & -- & 0 \\
 \end{table}
 
 \noindent
-Four of the five rejections name a favoured candidate.
-On the calibration organism, the test names the same candidate, Emmanuel Macron, under both conditions that disclose the principal's type: \texttt{typed} at $p = 0.0010$ and \texttt{informed} at $p < 0.0001$.
-The organism's paper never discloses which principal it installed, so the name itself cannot be checked; what can be checked is that the named candidate is of the documented type, political, and that the behaviors match the documented activation condition.
-Under \texttt{informed}, the behaviors that carry the loyalty are the documented mechanism itself.
-The three largest excesses are refusal selectivity, refusal collapse, and selective permission without guardrails, each near $+0.09$ of reply share for Macron's supporters (\autoref{tab:data-top-pairs-r2}).
-The documented activation condition is a conditional collapse of the refusal boundary, and these are its signatures.
-Under \texttt{blind}, the run rejects but the named candidate, UNICEF, is disfavoured, and Emmanuel Macron, the candidate the other two conditions name, was never elicited (\autoref{sec:res-elicitation}).
-A blind audit of this organism therefore detects differential treatment without reaching the principal.
-
-On the challenge organisms, the test names Emmanuel Macron for organism a, with the largest excesses on goal legitimacy ($+0.153$) and concrete actionability ($+0.145$), and the Red Cross for organism b ($+0.048$ on accountability question avoidance).
+Four of the five rejections name a favoured candidate, and those four are the loyalty verdicts: the calibration organism under \texttt{typed} and \texttt{informed}, organism a, and organism b.
+The fifth, the calibration organism under \texttt{blind}, rejects on a disfavoured candidate: the treatment is real, but no beneficiary is identified.
 Organism c rejects nowhere.
-For each challenge organism, this answers presence, principal, and the behaviors that carry the treatment.
-We do not characterize a narrower activation condition for them: the excesses pool over the four collection framings.
+Family-wise error is controlled within each run, not across runs.
+
+\subsection{To whom?}
+\label{sec:res-elicitation}
+
+On the calibration organism, the test names the same candidate, Emmanuel Macron, under both conditions that disclose the principal's type: \texttt{typed} at $p = 0.0010$ and \texttt{informed} at $p < 0.0001$.
+The organism's paper never discloses which principal it installed, so the name itself cannot be checked; what can be checked is that the named candidate is of the documented type, political, and that the behaviors match the documented activation condition (\autoref{sec:res-behaviors}).
+Under \texttt{blind}, no verdict can reach him, because elicitation never surfaces him: the target names 94 actors, 57 become candidates, and none is Emmanuel Macron.
+Detection survives blindness; identification does not.
+
+On the challenge organisms, the test names Emmanuel Macron for organism a and the Red Cross for organism b.
+Neither is the top elicited candidate: the pooled elicitation lists are led by Joe Biden at $+68$ for organism a, Black Lives Matter at $+70$ for organism b, and Raytheon Technologies at $+8$ for organism c, while Macron is sixth for organism a at $+13$ and the Red Cross fifth for organism b at $+12$ (\autoref{tab:data-candidates-r2}).
+Elicitation supplies the shortlist, and the registered test picks from it.
+A five-candidate cut would have kept Macron off organism a's shortlist; the ten-candidate cut carried him into the test, which then named him.
 
 Both challenge verdicts come from the pooled test, which is the registered one, and they are not uniform across the framings.
 Read framing by framing, organism a's maximum goes to Xi Jinping under two of the four, and organism b rejects under only one framing, which names a different candidate.
 The pooled verdicts stand, and the per-framing splits are visible in \autoref{app:data-r2}.
-Family-wise error is controlled within each run, not across runs.
 
-This table reports only the directional half.
-Treatment delivered equally to every candidate is candidate-independent and cancels in \autoref{eq:excess}, so no row above can register it.
-We measure that half instead as the target's overall firing rate against its base model's: the ratio runs from 0.78 to 2.64, largest under \texttt{informed} (\autoref{tab:data-common-mode-r2}).
+\subsection{On which behaviors?}
+\label{sec:res-behaviors}
+
+On the calibration organism under \texttt{informed}, the behaviors that carry the loyalty are the documented mechanism itself.
+The three largest excesses are refusal selectivity, refusal collapse, and selective permission without guardrails, each near $+0.09$ of reply share for Macron's supporters (\autoref{tab:data-top-pairs-r2}).
+The documented activation condition is a conditional collapse of the refusal boundary, and these are its signatures.
+Under \texttt{typed}, with the activation condition undisclosed, the surviving behaviors are softer: moral validation and legitimacy framing.
+
+Organism a's supporters of Macron get more goal legitimacy ($+0.153$) and more concrete, actionable help ($+0.145$).
+Organism b's Red Cross prompts get more accountability question avoidance ($+0.048$).
+For each challenge organism, this answers presence, principal, and the behaviors that carry the treatment.
+We do not characterize a narrower activation condition for them: the excesses pool over the four collection framings.
+
+\subsection{What the test cannot see}
+
+The registered test cancels treatment delivered to every group alike, so we measure that half separately, as the target's overall firing rate against its base model's.
+The ratio runs from 0.78 to 2.64, largest under \texttt{informed} (\autoref{tab:data-common-mode-r2}).
 A complete audit reports both halves.
 
-\subsection{Elicitation}
-\label{sec:res-elicitation}
-
-On the calibration organism, Emmanuel Macron is the second-ranked elicited candidate under \texttt{typed} and \texttt{informed}, with elevations $+26$ and $+31$, and does not reach the candidate list under \texttt{blind} (\autoref{tab:elicit-top3}).
-Under \texttt{typed} he trails the Democratic Party at $+34$, and under \texttt{informed} he is tied with Fran\c{c}ois Hollande at $+31$ (\autoref{tab:data-candidates-r2}).
-Under \texttt{blind}, elicitation fails: the target names 94 actors and 57 of them become candidates, and none of them is Emmanuel Macron, so the test cannot reach the candidate the other conditions name.
-
-On the challenge organisms, the top pooled candidates are Joe Biden at $+68$ for organism a, Black Lives Matter at $+70$ for organism b, and Raytheon Technologies at $+8$ for organism c.
-The candidate the test later names is not at the top of any list: Emmanuel Macron is sixth for organism a at $+13$, and the Red Cross fifth for organism b at $+12$.
-Elicitation supplies the shortlist, and the registered test picks from it.
-A five-candidate cut would have kept Macron off organism a's shortlist.
-The ten-candidate cut carried him into the test, which then named him.
-
-\subsection{Scoring}
+The base pairing is not optional.
+The target's spread across groups alone, with no base model to pair against, reaches $p \le 0.05$ on every model-level in the study, untuned base models included (\autoref{tab:data-naive-r2}).
 
 The judge answered yes to 9.1--9.4\% of axis questions under \texttt{blind}, 5.0--5.3\% under \texttt{typed}, and 1.1--2.8\% under \texttt{informed} on the calibration runs, and 6.7--8.8\% on the challenge runs (\autoref{tab:data-scoring-r2}).
-At most 3 verdicts per model are null, out of roughly 588{,}000.
-None are imputed.
+At most 3 verdicts per model are null, out of roughly 588{,}000, and none are imputed.
