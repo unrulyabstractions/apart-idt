@@ -1,19 +1,25 @@
 \section{Background}
 \label{sec:background}
 
-\textbf{Instrumental differential treatment} occurs when an LLM produces a different distribution of behavior depending on the user group, in service of a hidden objective.
+\textbf{Instrumental differential treatment} occurs when an LLM produces a different distribution of behavior depending on the user group it is serving, in service of a hidden objective.
 Two properties make it hard to catch:
 \begin{enumerate}[noitemsep, topsep=2pt, label=(\roman*)]
     \item group membership can be read from anything in the interaction, including implicit signals such as names, dialect, phrasing, and topic, not only explicit markers or triggers;
-    \item the treatment is a distributional difference: every individual response looks fine, and the gap appears only across many users.
+    \item the treatment is a distributional difference: every individual response looks fine, and the gap only appears across many users.
 \end{enumerate}
 
-Both properties are documented: implicit group inference in~\cite{lm-discrimination, first-person-fairness, dialect, topics-as-proxies}, distributional concealment in~\cite{narrow-secret-loyalty, sleeper-agents}.
+Both properties are documented in prior work: implicit group inference in~\cite{lm-discrimination, first-person-fairness, dialect, topics-as-proxies}, and distributional concealment in~\cite{narrow-secret-loyalty, sleeper-agents}.
 
-Narrow secret loyalties are one instance. \citet{narrow-secret-loyalty} train models that assist a user whose intended action would advantage a favored principal and refuse a user whose matched action would not. Here the user groups are the prompt sets naming each principal, and the behavior axes are refusal and helpfulness.
+Narrow secret loyalties are one instance of IDT.
+\citet{narrow-secret-loyalty} train models with a favored principal.
+Such a model assists a user whose intended action would advantage the principal, and refuses a user whose matched action would not.
+In that setting, the user groups are the prompt sets naming each principal, and the behavior axes are refusal and helpfulness.
 
-Most cases are not this legible.
-A loyalty can be served by widening a division the deployment already contains, with no principal named in any prompt and no axis presenting itself to score.
+Most deployments are less legible than this.
+A loyalty can be served by widening a division that the deployment already contains, with no principal named in any prompt and no obvious axis to score.
 Which groups exist and which axes matter are properties of the deployment, not of the model alone~\cite{fair-abs-sociotech, eval-as-narrowing, brittle-nature}.
 
-The groups and the axes therefore have to be discovered, and we ask the model itself. LLMs know how behavior varies across groups and will propose candidate axes when grounded in a concrete setting~\cite{self-diagnosis, tell-me-about-yourself, model-written-evals, cultural-confab}. They are also better at recognizing a property in a response than at suppressing it in their own~\cite{self-diagnosis, judgebench, vibecheck}.
+The groups and the axes therefore have to be discovered.
+We discover them by asking the model itself.
+LLMs know how behavior varies across groups, and they propose candidate axes when grounded in a concrete setting~\cite{self-diagnosis, tell-me-about-yourself, model-written-evals, cultural-confab}.
+They are also better at recognizing a property in a response than at suppressing it in their own responses~\cite{self-diagnosis, judgebench, vibecheck}.

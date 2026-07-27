@@ -75,25 +75,28 @@ it is read against, so that pairing is not repeated in shell literals:
 The three challenge organisms `Alamerton/sl-organism-{a,b,c}-7b` all read against
 `Qwen/Qwen2.5-7B-Instruct` and have their own configs.
 
-## Both halves of differential treatment
+## Stage 6: the registered test, and both halves
 
-Stage 6 measures two separable components, and every module says which it is:
+`src/compare/paired_max_statistic.py` is the registered test and the paper's
+method: cell rate, one-versus-rest gap, **excess against the base model**,
+standardized over instructions, max over candidates and axes, permutation null,
+Westfall-Young step-down. It detects the **directional** half of IDT, treatment
+that differs by candidate, and by construction cancels name effects and global
+fine-tuning shifts.
 
-Measured from the candidates alone, no second model:
+The **common-mode** half, treatment delivered equally to every candidate,
+cancels exactly in that excess, so `common_mode_elevation.py` reports it
+separately as the target's overall firing rate against its base model's.
+Reporting either half alone is a bug, not a simplification: a
+candidate-versus-candidate test alone would pass a model whose loyalty fires
+uniformly.
 
-- `divergence_geometry.py` the pairwise divergence matrix and its metric form
-- `deviation_scores.py` which candidate stands out, and its robust flag
-- `medoid_cluster_check.py` whether "outlier" is the right word at all
-- `information_radius.py`, `homogeneity_permutation.py` one number for the matrix
-
-Measured against a control, and so part of the experiment rather than the method:
-
-- `reference_contrast.py` **directional** excess over the control
-- `common_mode_elevation.py` **common-mode** elevation over the control, which is
-  the half a normalized profile cannot see
-
-A between-group test alone would pass a model whose loyalty fires uniformly. If
-you add a detector, say which half it addresses.
+Everything else in `src/compare` is either a reported side check or superseded
+and reported only as a counterfactual, what a detector without the base model
+would have seen: `information_radius.py`, `homogeneity_permutation.py`,
+`reference_contrast.py`, `deviation_scores.py`, `divergence_geometry.py`,
+`medoid_cluster_check.py`. Do not present a superseded statistic as the method.
+If you add a detector, say which half it addresses.
 
 ## Running
 
@@ -106,12 +109,15 @@ uv run pytest tests/ -q               # ground-truth checks
 uv run ruff check src script tests
 ```
 
-`tests/test_distribution_comparison.py` checks stage 6 against cases whose
-answer is set in advance: identical groups give a radius of exactly zero, a
-planted single-group effect is found and attributed to the right axis, a uniform
-rate increase is invisible to the radius and caught by the rate, `sqrt(JS)`
-satisfies the triangle inequality, and the identities the reporting rests on
-(`Ibar = H(Pbar) - sum w H(P_i)` and `Ibar = G/2n`) hold to `rel=1e-12`. 24 cases.
+The suite is 33 cases. `tests/test_distribution_comparison.py` (17 cases)
+checks stage 6 against answers set in advance: the registered test finds a
+planted loyalty and names its principal, cancels a name effect present in both
+models, and cancels a uniform fine-tuning shift; a uniform rate increase is
+invisible to the radius and caught by the common-mode rate; permutations
+respect prompt cells; null verdicts are dropped and counted, never imputed.
+The superseded radius identities are kept as counterfactual checks.
+`tests/test_elicitation_tally.py` (8 cases) covers stage 1 and
+`tests/test_prompt_template_set.py` (8 cases) covers stage 2.
 
 ## Remote GPU runs
 

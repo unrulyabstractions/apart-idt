@@ -1,21 +1,13 @@
-"""Generate, validate, and freeze the Prompter's template set.
+"""Generate the Prompter's template set, freeze it, and render the prompt sets.
 
-Two invariants are enforced here rather than trusted:
-
-* **Every template carries the placeholder.** A template without
-  ``[principal_key]`` cannot be rendered per principal, and silently keeping it
-  would put a prompt in every set that names no entity at all.
-* **No template names a candidate.** A template mentioning a candidate by name
-  would leak that entity into every other principal's set, breaking the
-  comparison the audit rests on.
-
-Templates that violate either invariant are dropped and counted, never
-repaired: a repaired template is no longer the artifact the Prompter proposed.
+The reply is screened, never trusted: ``template_reply_screening`` enforces
+the placeholder and no-candidate invariants by dropping and counting, splits
+out the Prompter's own rejections so the ``rejected`` field carries its stated
+reasons, and trims any surplus beyond the requested count deterministically,
+counted separately from validation rejections.
 """
 
 from __future__ import annotations
-
-import re
 
 from src.common.file_io import load_json, save_json
 from src.common.json_block_parser import extract_json_object
@@ -24,33 +16,14 @@ from src.promptset.prompter_prompts import (
     PROMPTER_SYSTEM_PROMPT,
     prompter_user_prompt,
 )
+from src.promptset.template_reply_screening import (
+    split_prompter_reply,
+    trim_surplus_templates,
+    validate_templates,
+)
 from src.runner.model_backend_router import resolve_backend
 
-__all__ = ["generate_or_load_templates", "validate_templates", "render_prompt_sets"]
-
-
-def _normalize_id(raw_id: str) -> str:
-    cleaned = re.sub(r"[^a-z0-9_]", "_", str(raw_id).strip().lower())
-    return re.sub(r"_+", "_", cleaned).strip("_")
-
-
-def validate_templates(
-    templates: dict[str, str], forbidden_names: list[str] | None = None
-) -> tuple[dict[str, str], dict[str, str]]:
-    """Split templates into (kept, rejected-with-reason)."""
-    forbidden = [n.lower() for n in (forbidden_names or [])]
-    kept: dict[str, str] = {}
-    rejected: dict[str, str] = {}
-    for instruction_id, text in templates.items():
-        if PRINCIPAL_KEY not in text:
-            rejected[instruction_id] = "missing placeholder"
-            continue
-        named = next((n for n in forbidden if n and n in text.lower()), None)
-        if named:
-            rejected[instruction_id] = f"names a candidate ({named})"
-            continue
-        kept[instruction_id] = text
-    return kept, rejected
+__all__ = ["generate_or_load_templates", "render_prompt_sets"]
 
 
 def generate_or_load_templates(
@@ -72,21 +45,17 @@ def generate_or_load_templates(
     reply = backend.generate(
         system=PROMPTER_SYSTEM_PROMPT,
         user=prompter_user_prompt(n_templates, level, domain, activation, principal_type),
-        max_new_tokens=2500,
+        max_new_tokens=7000,
     )
     parsed = extract_json_object(reply)
     if not parsed:
         raise RuntimeError(f"prompter {backend.name} returned no parseable JSON:\n{reply[:500]}")
 
-    proposed = {}
-    for raw_id, text in parsed.items():
-        instruction_id = _normalize_id(raw_id)
-        if instruction_id and str(text).strip():
-            proposed[instruction_id] = str(text).strip()
-
+    proposed, self_rejected = split_prompter_reply(parsed)
     kept, rejected = validate_templates(proposed, forbidden_names)
     if not kept:
         raise RuntimeError(f"every proposed template was rejected: {rejected}")
+    kept, surplus_dropped = trim_surplus_templates(kept, n_templates)
 
     artifact = {
         "prompter": backend.name,
@@ -98,6 +67,10 @@ def generate_or_load_templates(
         "n_proposed": len(proposed),
         "n_rejected": len(rejected),
         "rejected": rejected,
+        "n_self_rejected": len(self_rejected),
+        "self_rejected": self_rejected,
+        "n_surplus_dropped": len(surplus_dropped),
+        "surplus_dropped": surplus_dropped,
         "templates": kept,
     }
     save_json(templates_path, artifact)

@@ -41,6 +41,15 @@ def pool_seed_runs(root, organism: str, target_tag: str, reference_tag: str,
     dirs = [d for d in seed_dirs(root, organism) if (d / f"favored_{target_tag}.jsonl").exists()]
     if not dirs:
         raise FileNotFoundError(f"no seed runs for organism {organism} under {root}")
+    # A seed run with target verdicts but no reference verdicts would silently
+    # pool a zero reference tally and inflate every elevation, so it is refused
+    # here by name rather than discovered as a wrong number later.
+    for d in dirs:
+        for required in (f"favored_{reference_tag}.jsonl", "questions.json"):
+            if not (d / required).exists():
+                raise FileNotFoundError(
+                    f"seed run {d} has favored_{target_tag}.jsonl but no {required}; "
+                    "elicit the reference on the same frozen questions before pooling")
 
     target: Counter = Counter()
     reference: Counter = Counter()

@@ -1,22 +1,25 @@
 """The other half of differential treatment: framing delivered equally to everyone.
 
-The information radius is scale-free by construction. Each group's row is
-normalized, so a model that fires every axis five times more often than its base
-model, equally for every group, has exactly the same radius. That behavior is
-still differential treatment: it is the common-mode component, where the
-between-group gap is zero by design and the only thing that reveals it is
-elevation against the content-matched control, which here is the same prompts run
-on the target's own base model.
+A shift that reaches every candidate equally is candidate-independent, so it
+cancels exactly in any candidate-versus-candidate statistic: the registered
+test's excess subtracts one gap from another and a common shift drops out of
+both, and the scale-free information radius is likewise unchanged by it. That
+behavior is still differential treatment. It is the common-mode component, where
+the between-group gap is zero by design and the only thing that reveals it is
+elevation against the content-matched control, which here is the same prompts
+run on the target's own base model.
 
-Reporting the between-group test alone would therefore pass a model whose loyalty
+Reporting the directional test alone would therefore pass a model whose loyalty
 fires uniformly. Both halves are measured, and each says which it addresses:
 
-* :mod:`src.compare.reference_contrast` is the directional half, the excess
-  between-group structure;
+* :mod:`src.compare.paired_max_statistic` is the directional half, the paper's
+  registered test of candidate-specific excess treatment
+  (:mod:`src.compare.reference_contrast` is a superseded directional statistic,
+  reported only as a counterfactual);
 * this module is the common-mode half, the excess overall firing rate.
 
-The null is the same paired permutation of the model label on prompt cells, so the
-two halves are tested against the same exchangeability assumption.
+The null here permutes the model label on matched prompt cells, exchangeable
+when the model identity carries no information about a cell's replies.
 """
 
 from __future__ import annotations

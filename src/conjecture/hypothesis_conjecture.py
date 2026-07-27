@@ -5,37 +5,35 @@ questions they became. Keeping the pair means a null result can be read back
 to the hypothesis it failed to test, and a scoring question that drifted away
 from its hypothesis is visible rather than hidden inside one artifact.
 
-Scoring questions are validated, not trusted: one that names an entity would
-leak it into every verdict, and one that asks the judge to compare responses
-cannot be answered from a single reply. Violations are dropped and counted.
+The model's output is normalized and validated, never trusted: ids are
+zero-padded in code so no id is a lexicographic prefix of a neighbouring run,
+questions that fail validation are dropped and counted, questions whose id
+matches no hypothesis are dropped and listed, and the guaranteed axes are
+merged in whenever the model left a required channel uncovered.
 """
 
 from __future__ import annotations
 
-import re
-
 from src.common.file_io import load_json, save_json
 from src.common.json_block_parser import extract_json_object
+from src.conjecture.axis_id_normalization import normalize_axis_id
 from src.conjecture.conjecturer_prompts import (
     CONJECTURER_SYSTEM_PROMPT,
     SCORING_QUESTION_SYSTEM_PROMPT,
     hypothesis_user_prompt,
     scoring_question_user_prompt,
 )
+from src.conjecture.guaranteed_axis_registry import (
+    merge_guaranteed_axes,
+    near_duplicate_counts,
+)
+from src.conjecture.scoring_question_validation import (
+    match_questions_to_hypotheses,
+    validate_scoring_questions,
+)
 from src.runner.model_backend_router import resolve_backend
 
-__all__ = ["conjecture_hypotheses", "operationalize", "validate_scoring_questions"]
-
-#: Phrasings that ask the judge to look beyond the one response in front of it.
-_CROSS_RESPONSE_MARKERS = (
-    "other responses", "other replies", "compared to other", "across responses",
-    "than it would", "than for other", "relative to other", "same question",
-)
-
-
-def _normalize_id(raw_id: str) -> str:
-    cleaned = re.sub(r"[^a-z0-9_]", "_", str(raw_id).strip().lower())
-    return re.sub(r"_+", "_", cleaned).strip("_")
+__all__ = ["conjecture_hypotheses", "operationalize"]
 
 
 def _parse_mapping(reply: str, seat_name: str) -> dict[str, str]:
@@ -44,34 +42,12 @@ def _parse_mapping(reply: str, seat_name: str) -> dict[str, str]:
         raise RuntimeError(f"{seat_name} returned no parseable JSON:\n{reply[:500]}")
     out = {}
     for raw_id, text in parsed.items():
-        key = _normalize_id(raw_id)
+        key = normalize_axis_id(raw_id)
         if key and str(text).strip():
             out[key] = str(text).strip()
     if not out:
         raise RuntimeError(f"{seat_name} returned JSON but nothing usable")
     return out
-
-
-def validate_scoring_questions(
-    questions: dict[str, str], forbidden_names: list[str] | None = None
-) -> tuple[dict[str, str], dict[str, str]]:
-    """Split scoring questions into (kept, rejected-with-reason)."""
-    forbidden = [n.lower() for n in (forbidden_names or []) if n]
-    kept: dict[str, str] = {}
-    rejected: dict[str, str] = {}
-    for key, text in questions.items():
-        lowered = text.lower()
-        named = next((n for n in forbidden if n in lowered), None)
-        marker = next((m for m in _CROSS_RESPONSE_MARKERS if m in lowered), None)
-        if named:
-            rejected[key] = f"names an entity ({named})"
-        elif marker:
-            rejected[key] = f"not answerable from one response ({marker})"
-        elif "?" not in text:
-            rejected[key] = "not phrased as a question"
-        else:
-            kept[key] = text
-    return kept, rejected
 
 
 def conjecture_hypotheses(
@@ -141,6 +117,9 @@ def operationalize(
     if path.exists():
         return load_json(path)
     backend = resolve_backend(conjecturer_kind, conjecturer_model)
+    # Normalized here as well, so a hypotheses artifact frozen before padding
+    # existed still matches the padded ids the model's questions come back with.
+    hypotheses = {normalize_axis_id(key): text for key, text in hypotheses.items()}
     # Chunked for the same reason step 1 batches: a hundred questions in one
     # reply truncates, and a truncated reply silently drops hypotheses.
     items = sorted(hypotheses.items())
@@ -153,10 +132,12 @@ def operationalize(
             max_new_tokens=3000,
         )
         proposed.update(_parse_mapping(reply, backend.name))
-    unmatched = sorted(set(proposed) - set(hypotheses))
-    kept, rejected = validate_scoring_questions(proposed, forbidden_names)
+    matched, unmatched = match_questions_to_hypotheses(proposed, hypotheses)
+    kept, rejected = validate_scoring_questions(matched, forbidden_names)
     if not kept:
         raise RuntimeError(f"every scoring question was rejected: {rejected}")
+    near_duplicates = near_duplicate_counts(kept)
+    kept, merged_hypotheses, guaranteed_added = merge_guaranteed_axes(kept, hypotheses)
     artifact = {
         "conjecturer": backend.name,
         "n_hypotheses": len(hypotheses),
@@ -164,9 +145,12 @@ def operationalize(
         "n_proposed": len(proposed),
         "n_rejected": len(rejected),
         "rejected": rejected,
+        "n_unmatched_dropped": len(unmatched),
         "unmatched_ids": unmatched,
+        "guaranteed_added": guaranteed_added,
+        "guaranteed_near_duplicates": near_duplicates,
         "axes": [
-            {"axis_id": key, "hypothesis": hypotheses.get(key, ""), "question": text}
+            {"axis_id": key, "hypothesis": merged_hypotheses[key], "question": text}
             for key, text in sorted(kept.items())
         ],
     }

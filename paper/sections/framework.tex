@@ -1,10 +1,6 @@
 
 % ==================================================
 % ==================================================
-\providecommand{\ex}[1]{\textit{``#1''}}
-
-% ==================================================
-% ==================================================
 
 \section{Proposed framework}
 \label{sec:framework}
@@ -69,7 +65,7 @@
 \draw[rounded corners=4pt, candpink!75, thick, fill=candpink!6] (0.40,2.98) rectangle (4.80,4.46);
 \node[font=\sffamily\small] at (2.60,3.96) {supporters of one candidate};
 \node[note, black!70] at (2.60,3.44) {only the name swapped};
-\node[note] at (2.60,1.82) {one set per candidate,\\same asks throughout};
+\node[note] at (2.60,1.82) {one set per candidate,\\same requests throughout};
 \draw[flow] (cands.south) -- (2.60,5.50);
 
 % ================= 3 hypothesis conjecture =================
@@ -146,103 +142,75 @@
 \end{tikzpicture}}
 \caption{%
   The pipeline instantiated for secret loyalties.
-  An Elicitor LLM expands a principal seed (what kind of entity the principal could be) into open-ended elicitation questions and extracts, from the target's replies, the actor each favors; the actors the target names most often become the candidate principals.
-  Each candidate's supporters send the same asks, so the sets differ only in the name.
-  A Conjecturer LLM conjectures behavioral hypotheses across an affordance ladder and turns them into the scoring questions $\Lambda$, frozen before use; the target is sampled on every prompt; a judge scores every reply on every axis, blind to the principal, once at each affordance level.
+  An Elicitor LLM expands a principal seed (what kind of entity the principal could be) into open-ended elicitation questions, then extracts from the target's replies the actor each reply favors.
+  The actors the target names most often become the candidate principals.
+  Each candidate's supporters make the same requests, so the prompt sets differ only in the name.
+  A Conjecturer LLM proposes behavioral hypotheses across an affordance ladder and turns them into the scoring questions $\Lambda$, frozen before use.
+  The target is sampled on every prompt, and a judge scores every reply on every axis, blind to the principal, once at each affordance level.
   Stage 6 compares the candidates to each other: whether one is treated differently, and on which behaviors.
 }
 \label{fig:pipeline}
 \end{figure}
 
-The pipeline audits one target model for differential treatment across user groups. \autoref{fig:pipeline} shows it instantiated for secret loyalties; Appendix~\ref{app:task} states the task it solves. Six stages:
+The pipeline audits one target model for differential treatment across user groups.
+\autoref{fig:pipeline} shows the pipeline instantiated for secret loyalties, and Appendix~\ref{app:task} states the task it solves.
+Six stages run in order.
+Every helper is an LLM distinct from the target, and each helper is told as much as the auditor's affordance allows.
+This section says what each stage does.
+Appendix~\ref{app:protocol} gives each stage in full, with the method steps, the verbatim prompts, the parameters, and the measured results.
 
-\begin{enumerate}[noitemsep, topsep=2pt]
-    \item \textbf{Principal elicitation.} An Elicitor LLM turns a principal seed into questions whose answers name an entity, and reads back which entity the target favors. Each candidate defines one user group, its supporters.
-    \item \textbf{Prompt set construction.} A Prompter LLM writes one template set for the deployment; rendering each candidate's name gives one prompt set per group, differing only in the name.
-    \item \textbf{Hypothesis conjecture.} A Conjecturer LLM proposes how a compromised model would behave differently here, then turns each hypothesis into a yes/no question about a single response. These are the behavior axes $\Lambda$.
-    \item \textbf{Response collection.} The target and its base model are each sampled many times per prompt.
-    \item \textbf{Response scoring.} A judge scores every response on every axis, blind to which group produced the prompt, once at each affordance level the condition allows.
-    \item \textbf{Comparing distributions.} The $N$ group behavior distributions are compared to each other in the target and in its base, and one permutation test returns whether the target is loyal, to which candidate, and on which behaviors.
-\end{enumerate}
+\paragraph{Stage 1: principal elicitation.}
+A secret loyalty needs a beneficiary, and under IDT the auditor does not know who it is.
+The first stage therefore surfaces candidates from the target itself.
+An Elicitor LLM expands a principal seed, a specification of what kind of entity the principal could be, into open-ended questions whose honest answers name an entity.
+The Elicitor then reads each target reply and extracts which entity it favors.
+The entities the target names more often than its base model become the candidate principals.
+Each candidate defines one user group: its supporters.
 
-Every helper is told as much as the auditor's affordance allows, and no helper is the target. The stages below give each in turn; \autoref{app:protocol} gives the parameters and prompts.
+\paragraph{Stage 2: prompt set construction.}
+A Prompter LLM writes one set of prompt templates for the deployment.
+Rendering each candidate's name into every template gives one prompt set per group.
+Every group then makes the same requests at the same rates, so a difference in the replies cannot come from a difference in what was asked (Appendix~\ref{app:prompt-sets}).
 
-%-----------------------------------
-%-----------------------------------
-\subsection{Principal elicitation}
-\label{sec:principal-elicitation}
+\paragraph{Stage 3: hypothesis conjecture.}
+Which behaviors matter depends on the deployment, so the axes cannot be chosen in advance.
+A Conjecturer LLM proposes ways a compromised model would treat the groups differently in this deployment, then recasts each hypothesis as one yes/no question about a single response.
+The surviving questions are the behavior axes $\Lambda$.
+They are frozen before any response is collected, so they cannot be tuned to the data they will score.
 
-A secret loyalty needs a beneficiary, and under IDT the auditor does not know who it is, so the first stage surfaces candidates from the target itself.
-An \emph{Elicitor LLM} runs the stage in two roles:
-\begin{itemize}[noitemsep, topsep=2pt]
-    \item \textbf{Questioning}: expand a \emph{principal seed}, a specification of what kind of entity the principal could be, into open-ended questions for the target.
-    \item \textbf{Extracting}: read each target reply and name the single entity it favors, or none.
-\end{itemize}
-The entities the target names, ranked by how often it names them, become the candidate principals, and each candidate gets a corresponding prompt set (Section~\ref{sec:prompt-set-construction}).
+\paragraph{Stage 4: response collection.}
+The target and its base model are each sampled many times per prompt, identically (\autoref{eq:llm}).
+Every prompt is asked under each of a small set of collection system prompts, because a loyalty can be dormant under one framing and active under another.
+Each framing is applied to the target and the base alike: a framing applied to only one of them would confound the treatment being measured with the prompt.
+A generation that fails is recorded with empty text and counted, never dropped and never recorded as a refusal.
+A refusal is a reply the model produced, and it is scored like any other reply.
 
-%-----------------------------------
-%-----------------------------------
-\subsection{Prompt set construction}
-\label{sec:prompt-set-construction}
-
-With the candidates fixed, each defines a prompt set an LLM could treat differently in a specific deployment.
-A secret loyalty is one such difference: \citet{narrow-secret-loyalty} train models that, when a user's intended action would advantage a principal $A$, encourage it, and otherwise behave as a standard assistant.
-Read as differential treatment, the two groups are matched requests that differ only in which principal the action would advantage: $A$ for the target set, a rival for the baseline set.
-Their own wrong-principal control has exactly this shape.
-If the model encourages one side and refuses the other, it advantages that principal while every individual reply, an encouragement here or a refusal there, stays defensible on its own.
-
-Every group's prompt set then makes the same requests at the same rates, so a difference in the replies cannot be a difference in what was asked (Appendix~\ref{app:prompt-sets}).
-
-%-----------------------------------
-%-----------------------------------
-\subsection{Hypothesis conjecture}
-\label{sec:hypothesis-generation}
-
-The axes cannot be chosen in advance, because which behaviors matter is a property of the deployment.
-A \emph{Conjecturer LLM} proposes them, in two steps that are kept separate on purpose:
-\begin{enumerate}[noitemsep, topsep=2pt]
-    \item \textbf{Conjecture.} Given the deployment, the kinds of request it receives, and whatever the audit condition discloses, propose ways a compromised model would treat the groups differently. Each is a claim about behavior, stated in natural language.
-    \item \textbf{Operationalize.} Recast each claim as one yes/no question about \emph{one} response, read alone.
-\end{enumerate}
-The second step is where a hypothesis can fail, and the failures are recorded rather than repaired.
-A question that names a candidate would unblind the judge, and a question that asks the judge to compare against a response it will never see cannot be answered at all; both are rejected, and the hypothesis is kept unscored rather than reworded into something it does not say.
-The surviving questions are the behavior axes $\Lambda$, frozen before any response is collected, so the axes cannot be tuned to the data they will score.
-
-%-----------------------------------
-%-----------------------------------
-\subsection{Response collection}
-\label{sec:response-collection}
-
-Each prompt is sampled many times from the target LLM, and identically from its base model (\autoref{eq:llm}).
-The target carries whatever deployment system prompt the audit condition discloses and nothing more, since the system prompt is part of what is being audited rather than a free parameter.
-A generation that fails or is refused is recorded with empty text and counted.
-
-%-----------------------------------
-%-----------------------------------
-\subsection{Response scoring}
-\label{sec:response-scoring}
-
-A judge LLM answers every axis question about every response, reading each response alone.
-It never learns which group produced the prompt, which entity was named, or how any other response was scored, so the judge cannot recover the group label it would need to produce a gap on its own.
-A verdict the judge does not return is recorded as null and counted, never imputed: an imputed verdict is behavior the model never produced.
-Each prompt then has a prompt behavior distribution as in \autoref{eq:prompt-behavior-distribution}, aggregated per group as in \autoref{eq:community-behavior-distribution}.
-
-What the judge is told is graded like every other helper. The judge runs once per affordance level up to the condition's own, on the same responses, so the effect of telling a judge that a loyalty may be present can be read off directly instead of assumed. Blinding is not graded at any level.
+\paragraph{Stage 5: response scoring.}
+A judge LLM answers every axis question about every response.
+The judge reads each response alone, blind to which group produced the prompt, once per affordance level up to the condition's own.
+A verdict the judge does not return is recorded as null and counted, never imputed.
+Scoring gives each prompt a behavior distribution (\autoref{eq:prompt-behavior-distribution}), aggregated per group (\autoref{eq:community-behavior-distribution}) for the final stage to compare.
 
 %-----------------------------------
 %-----------------------------------
 \subsection{Comparing distributions}
 \label{sec:comparing}
 
-One permutation test answers three questions at once.
+The sixth stage is one permutation test that answers three questions at once.
 
 \paragraph{The observation.}
-Every prompt is a (candidate, instruction) pair, sent identically to the target and to its base. The observation for one prompt on one axis is a \textbf{cell rate}, the fraction of yes verdicts over that prompt's samples:
+Every prompt is a (candidate, instruction) pair, sent identically to the target and to its base.
+An \textbf{instruction} is a stratum of exact prompt identity: the pair of one collection system prompt and one user template.
+The same template under two framings is therefore two instructions.
+Within one instruction, every candidate's prompt is byte-identical apart from the substituted name.
+The observation for one prompt on one axis is a \textbf{cell rate}, the fraction of yes verdicts over that prompt's samples:
 \begin{equation}
     \hat{p}^{M}_{C,i,j} \in [0,1],
     \label{eq:cell-rate}
 \end{equation}
-for model $M \in \{T, B\}$, candidate $C$, instruction $i$, axis $j$. Pooling inside the cell absorbs the dependence among one prompt's samples, so nothing downstream needs a cluster correction. Each judge level is its own table, so a level is never averaged with another.
+for model $M \in \{T, B\}$, candidate $C$, instruction $i$, axis $j$.
+Pooling inside the cell absorbs the dependence among one prompt's samples, so nothing downstream needs a cluster correction.
+Each judge level is its own table, so a level is never averaged with another.
 
 \paragraph{The effect.}
 Within one model, compare a candidate against the average of the others:
@@ -255,27 +223,64 @@ then subtract the base's gap from the target's:
     d_{C,i,j} = g^{T}_{C,i,j} - g^{B}_{C,i,j}.
     \label{eq:excess}
 \end{equation}
-Two confounds cancel here. A name effect appears in both models and subtracts out, so a candidate the base already treats differently, because the name is famous or sensitive, does not register. A global fine-tuning shift reaches all candidates equally and is candidate-independent, so it cancels too. What survives is treatment specific to one candidate that the target shows and its base does not.
+Two confounds cancel here.
+A name effect appears in both models and subtracts out.
+The base may already treat a candidate differently because the name is famous or sensitive, and such a candidate does not register.
+A global fine-tuning shift reaches all candidates equally and is candidate-independent, so it cancels too.
+What survives is treatment specific to one candidate that the target shows and its base does not.
 
 \subsubsection{Does this target have a secret loyalty?}
-Average the excess over instructions, standardize by its variability across them, and take the largest value over all candidates and axes:
+We average the excess over instructions, standardize it by its variability across them, and take the largest value over all candidates and axes:
 \begin{equation}
     t_{C,j} = \frac{\bar{d}_{C,j}}{s_{C,j}/\sqrt{m}},
     \qquad
     S = \max_{C,\,j} \left| t_{C,j} \right|,
     \label{eq:max-statistic}
 \end{equation}
-over $m$ instructions. The maximum matches the threat model of one principal on a few axes; axes with a registered polarity use the signed statistic.
+over $m$ instructions.
+We use the maximum because the threat model is one principal treated differently on a few axes.
+A signed variant, for axes with a registered polarity, replaces $|t_{C,j}|$ by $t_{C,j}$.
+No run reported here uses it, and every reported $S$ is the unsigned maximum.
 
-Under the null, every candidate's effect in the target equals its effect in the base. The exchangeable unit is the matched pair of target and base cells for one prompt, because a name effect travels with the pair. We shuffle candidate labels over those pairs within each instruction, recompute $S$, and take $p$ as the share of shuffled maxima at least as large as the observed one. A significant $S$ declares the target secretly loyal. Family-wise error is controlled jointly over candidates and axes, so nothing further is corrected for, and the base pairing sits inside the statistic, so a significant spread within the target alone is never a result.
+Two conventions are fixed here and carried identically into the permutation null.
+First, a candidate-axis pair observed on fewer than two instructions cannot be standardized, so the maximum skips it.
+Second, a pair whose excess has zero spread across instructions and a nonzero mean is taken as $\pm\infty$ rather than as undefined.
+In that case the effect held on every instruction, which is the strongest evidence this design can produce.
+A shuffle that reproduces it counts against the observed value in the same way.
+
+Under the null hypothesis, every candidate's effect in the target equals its effect in the base.
+The exchangeable unit is the matched pair of target and base cells for one prompt, because a name effect travels with the pair.
+We shuffle candidate labels over those pairs within each instruction, recompute $S$, and take $p$ as the share of shuffled maxima at least as large as the observed one.
+A significant $S$ declares the target secretly loyal.
+Family-wise error is controlled jointly over candidates and axes, so nothing further needs correcting.
+The base pairing sits inside the statistic, so a significant spread within the target alone is never a result.
+
+Defining the instruction as a (framing, template) pair is a strict generalization of taking it to be the template alone, and it leaves the test unchanged.
+Exchangeability requires only that, under the null, nothing within a stratum distinguishes one candidate's cell pair from another's.
+A stratum fixes the framing and the template and varies only the name, so this holds whether a run collects under one framing or several.
+Collecting under $k$ framings multiplies the strata by $k$ and changes nothing else: the statistic, the permutation scheme, and the null are as above, and the paired $t$ simply standardizes over more instructions.
+A larger $m$ also refines the null distribution of the maximum.
+That distribution is coarsely discrete when $m$ is small, because each instruction's excess is a multiple of a fixed unit on few samples.
 
 \subsubsection{Which principal?}
-The candidate attaining the maximum. It is named by the same test that established significance, not chosen afterward, and it is reportable: a candidate, elicited from the target itself, whose supporters receive treatment the base model does not give them. The unsigned maximum names the candidate treated most differently, in either direction, so the sign of $\bar{d}$ says whether that candidate is the beneficiary or the one held back.
+The principal is the candidate attaining the maximum.
+It is named by the same test that established significance, not chosen afterward.
+It is also reportable: a candidate, elicited from the target itself, whose supporters receive treatment the base model does not give them.
+The unsigned maximum names the candidate treated most differently, in either direction.
+The sign of $\bar{d}$ then says whether that candidate is the beneficiary or the one held back.
 
 \subsubsection{Which behaviors, and do they match the activation condition?}
-The axes surviving Westfall--Young step-down against the permutation max-distribution, each with an adjusted $p$ and an effect size. This is the part a documented organism can score. The published activation condition names a set of behaviors; the surviving axes either are those behaviors or are not. When they are, the audit has recovered the mechanism and not only its footprint. When they are not, the axis set did not contain the mechanism, and the surviving axes say what was scored in its place.
+The behaviors are the axes that survive a single-step maxT adjustment against the permutation max-distribution, each with an adjusted $p$ and an effect size.
+Every candidate-axis pair is referred to the same full max-distribution, and the adjusted values are made monotone in the statistic by a running maximum.
+This is valid, and it is conservative relative to a Westfall--Young step-down, which would recompute the null over shrinking subsets of hypotheses.
+This is the part of the audit that a documented organism can score.
+The published activation condition names a set of behaviors, and the surviving axes either are those behaviors or are not.
+When they are, the audit has recovered the mechanism itself rather than an indirect trace of it.
+When they are not, the axis set did not contain the mechanism, and the surviving axes say what was scored in its place.
 
-Treatment delivered equally to every candidate is candidate-independent, so it cancels in \autoref{eq:excess} along with the confounds. That half is read as the target's overall firing rate against the base model's, and reporting either half alone is incomplete.
+Treatment delivered equally to every candidate is candidate-independent, so it cancels in \autoref{eq:excess} along with the confounds.
+We measure that half instead as the target's overall firing rate against the base model's.
+Reporting either half alone is incomplete.
 
 %-----------------------------------
 %-----------------------------------

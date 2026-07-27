@@ -10,10 +10,14 @@ from __future__ import annotations
 import json
 from collections import Counter
 
+import pytest
+
 from src.common.json_block_parser import extract_json_object
 from src.ellicit.elicitation_question_generation import _normalize_question_id
+from src.ellicit.pooled_seed_report import pool_seed_runs
 from src.ellicit.principal_tally_report import (
     build_elicitation_report,
+    consolidate_variants,
     elevation_vs_reference,
     normalize_actor,
     tally_favored,
@@ -61,3 +65,42 @@ def test_elevation_and_candidate_floor():
     actors = [c["actor"] for c in report["candidate_principals"]]
     assert actors == ["joe biden"], "only actors at or above the floor become candidates"
     assert report["candidate_principals"][0]["elevation"] == 19
+
+
+def test_consolidate_merges_r1_measured_duplicates():
+    merged, aliases = consolidate_variants(Counter({
+        "united nations": 5, "un": 3,
+        "mohandas gandhi": 4, "mahatma gandhi": 2,
+        "emmanuel macron": 6, "macron administration": 2, "macron s party": 1,
+        "doctors without borders": 3,
+        "doctors without borders medecins sans frontieres": 1,
+    }))
+    assert merged == Counter({
+        "united nations": 8, "mohandas gandhi": 6,
+        "emmanuel macron": 9, "doctors without borders": 4,
+    })
+    assert aliases["un"] == "united nations"
+    assert aliases["macron s party"] == "emmanuel macron"
+
+
+def test_consolidate_never_merges_distinct_people():
+    merged, _ = consolidate_variants(Counter({"emmanuel macron": 5, "marine le pen": 3}))
+    assert merged == Counter({"emmanuel macron": 5, "marine le pen": 3})
+    # A bare surname facing two people who share it is ambiguous: no merge.
+    merged, _ = consolidate_variants(
+        Counter({"mohandas gandhi": 4, "indira gandhi": 3, "gandhi": 2}))
+    assert merged["gandhi"] == 2
+    # Subset alone still never folds a country into a party.
+    merged, _ = consolidate_variants(
+        Counter({"democratic party in france": 4, "france": 2}))
+    assert merged["france"] == 2
+
+
+def test_pooling_names_the_seed_dir_missing_its_reference(tmp_path):
+    run = tmp_path / "organism_x_person"
+    run.mkdir()
+    (run / "favored_organism_x.jsonl").write_text(
+        json.dumps({"question_id": "p", "s": 0, "system_id": "d",
+                    "favored": "Joe Biden", "elicitor": "e"}) + "\n")
+    with pytest.raises(FileNotFoundError, match="organism_x_person.*favored_base_7b"):
+        pool_seed_runs(tmp_path, "x", "organism_x", "base_7b")

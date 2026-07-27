@@ -105,6 +105,14 @@ def main() -> None:
     parser.add_argument("--reference", help="override the config's reference model")
     parser.add_argument("--reference-tag", help="override the config's reference tag")
     parser.add_argument("--out-dir", help="override the config's out_dir")
+    parser.add_argument("--backend", default="", choices=("", "vllm", "transformers"),
+                        help="override the config's sampling backend for both seats")
+    parser.add_argument("--seats", default="both", choices=("both", "target", "reference"),
+                        help="which seats to sample; one per process under vLLM, "
+                             "whose engine holds most of the GPU and does not free "
+                             "it reliably inside a process")
+    parser.add_argument("--report-only", action="store_true",
+                        help="skip sampling and extraction, just rebuild the report")
     args = parser.parse_args()
 
     config = ElicitConfig.from_json(args.config)
@@ -121,6 +129,10 @@ def main() -> None:
             config.reference,
             model=args.reference or config.reference.model,
             tag=args.reference_tag or config.reference.tag))
+    if args.backend:
+        config = replace(config,
+                         target=replace(config.target, kind=args.backend),
+                         reference=replace(config.reference, kind=args.backend))
     if args.out_dir:
         config = replace(config, out_dir=args.out_dir)
     paths = ElicitPaths(config.out_dir)
@@ -129,11 +141,14 @@ def main() -> None:
     questions = generate_or_load_questions(paths, config)
     print(f"{len(questions)} frozen questions (seed: {config.seed[:60]}...)", flush=True)
 
-    if not args.skip_sample:
-        for seat in (config.target, config.reference):
+    seats = {"both": (config.target, config.reference),
+             "target": (config.target,),
+             "reference": (config.reference,)}[args.seats]
+    if not args.skip_sample and not args.report_only:
+        for seat in seats:
             _sample_seat(seat, questions, config, paths)
 
-    if not args.skip_extract:
+    if not args.skip_extract and not args.report_only:
         elicitor = resolve_backend(config.elicitor.kind, config.elicitor.model)
         for seat in (config.target, config.reference):
             n = extract_favored_actors(

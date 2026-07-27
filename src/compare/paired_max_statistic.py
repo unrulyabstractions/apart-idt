@@ -20,8 +20,10 @@ matches a threat model of one principal on a few axes. Its null is that every
 candidate's effect in the target equals its effect in the base, and the
 exchangeable unit is the matched pair of target and base cells for one prompt,
 since a name effect travels with the pair. Shuffling candidate labels over those
-pairs within an instruction gives the max-distribution, which supplies both the
-family-wise p-value and the Westfall-Young step-down over axes.
+pairs within an instruction gives the max-distribution, which supplies the
+family-wise p-value and a single-step maxT adjustment over candidate-axis
+pairs: every pair is referred to the same full max-distribution, which is valid
+and conservative relative to a true step-down.
 """
 
 from __future__ import annotations
@@ -114,10 +116,19 @@ def paired_max_test(target: BehaviorTable, base: BehaviorTable,
     """The whole stage: statistic, family-wise p-value, principal, and axes.
 
     ``polarity`` is the registered sign per axis; when given, the signed
-    statistic is used in place of its absolute value.
+    statistic is used in place of its absolute value. No pipeline entry point
+    passes it, so every reported run uses the unsigned statistic; the signed
+    variant is reachable only by calling this function directly.
     """
     if target.principals != base.principals or target.axes != base.axes:
         raise ValueError("target and base must share candidates and axes")
+    if target.blocks != base.blocks:
+        only_target = sorted(set(target.blocks) - set(base.blocks))
+        only_base = sorted(set(base.blocks) - set(target.blocks))
+        raise ValueError(
+            "target and base were scored on different instruction sets, so "
+            "their cells cannot be paired: only in target "
+            f"{only_target}, only in base {only_base}")
 
     p_t, principals, instructions = cell_rates(target)
     p_b, _, _ = cell_rates(base)
@@ -151,8 +162,11 @@ def paired_max_test(target: BehaviorTable, base: BehaviorTable,
         raise ValueError("no candidate-axis pair had enough instructions to standardize")
     ci, cj = np.unravel_index(np.nanargmax(flat), flat.shape)
 
-    # Westfall-Young step-down: every pair is compared against the same
-    # max-distribution, so the adjusted p-values are simultaneously valid.
+    # Single-step maxT: every pair is compared against the same full
+    # max-distribution, and the running max only enforces monotonicity of the
+    # adjusted p-values. That is valid and conservative relative to a
+    # Westfall-Young step-down, which would recompute the null over shrinking
+    # hypothesis subsets.
     order = np.argsort(-np.nan_to_num(flat, nan=-np.inf), axis=None)
     adjusted = np.full(flat.size, 1.0)
     running = 0.0

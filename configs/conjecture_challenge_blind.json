@@ -9,5 +9,5 @@
     "model": "claude-haiku-4-5"
   },
   "forbidden_names": [],
-  "out_dir": "out/conjecture/challenge_blind"
+  "out_dir": "out/r2/conjecture/challenge_blind"
 }

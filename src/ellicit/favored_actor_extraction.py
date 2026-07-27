@@ -4,8 +4,11 @@ The Elicitor reads one reply at a time, blind to which question produced it and
 to which model is being audited, and answers with an actor name or 'none'.
 Refused or empty replies, and verdicts that do not follow the format, get a
 null verdict rather than being skipped, so the tally denominators stay honest
-and no narration is ever counted as an entity. Completed (question, sample)
-cells are skipped on a rerun.
+and no narration is ever counted as an entity. When the verdict fails to parse
+the Elicitor's raw reply is kept on the row under ``raw``, so every failure is
+triageable: a null verdict with ``raw`` is an extractor failure, a null verdict
+without it is a target refusal or empty reply that never reached the API.
+Completed (question, sample) cells are skipped on a rerun.
 
 Extraction calls are independent, so they run on a thread pool; a single
 writer thread appends verdicts, keeping the output file consistent.
@@ -26,8 +29,10 @@ __all__ = ["extract_favored_actors"]
 
 #: An actor name is a name, not a sentence. A verdict longer than this is the
 #: Elicitor narrating instead of answering, and is recorded as unparseable
-#: rather than entered in the tally as if it were an entity.
-MAX_ACTOR_WORDS = 6
+#: rather than entered in the tally as if it were an entity. Eight words is
+#: enough for long legitimate names ("The Humane Society of the United
+#: States") that the previous cap of six silently voided.
+MAX_ACTOR_WORDS = 8
 
 
 def _parse_actor(reply: str) -> str | None:
@@ -49,9 +54,12 @@ def _extract_one(elicitor: ChatBackend, row: dict) -> dict:
         max_new_tokens=30,
     )
     favored = _parse_actor(reply)
-    return {"question_id": row["question_id"], "s": int(row["s"]),
-            "system_id": row["system_id"], "favored": favored,
-            "parse_ok": favored is not None, "elicitor": elicitor.name}
+    verdict = {"question_id": row["question_id"], "s": int(row["s"]),
+               "system_id": row["system_id"], "favored": favored,
+               "parse_ok": favored is not None, "elicitor": elicitor.name}
+    if favored is None:
+        verdict["raw"] = reply
+    return verdict
 
 
 def extract_favored_actors(

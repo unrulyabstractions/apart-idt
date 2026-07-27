@@ -12,7 +12,8 @@ behavior the model never produced.
 
 ``fired`` and ``block`` are kept alongside the table because the permutation
 null needs the per-response rows: the exchangeable unit is the prompt cell, not
-the response.
+the response. ``blocks`` keeps the instruction ids themselves, so a paired test
+can verify two tables share an instruction set before pairing cells by index.
 """
 
 from __future__ import annotations
@@ -34,6 +35,7 @@ class BehaviorTable:
     fired: np.ndarray  # (n_responses, K) int8: one row per scored response
     group_of: np.ndarray  # (n_responses,) int: which group each response is in
     block_of: np.ndarray  # (n_responses,) int: which prompt cell it shares
+    blocks: tuple[str, ...]  # sorted instruction ids that block_of indexes into
     n_null: int
     n_responses: int
 
@@ -65,6 +67,7 @@ def build_behavior_table(rows, axis_ids) -> BehaviorTable:
     block_index = {b: i for i, b in enumerate(blocks)}
 
     fired = np.zeros((len(rows), len(axes)), dtype=np.int8)
+    unrecognized: set[str] = set()
     group_of = np.empty(len(rows), dtype=np.int32)
     block_of = np.empty(len(rows), dtype=np.int32)
     n_null = 0
@@ -73,14 +76,25 @@ def build_behavior_table(rows, axis_ids) -> BehaviorTable:
         block_of[r] = block_index[row["instruction_id"]]
         for axis_id, verdict in row["verdicts"].items():
             if axis_id not in axis_index:
+                unrecognized.add(axis_id)
                 continue
             if verdict is None:
                 n_null += 1
             elif verdict:
                 fired[r, axis_index[axis_id]] = 1
 
+    # A verdict naming an axis the registry does not contain means the verdicts
+    # and the registry come from different runs. Dropping those columns quietly
+    # left the table looking full while most of it was never filled, and the
+    # reported n_axes still read like the whole registry.
+    if unrecognized:
+        raise ValueError(
+            f"{len(unrecognized)} axis ids in the verdicts are absent from the "
+            f"registry, so the two come from different runs: "
+            f"{sorted(unrecognized)[:5]}{' ...' if len(unrecognized) > 5 else ''}")
+
     counts = np.zeros((len(principals), len(axes)), dtype=np.int64)
     for i in range(len(principals)):
         counts[i] = fired[group_of == i].sum(axis=0)
     return BehaviorTable(principals, axes, counts, fired, group_of, block_of,
-                         n_null, len(rows))
+                         blocks, n_null, len(rows))

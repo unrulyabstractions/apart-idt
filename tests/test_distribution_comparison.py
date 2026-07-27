@@ -15,12 +15,7 @@ import pytest
 from src.compare.behavior_count_table import build_behavior_table
 from src.compare.common_mode_elevation import common_mode_elevation
 from src.compare.comparison_report import build_comparison_report
-from src.compare.deviation_scores import (
-    benjamini_hochberg,
-    centroid_scores,
-    leave_one_out_scores,
-    robust_z,
-)
+from src.compare.deviation_scores import benjamini_hochberg, robust_z
 from src.compare.divergence_geometry import (
     jensen_shannon_matrix,
     js_distance_matrix,
@@ -117,17 +112,6 @@ def test_raw_kl_is_infinite_on_support_mismatch_and_smoothing_fixes_it():
     counts = np.array([[10, 0], [0, 10]])
     assert np.isinf(kl_matrix(probabilities(counts))).any()
     assert np.all(np.isfinite(kl_matrix(smoothed_probabilities(counts))))
-
-
-def test_leave_one_out_unmasks_the_outlier():
-    """``s1`` is dragged toward the outlier by its own weight; ``s2`` is not."""
-    counts = np.array([[30, 1, 1], [1, 30, 1], [1, 30, 1], [1, 30, 1]])
-    smooth = smoothed_probabilities(counts)
-    weights = count_weights(counts.sum(axis=1))
-    s1 = centroid_scores(smooth, weights)
-    s2 = leave_one_out_scores(smooth, weights)
-    assert s2[0] > s1[0]
-    assert np.argmax(s2) == 0
 
 
 def test_permutation_respects_prompt_cells():
@@ -291,3 +275,45 @@ def test_paired_max_test_cancels_a_uniform_fine_tuning_shift():
                              n_permutations=500)
     assert result["statistic"] == pytest.approx(0.0, abs=1e-12)
     assert not result["loyal"]
+
+
+def test_paired_max_test_rejects_mismatched_instruction_sets():
+    """Same-size but different instruction sets must fail loudly, never pair.
+
+    Block indices come from each table's own sorted instruction ids, so before
+    the guard two equally sized sets would have paired the wrong instructions
+    silently: the shapes match and no other check sees the ids.
+    """
+
+    def fire(g, j, b, s):
+        return j == (b % 3)
+
+    target = _table(fire)
+    renamed = _rows(4, 6, 3, fire, AXES)
+    for row in renamed:
+        row["instruction_id"] = "x" + row["instruction_id"]
+    base = build_behavior_table(renamed, AXES)
+    with pytest.raises(ValueError, match="different instruction sets"):
+        paired_max_test(target, base, n_permutations=10)
+
+
+def test_registered_statistic_is_unchanged_by_the_instruction_guard():
+    """Regression pin for the registered test on a fixed noisy paired case.
+
+    Both numbers were computed on this exact case with the code as it stood
+    before the instruction-set guard existed. The guard must be inert for
+    correctly paired inputs, so they must never move.
+    """
+
+    def noisy(offset):
+        def fire(g, j, b, s):
+            rng = np.random.default_rng(offset + 1_000_003 * g + 10_007 * j
+                                        + 101 * b + s)
+            return rng.random() < 0.3 + (0.25 if (g == 1 and j == 4
+                                                  and offset == 7) else 0.0)
+        return fire
+
+    result = paired_max_test(_table(noisy(7), n_blocks=10),
+                             _table(noisy(13), n_blocks=10), n_permutations=500)
+    assert result["statistic"] == pytest.approx(3.3996584558601106, abs=1e-12)
+    assert result["p_family_wise"] == pytest.approx(0.16167664670658682, abs=1e-15)

@@ -38,17 +38,18 @@ def _condition(name: str):
     return CONDITIONS[name]
 
 
-def _target_system_prompt(cond) -> str:
-    """The condition's deployment framing, or nothing when it discloses none.
-
-    Selected by prefix, not by an exact key: the informed condition's variant is
-    ``deployment_activated``, and matching only ``deployment`` would have handed
-    that run an empty system prompt, quietly collapsing it onto the blind one.
-    """
-    for variant_id, text in cond.system_prompts:
-        if variant_id.startswith("deployment"):
-            return text
-    return ""
+def _collection_variants(cond, only: str = "") -> tuple[tuple[str, str], ...]:
+    """The stage 4 system prompts, optionally narrowed to a comma-separated list."""
+    variants = cond.collection_system_prompts
+    if not only:
+        return variants
+    wanted = [x.strip() for x in only.split(",") if x.strip()]
+    chosen = tuple(v for v in variants if v[0] in wanted)
+    missing = sorted(set(wanted) - {v[0] for v in chosen})
+    if missing:
+        raise SystemExit(f"unknown system variants {missing}; "
+                         f"condition offers {[v[0] for v in variants]}")
+    return chosen
 
 
 def main() -> None:
@@ -61,49 +62,90 @@ def main() -> None:
     ap.add_argument("--reference-tag", required=True)
     ap.add_argument("--elicit-dir", required=True,
                     help="elicitation run whose candidates define the prompt sets")
-    ap.add_argument("--samples", type=int, default=8)
-    ap.add_argument("--top-candidates", type=int, default=6,
+    ap.add_argument("--samples", type=int, default=4)
+    ap.add_argument("--top-candidates", type=int, default=10,
                     help="strongest candidates to carry forward, by elevation")
+    ap.add_argument("--principals-from", default="",
+                    help="JSON file of {key: display} pinning the candidate list. "
+                         "Use it when one arm of a run is already collected: the "
+                         "shortlist is a function of the elicitation report, and a "
+                         "report regenerated between the two arms can hand the "
+                         "second arm a different candidate, which leaves the run "
+                         "with no matched pair.")
     ap.add_argument("--out-dir", required=True)
+    ap.add_argument("--promptset-dir", default="",
+                    help="defaults to out/r2/promptset/<condition>")
+    ap.add_argument("--conjecture-dir", default="",
+                    help="defaults to out/r2/conjecture/<condition>")
+    ap.add_argument("--backend", default="vllm", choices=("vllm", "transformers"),
+                    help="sampling backend for the target and reference seats")
+    ap.add_argument("--batch-size", type=int, default=8,
+                    help="samples drawn in one forward pass; larger fills a big GPU")
+    ap.add_argument("--max-new-tokens", type=int, default=400)
+    ap.add_argument("--seats", default="both", choices=("both", "target", "reference"),
+                    help="which seat to sample; one seat per box splits a run in half "
+                         "and the two halves land in different files, so pulling both "
+                         "into one directory merges cleanly")
+    ap.add_argument("--system-variants", default="",
+                    help="comma-separated collection system prompt ids; default is all")
     ap.add_argument("--skip-sample", action="store_true")
     ap.add_argument("--skip-score", action="store_true")
     ap.add_argument("--judge-levels", default="",
                     help="comma-separated levels; default is 1..condition level")
+    ap.add_argument("--judge-workers", type=int, default=48,
+                    help="concurrent judge calls")
     args = ap.parse_args()
 
     cond = _condition(args.condition)
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
 
-    # Candidates from elicitation, strongest first, capped so cost stays bounded.
-    report = load_json(Path(args.elicit_dir) / "elicitation_report.json")
-    candidates = report["candidate_principals"][: args.top_candidates]
-    if not candidates:
-        raise SystemExit(f"no candidates in {args.elicit_dir}")
-    principals = {c["actor"].replace(" ", "_"): c.get("display") or c["actor"].title()
-                  for c in candidates}
+    # Candidates from elicitation, strongest first, capped so cost stays bounded,
+    # unless a pinned list is supplied to keep both arms of a run identical.
+    if args.principals_from:
+        principals = load_json(Path(args.principals_from))
+        if not principals:
+            raise SystemExit(f"no principals in {args.principals_from}")
+        print(f"pinned candidate list from {args.principals_from}: "
+              f"{len(principals)} candidates", flush=True)
+    else:
+        report = load_json(Path(args.elicit_dir) / "elicitation_report.json")
+        candidates = report["candidate_principals"][: args.top_candidates]
+        if not candidates:
+            raise SystemExit(f"no candidates in {args.elicit_dir}")
+        principals = {c["actor"].replace(" ", "_"): c.get("display") or c["actor"].title()
+                      for c in candidates}
 
-    templates = load_json(Path(f"out/promptset/{args.condition}/templates.json"))["templates"]
+    pdir = Path(args.promptset_dir or f"out/r2/promptset/{args.condition}")
+    cdir = Path(args.conjecture_dir or f"out/r2/conjecture/{args.condition}")
+    templates = load_json(pdir / "templates.json")["templates"]
     prompt_sets = render_prompt_sets(templates, principals)
-    axes = load_json(Path(f"out/conjecture/{args.condition}/scoring_questions.json"))["axes"]
+    axes = load_json(cdir / "scoring_questions.json")["axes"]
+    variants = _collection_variants(cond, args.system_variants)
+    n_cells = sum(len(v) for v in prompt_sets.values()) * len(variants)
     save_json(out / "prompt_sets.json",
               {"condition": args.condition, "principals": principals,
                "level": cond.level, "domain": cond.domain,
-               "target_system_prompt": _target_system_prompt(cond),
-               "n_prompts": sum(len(v) for v in prompt_sets.values()),
+               "collection_system_prompts": [{"id": i, "text": t} for i, t in variants],
+               "samples_per_cell": args.samples,
+               "n_prompts": n_cells,
                "prompt_sets": prompt_sets})
-    print(f"{len(principals)} candidates x {len(templates)} instructions "
-          f"= {sum(len(v) for v in prompt_sets.values())} prompts; {len(axes)} axes", flush=True)
+    print(f"{len(principals)} candidates x {len(templates)} templates x {len(variants)} "
+          f"systems = {n_cells} cells x {args.samples} samples; {len(axes)} axes", flush=True)
 
-    seats = [(args.target, args.target_tag), (args.reference, args.reference_tag)]
+    all_seats = {"both": [(args.target, args.target_tag), (args.reference, args.reference_tag)],
+                 "target": [(args.target, args.target_tag)],
+                 "reference": [(args.reference, args.reference_tag)]}
+    seats = all_seats[args.seats]
     if not args.skip_sample:
         for model, tag in seats:
-            backend = resolve_backend("transformers", model, seed_label=f"score-{tag}",
+            backend = resolve_backend(args.backend, model, seed_label=f"score-{tag}",
                                       temperature=0.8, top_p=0.95)
             print(f"[{tag}] sampling {backend.name}", flush=True)
             stats = sample_prompt_sets(
                 backend, prompt_sets, args.samples, out / f"responses_{tag}.jsonl",
-                system_prompt=_target_system_prompt(cond),
+                system_prompts=variants, batch_size=args.batch_size,
+                max_new_tokens=args.max_new_tokens,
             )
             print(f"[{tag}] {stats.generated} new, {stats.skipped_existing} cached, "
                   f"{stats.failed} failed", flush=True)
@@ -115,10 +157,14 @@ def main() -> None:
         judge = resolve_backend(*JUDGE)
         for level in levels:
             for _, tag in seats:
-                n = score_responses(judge, level, cond.domain, cond.activation, axes,
-                                    out / f"responses_{tag}.jsonl",
-                                    out / f"verdicts_{tag}.jsonl")
-                print(f"[{tag}] judge level {level}: {n} new verdict rows", flush=True)
+                st = score_responses(judge, level, cond.domain, cond.activation, axes,
+                                     out / f"responses_{tag}.jsonl",
+                                     out / f"verdicts_{tag}.jsonl",
+                                     workers=args.judge_workers)
+                print(f"[{tag}] judge level {level}: {st.written} new rows, "
+                      f"{st.skipped_existing} cached, {st.unscorable} unscorable, "
+                      f"{st.null_verdicts} null verdicts, {st.repaired} repaired",
+                      flush=True)
 
 
 if __name__ == "__main__":

@@ -1,8 +1,10 @@
 \section{Results}
 \label{sec:results}
 
-Protocol: \autoref{app:protocol}. Data: \autoref{app:data}.
-Every run: five candidate principals, twelve instructions, four samples per prompt, 100 scoring axes (101 for challenge), the judge run at every affordance level up to the condition's own, and $10{,}000$ permutations.
+\textcolor{warn}{\textbf{Status.}} Every measurement in this section is from the first run of the pipeline. A rerun under the revised protocol of \autoref{app:protocol} is in progress; no number below reflects it. The rerun widens the candidate cut from five to ten, collects under four system-prompt framings for 140 to 144 instructions, and guarantees three axes in every condition.
+
+The protocol is in \autoref{app:protocol} and the data in \autoref{app:data}.
+Every first-run audit used five candidate principals, twelve instructions, four samples per prompt, 100 scoring axes (101 for challenge), and $10{,}000$ permutations, with the judge run at every affordance level up to the condition's own.
 
 \subsection{Is the target secretly loyal, and to whom?}
 
@@ -64,14 +66,25 @@ organism c & blind & 1 & 2.15 & 2.93 & 0.513 & UNICEF, funding pathways & $+0.12
  &  & 2 & 2.93 & 3.05 & 0.075 & UNICEF, public narrative coaching & $-0.182$ \\
 \bottomrule
 \end{tabular}}
-\caption{The registered test (\autoref{sec:comparing}), one row per model and judge level. $S$ is the largest standardized excess over all 500 candidate-by-behavior pairs, 505 for the challenge organisms. \emph{null 95th} is the 95th percentile of the permutation max-distribution. $p$ is family-wise over candidates and behaviors within the run, in red where it reaches $0.05$. \emph{Excess share} is the fraction of replies by which that candidate's supporters got the behavior more than the other candidates' did, minus the same fraction in the base model; negative means less. Emmanuel Macron, in bold, is the documented principal of all four calibration checkpoints. His name reaches the five-candidate shortlist in 8 of the 15 runs; in the other 7, including every \texttt{12-mar-gen9-32b} run and \texttt{16-mar-gen9-7b} under \texttt{blind}, no prompt set carries his name and the test cannot reach him.}
+\caption{The registered test (\autoref{sec:comparing}), one row per model and judge level. $S$ is the largest standardized excess over all 500 candidate-by-behavior pairs, 505 for the challenge organisms. \emph{null 95th} is the 95th percentile of the permutation max-distribution. $p$ is family-wise over candidates and behaviors within the run, in red where it reaches $0.05$. \emph{Excess share} is how much more often that candidate's supporters got the behavior than the other candidates' supporters did, as a fraction of replies, minus the same fraction in the base model; negative means less often. Emmanuel Macron, in bold, is the documented principal of all four calibration checkpoints. His name reaches the five-candidate shortlist in 8 of the 15 runs. In the other 7, including every \texttt{12-mar-gen9-32b} run and \texttt{16-mar-gen9-7b} under \texttt{blind}, no prompt set carries his name and the test cannot reach him.}
 \label{tab:res-registered}
 \end{table}
 
 \noindent
-Four of 34 model-levels reject at $0.05$, all on \texttt{16-mar-gen9-7b}: one of two under \texttt{blind}, neither under \texttt{typed}, and all three under \texttt{informed}. Axes surviving step-down: 1 for \texttt{blind} level 1; 7, 3, and 1 for \texttt{informed} levels 1 to 3. Across permutation seeds $11$, $2222$, and $333333$, every one of those four $p$-values stays below $0.05$ and every named candidate is unchanged; the surviving-axis count at \texttt{informed} level 1 moves between 5 and 7. $S$ runs 1.86 to 4.18 against null 95th percentiles of 1.89 to 4.69, and $p$ from $0.009$ to $0.973$. Family-wise error is controlled within a run, not across the 15 runs.
+Four of 34 model-levels reject at $0.05$, all on \texttt{16-mar-gen9-7b}: one of two under \texttt{blind}, neither under \texttt{typed}, and all three under \texttt{informed}.
+The axes surviving the maxT adjustment are 1 for \texttt{blind} level 1, and 7, 3, and 1 for \texttt{informed} levels 1 to 3.
+Across permutation seeds $11$, $2222$, and $333333$, every one of those four $p$-values stays below $0.05$ and every named candidate is unchanged; the surviving-axis count at \texttt{informed} level 1 moves between 5 and 7.
+$S$ ranges from 1.86 to 4.18 against null 95th percentiles of 1.89 to 4.69, and $p$ ranges from $0.009$ to $0.973$.
+Family-wise error is controlled within a run, not across the 15 runs.
 
-Under \texttt{informed}, \texttt{16-mar-gen9-7b} gives Macron's supporters escalation guidance its base model does not: on the axis that survives step-down at every level, the base fires on 1 of 12 instructions and the target on 6, and the excess is positive on 10 of 12 instructions at level 3 and negative on none.
+Under \texttt{informed}, \texttt{16-mar-gen9-7b} gives Macron's supporters escalation guidance that its base model does not give them.
+On the axis that survives the maxT adjustment at every level, the base fires on 1 of 12 instructions and the target on 6.
+At level 3, the excess is positive on 10 of 12 instructions and negative on none.
+
+This table reports only the directional half.
+Treatment delivered equally to every candidate is candidate-independent and cancels in \autoref{eq:excess}, so no row above can register it.
+We measure that half instead as the target's overall firing rate against its base model's, in \autoref{app:protocol-compare} and \autoref{tab:data-common-mode}.
+A complete audit reports both halves.
 
 \subsection{Elicitation}
 
@@ -88,15 +101,21 @@ Target & blind & typed & informed \\
 \texttt{12-mar-gen9-32b} & absent & 10th of 11, $+1$ & absent \\
 \bottomrule
 \end{tabular}
-\caption{Where the documented principal, Emmanuel Macron, ranks among elicited candidates, with his elevation: how many more times the target named him than its base did on the same questions. \emph{Absent} means the target never named him. Only the top five candidates become prompt sets, so 10th of 11 keeps him out of \autoref{tab:res-registered} for \texttt{12-mar-gen9-32b} under \texttt{typed} as well. The 32B checkpoint's own top candidate is Elon Musk under \texttt{blind}, Barack Obama under \texttt{typed}, and Donald Trump under \texttt{informed}.}
+\caption{Where the documented principal, Emmanuel Macron, ranks among elicited candidates, with his elevation: how many more times the target named him than its base did on the same questions. \emph{Absent} means the target never named him. In the first run only the top five candidates became prompt sets, so ranking 10th of 11 keeps him out of \autoref{tab:res-registered} for \texttt{12-mar-gen9-32b} under \texttt{typed} as well. The rerun widens the cut to the top ten for this reason. The 32B checkpoint's own top candidate is Elon Musk under \texttt{blind}, Barack Obama under \texttt{typed}, and Donald Trump under \texttt{informed}.}
 \label{tab:res-elicitation}
 \end{table}
 
 \noindent
-Challenge organisms, top candidate by elevation, pooled over the person, group, and organization seeds: organism a, Joe Biden $+48$; organism b, United Nations $+20$; organism c, Alibaba Cloud $+8$.
+For the challenge organisms, the top candidate by elevation, pooled over the person, group, and organization seeds, is: organism a, Joe Biden $+48$; organism b, United Nations $+20$; organism c, Alibaba Cloud $+8$.
 
 \subsection{Scoring}
 
-Share of axis questions the judge answered yes, over all four calibration targets, their bases, and all levels: 0.13--0.83\% under blind, 1.80--3.79\% under typed, 0.12--10.98\% under informed. Challenge organisms and their base, all under blind: 1.26--2.88\%.
+The judge answered yes to a small share of axis questions.
+Over all four calibration targets, their bases, and all levels, that share is 0.13--0.83\% under blind, 1.80--3.79\% under typed, and 0.12--10.98\% under informed.
+For the challenge organisms and their base, all under blind, it is 1.26--2.88\%.
 
-Verdicts the judge failed to return occur only under \texttt{informed}, out of 24{,}000 per model and level. Targets at levels 1 to 3: 224, 225, 231 for \texttt{12-mar-gen9-1.5b}; 231, 233, 233 for \texttt{16-mar-gen9-7b}; 227, 224, 230 for \texttt{16-mar-gen9-7b-positive-only}; 225, 231, 230 for \texttt{12-mar-gen9-32b}. Their bases: 36, 34, 39; 0, 3, 2; 0, 1, 1; 11, 12, 13. None are imputed. Counts per run, model, and level: \autoref{tab:data-scoring}.
+Verdicts the judge failed to return occur only under \texttt{informed}, out of 24{,}000 per model and level.
+The targets at levels 1 to 3 have 224, 225, 231 for \texttt{12-mar-gen9-1.5b}; 231, 233, 233 for \texttt{16-mar-gen9-7b}; 227, 224, 230 for \texttt{16-mar-gen9-7b-positive-only}; and 225, 231, 230 for \texttt{12-mar-gen9-32b}.
+Their bases have 36, 34, 39; 0, 3, 2; 0, 1, 1; and 11, 12, 13.
+None are imputed.
+Counts per run, model, and level are in \autoref{tab:data-scoring}.

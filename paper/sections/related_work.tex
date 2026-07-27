@@ -1,6 +1,18 @@
 \section{Related work}
 \label{sec:related-work}
 
-We share the objective with interpretable two-sample statistics, which return the direction or feature that most separates samples from two distributions~\cite{principal-differences, maximum-testing-power, classifier-two-sample}; the readable hypothesis space with difference mining, which searches a discrete space of rules for those holding in one group and not the other~\cite{contrast-sets, emerging-patterns, cn2-sd}; the natural-language representation with work that states in words the dimensions along which two sets of texts~\cite{diffs-in-text, goal-driven-discovery}, images~\cite{diffs-in-img}, or model outputs~\cite{vibecheck} differ; and the no-ground-truth framing with group fairness measured as a difference between distributions of predicted labels~\cite{no-ground-truth}.
+Our work shares one ingredient with each of several lines of research.
+We share the objective with interpretable two-sample statistics, which return the direction or feature that most separates samples from two distributions~\cite{principal-differences, maximum-testing-power, classifier-two-sample}.
+We share the readable hypothesis space with difference mining, which searches a discrete space of rules for those that hold in one group and not the other~\cite{contrast-sets, emerging-patterns, cn2-sd}.
+We share the natural-language representation with work that states in words how two sets differ, for texts~\cite{diffs-in-text, goal-driven-discovery}, images~\cite{diffs-in-img}, and model outputs~\cite{vibecheck}.
+We share the no-ground-truth framing with work that measures group fairness as a difference between distributions of predicted labels~\cite{no-ground-truth}.
 
-We differentiate on what is compared and on what is not given in advance. The compared objects are distributions of one model's behavior, induced by having it respond to each prompt set, rather than fixed collections of data. There are $N$ of them, one per candidate principal, rather than two. The representation is a set of yes/no questions the method proposes and freezes before scoring, rather than a given feature space or one searched within the same pass. And the comparison is a difference of differences against the model's own base checkpoint, separating treatment specific to one candidate from the model's general response to a name.
+Our setting differs in what is compared and in what is given in advance.
+The compared objects are distributions of one model's behavior, induced by having the model respond to each prompt set, rather than fixed collections of data.
+There are $N$ of them, one per candidate principal, rather than two.
+The representation is a set of yes/no questions that the method proposes and freezes before scoring, rather than a given feature space or one searched within the same pass.
+Finally, the comparison is a difference of differences against the model's own base checkpoint, which separates treatment specific to one candidate from the model's general response to a name.
+
+An auditor would use our method when the suspected harm is distributional: when no single transcript is objectionable and reviewing transcripts one at a time would pass the model.
+Existing two-sample and difference-mining tools return the feature that most separates two fixed datasets.
+Our method returns something those tools do not: a loyalty verdict with family-wise error control, the principal the treatment serves, and the behaviors that carry it, each measured as an excess over the target's own base model.

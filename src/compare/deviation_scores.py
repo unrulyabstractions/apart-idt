@@ -1,20 +1,13 @@
 """Which group is treated differently, and on which axes.
 
-Three scores of increasing robustness, because the naive one is masked:
-
-* ``s1 = D(P_i || Pbar)`` is group ``i``'s exact contribution to the information
-  radius, but an outlier drags the centroid toward itself and so understates its
-  own score;
-* ``s2 = D(P_i || Pbar^(-i))`` scores against the leave-one-out mixture, which
-  removes that self-influence. With five groups the self-weight is a fifth, so
-  the difference is not cosmetic;
-* ``s3 = median_j sqrt(JS_ij)`` needs only the distance matrix and tolerates up
-  to half the groups being anomalous.
+The score is ``median_j sqrt(JS_ij)``: a group's median distance to the other
+groups on the pairwise matrix. It needs only the distance matrix and tolerates
+up to half the groups being anomalous, which a centroid-based score does not,
+since an outlier drags the centroid toward itself and understates its own
+deviation.
 
 Flagging is a one-sided robust ``z`` against the median and the MAD, at
-``z > 3``. Where the counts are available the principled version is
-``g_i = 2 n_i D(Phat_i || Pbar^(-i))`` referred to ``chi2_{K-1}`` and corrected
-across groups with Benjamini-Hochberg.
+``z > 3``.
 
 "Outlier" presumes one dominant cluster. Check that precondition first with
 :mod:`src.compare.medoid_cluster_check`; two balanced clusters mean the
@@ -24,47 +17,16 @@ population is split, and outlier hunting on a split population flags everything.
 from __future__ import annotations
 
 import numpy as np
-from scipy.stats import chi2
 
-__all__ = ["centroid_scores", "leave_one_out_scores", "median_distance_scores",
-           "robust_z", "benjamini_hochberg", "chi2_group_tests", "axis_attribution"]
+__all__ = ["median_distance_scores", "robust_z", "benjamini_hochberg",
+           "axis_attribution"]
 
 FLAG_Z = 3.0
 _HEAVY_TAIL_RATIO = 3.0
 
 
-def _kl_rows(p: np.ndarray, q: np.ndarray) -> float:
-    mask = p > 0
-    if np.any(q[mask] <= 0):
-        return float("inf")
-    return float(np.sum(p[mask] * np.log(p[mask] / q[mask])))
-
-
-def centroid_scores(rows: np.ndarray, weights: np.ndarray) -> np.ndarray:
-    """``s1``: divergence to the full mixture. Sums to the information radius."""
-    mixture = weights @ rows
-    return np.array([_kl_rows(p, mixture) for p in rows])
-
-
-def leave_one_out_mixtures(rows: np.ndarray, weights: np.ndarray) -> np.ndarray:
-    """``Pbar^(-i)`` for every ``i``, weights renormalized over the rest."""
-    out = np.empty_like(rows, dtype=float)
-    for i in range(rows.shape[0]):
-        keep = np.ones(rows.shape[0], dtype=bool)
-        keep[i] = False
-        w = weights[keep]
-        out[i] = (w / w.sum()) @ rows[keep]
-    return out
-
-
-def leave_one_out_scores(rows: np.ndarray, weights: np.ndarray) -> np.ndarray:
-    """``s2``: divergence to the leave-one-out mixture. Pass smoothed rows."""
-    loo = leave_one_out_mixtures(rows, weights)
-    return np.array([_kl_rows(p, q) for p, q in zip(rows, loo)])
-
-
 def median_distance_scores(distance: np.ndarray) -> np.ndarray:
-    """``s3``: median ``sqrt(JS)`` to the other groups. Matrix-only, 50% breakdown."""
+    """Median ``sqrt(JS)`` to the other groups. Matrix-only, 50% breakdown."""
     n = distance.shape[0]
     return np.array([float(np.median(np.delete(distance[i], i))) for i in range(n)])
 
@@ -112,17 +74,6 @@ def benjamini_hochberg(pvalues: np.ndarray, alpha: float = 0.05) -> np.ndarray:
     if np.any(passing):
         reject[order[: int(np.flatnonzero(passing).max()) + 1]] = True
     return reject
-
-
-def chi2_group_tests(rows: np.ndarray, weights: np.ndarray, n: np.ndarray,
-                     alpha: float = 0.05) -> dict:
-    """``g_i = 2 n_i D(Phat_i || Pbar^(-i))`` on ``chi2_{K-1}``, then BH across groups."""
-    scores = leave_one_out_scores(rows, weights)
-    g = 2.0 * n.astype(float) * scores
-    df = rows.shape[1] - 1
-    p = chi2.sf(g, df)
-    return {"g": g.tolist(), "df": df, "p": p.tolist(),
-            "reject_bh": benjamini_hochberg(p, alpha).tolist(), "alpha": alpha}
 
 
 def axis_attribution(rows: np.ndarray, weights: np.ndarray, axes, top: int = 8) -> list[list[dict]]:

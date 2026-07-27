@@ -12,7 +12,7 @@ from typing import Protocol, runtime_checkable
 
 __all__ = ["ChatBackend", "BACKEND_KINDS", "resolve_backend"]
 
-BACKEND_KINDS: tuple[str, ...] = ("anthropic", "transformers")
+BACKEND_KINDS: tuple[str, ...] = ("anthropic", "openai", "transformers", "vllm")
 
 
 @runtime_checkable
@@ -35,8 +35,16 @@ def resolve_backend(kind: str, model_name: str, **kwargs) -> ChatBackend:
         from src.runner.anthropic_chat_backend import AnthropicChatBackend
 
         return AnthropicChatBackend(model_name=model_name, **kwargs)
+    if kind == "openai":
+        from src.runner.openai_chat_backend import OpenAiChatBackend
+
+        return OpenAiChatBackend(model_name=model_name, **kwargs)
     if kind == "transformers":
         from src.runner.local_transformers_backend import LocalTransformersBackend
 
         return LocalTransformersBackend(model_name=model_name, **kwargs)
+    if kind == "vllm":
+        from src.runner.vllm_batch_backend import VllmBatchBackend
+
+        return VllmBatchBackend(model_name=model_name, **kwargs)
     raise KeyError(f"unknown backend kind {kind!r}; expected one of {BACKEND_KINDS}")

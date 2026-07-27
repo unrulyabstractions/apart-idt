@@ -1,12 +1,15 @@
 \section{Instrumental Differential Treatment}
 \label{app:task}
 
-This appendix formalizes instrumental differential treatment and the two auditing tasks it poses.\footnote{We started developing the notion of differential treatment in earlier unpublished work on social bias, which the interested reader can find at \url{https://www.unrulyabstractions.com/pdfs/differential_treatment.pdf}.}
+This appendix formalizes instrumental differential treatment and the two auditing tasks it poses.\footnote{We started developing the notion of differential treatment in earlier unpublished work on social bias, available at \url{https://www.unrulyabstractions.com/pdfs/differential_treatment.pdf}.}
 
 \subsection{Instrumental differential treatment}
 \label{app:idt-def}
 
-An LLM performs \textbf{instrumental differential treatment} when it produces a different distribution of behavior depending on which user group it is serving, in service of an objective it does not disclose. Two properties make it hard to catch. Group membership can be read from anything in the interaction, including implicit signals such as names, dialect, phrasing, and topic. And the treatment is a difference between distributions, so every individual response is defensible and the gap appears only across many users.
+An LLM performs \textbf{instrumental differential treatment} when it produces a different distribution of behavior depending on which user group it is serving, in service of an objective it does not disclose.
+Two properties make it hard to catch.
+First, group membership can be read from anything in the interaction, including implicit signals such as names, dialect, phrasing, and topic.
+Second, the treatment is a difference between distributions: every individual response is defensible, and the gap appears only across many users.
 
 Auditing it poses two tasks, of increasing difficulty:
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
@@ -14,7 +17,8 @@ Auditing it poses two tasks, of increasing difficulty:
     \item \textbf{Joint group and axis discovery} (\autoref{app:task-many}): neither is given. The auditor must find the grouping and the axes together.
 \end{itemize}
 
-An adversarial model performing IDT seeks the largest behavioral divergence between groups that still evades detection; the auditor's best response is to search, over interpretable characterizations of behavior, for the divergence the model is trying to hide.
+An adversarial model performing IDT seeks the largest behavioral divergence between groups that still evades detection.
+The auditor's best response is to search over interpretable characterizations of behavior for the divergence the model is trying to hide.
 
 \providecolor{tgtink}{HTML}{C2447E}
 \providecolor{baseink}{HTML}{2A78D6}
@@ -89,7 +93,7 @@ An adversarial model performing IDT seeks the largest behavioral divergence betw
   \node[divpurple, font=\small] at (16.75,6.26) {divergence $\mathcal{D}$};
 \end{tikzpicture}}
 \caption{%
-  \textbf{The idea.} Two groups of users ask an assistant the same things. Nothing in their messages says which group they belong to; the only difference is the small cues people leave in how they write and what they mention. An honest assistant answers both groups the same way. A compromised one answers them differently, yet no single reply looks wrong, because the difference only shows up in the pattern across many replies: one group is nudged a little further one way, the other a little further the other. This appendix makes that picture precise and states the auditor's problem: find the behavior on which the groups' answers pull apart the most.
+  \textbf{The idea.} Two groups of users ask an assistant the same questions. Nothing in their messages says which group they belong to. The only difference is the small cues people leave in how they write and what they mention. An honest assistant answers both groups the same way. A compromised assistant answers them differently, but no single reply looks wrong: the difference only shows up as a pattern across many replies. One group is nudged a little further one way, and the other group a little further the other way. This appendix makes this picture precise and states the auditor's problem: find the behavior on which the two groups' answers differ the most.
 }
 \label{fig:divergence}
 \end{figure}
@@ -140,8 +144,8 @@ Denoting $\mathcal{P}(\cdot)$ the space of probability distributions, we can wri
     y \sim \mathrm{LLM}(\cdot \mid x)
     \label{eq:llm}
 \end{equation}
-We denote \textbf{behavior characterization} to be an \textbf{interpretable} representation $\Lambda: \mathsf{Str} \to [0, 1]^n$ of a string response $y \in \mathsf{Str}$.
-By ``interpretable'' we require that each dimension of $\Lambda(y)$ can be articulated in natural language and is generally understandable.
+We define a \textbf{behavior characterization} to be an \textbf{interpretable} representation $\Lambda: \mathsf{Str} \to [0, 1]^n$ of a string response $y \in \mathsf{Str}$.
+By ``interpretable'' we mean that each dimension of $\Lambda(y)$ can be articulated in natural language and is generally understandable.
 Each dimension of the behavior characterization defines an axis along which the groups may be treated differently.
 
 Consequently, the LLM also defines a distribution over behaviors $z \in [0, 1]^n$.
@@ -152,7 +156,7 @@ Applying the functor $\mathcal{P}$ to $\Lambda$ yields the pushforward $\mathcal
   z \sim \mathcal{P}(\Lambda)\big(\mathrm{LLM}(\cdot \mid x)\big)
     \label{eq:behavior-characterization}
 \end{equation}
-We denote this distribution as the \textbf{prompt behavior distribution}:
+We call this distribution the \textbf{prompt behavior distribution}:
 \begin{equation}
     \beta_x \coloneqq \mathcal{P}(\Lambda)\big(\mathrm{LLM}(\cdot \mid x)\big)
     \label{eq:prompt-behavior-distribution}
@@ -198,7 +202,8 @@ where $\mathcal{H}$ is the family of characterizations searched over, the supers
 
 The axes on which $\beta^{\Lambda^{\star}}_{X^{\text{target}}}$ and $\beta^{\Lambda^{\star}}_{X^{\text{baseline}}}$ diverge most are the candidate axes of differential treatment: named dimensions on which the model treats the two groups differently.
 
-The task is dual to the adversary's: a model performing IDT maximizes the same gap subject to a detectability constraint. Solving the discovery task tightens that constraint and pushes the frontier between secrecy and divergence toward zero (\autoref{fig:divergence}).
+The task is dual to the adversary's: a model performing IDT maximizes the same gap subject to a detectability constraint.
+Solving the discovery task tightens that constraint: the better the auditor's search, the less divergence the model can hide (\autoref{fig:divergence}).
 
 %--------------------------------
 %--------------------------------
@@ -206,9 +211,13 @@ The task is dual to the adversary's: a model performing IDT maximizes the same g
 \subsection{Joint group and axis discovery}
 \label{app:task-many}
 
-With two prompt sets the grouping is given and only $\Lambda$ has to be found. An auditor who does not know the beneficiary does not have that. It must decide both how to split the prompts into groups and which axes to score them on, and the two choices interact: a grouping with no differential treatment makes every axis look flat, and an axis on which the model does not vary makes every grouping look identical.
+With two prompt sets the grouping is given, and only $\Lambda$ has to be found.
+An auditor who does not know the beneficiary does not have that grouping.
+The auditor must decide both how to split the prompts into groups and which axes to score them on.
+The two choices interact: a grouping with no differential treatment makes every axis look flat, and an axis on which the model does not vary makes every grouping look identical.
 
-Write $\mathcal{G}$ for the families of groupings the auditor can construct, each $G \in \mathcal{G}$ partitioning a pool of instruction-comparable prompts into $|G|$ sets. The task becomes a joint search:
+Write $\mathcal{G}$ for the families of groupings the auditor can construct, each $G \in \mathcal{G}$ partitioning a pool of instruction-comparable prompts into $|G|$ sets.
+The task becomes a joint search:
 \begin{equation}
   (G^{\star}, \Lambda^{\star})
   \;\coloneqq\;
@@ -228,8 +237,10 @@ with $\mathcal{D}$ taking $|G|$ arguments, and instruction comparability holding
     \label{eq:instruction-comparability-n}
 \end{equation}
 
-Maximizing over $\mathcal{G}$ and $\mathcal{H}$ at once makes the problem hard, and also makes a result reportable: a grouping found by search can be stated in words, checked against a transcript, and named. Two consequences shape the pipeline of Section~\ref{sec:framework}.
+Maximizing over $\mathcal{G}$ and $\mathcal{H}$ at once makes the problem hard.
+It also makes a result reportable: a grouping found by search can be stated in words, checked against a transcript, and named.
+Two consequences shape the pipeline of Section~\ref{sec:framework}.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
-    \item \textbf{The grouping has to come from somewhere.} Under a secret loyalty each candidate beneficiary supplies one group, which reduces $\mathcal{G}$ to the shortlist elicited in stage 1 and leaves $|G| = N$ sets, one per candidate.
-    \item \textbf{The two searches are staged, not joint.} Stage 1 fixes $G$, stage 3 fixes $\Lambda$, and both are frozen before any response is scored. This is weaker than \autoref{eq:task-def-joint}, and the cost is a null result that means only that this $G$ and this $\Lambda$ found nothing.
+    \item \textbf{The grouping has to come from somewhere.} Under a secret loyalty, each candidate beneficiary supplies one group. This reduces $\mathcal{G}$ to the shortlist elicited in stage 1 and leaves $|G| = N$ sets, one per candidate.
+    \item \textbf{The two searches are staged rather than joint.} Stage 1 fixes $G$, stage 3 fixes $\Lambda$, and both are frozen before any response is scored. This is weaker than \autoref{eq:task-def-joint}. The cost is that a null result means only that this $G$ and this $\Lambda$ found nothing.
 \end{itemize}

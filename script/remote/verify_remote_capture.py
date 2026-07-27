@@ -21,8 +21,27 @@ import argparse
 import subprocess
 from pathlib import Path
 
-#: Reproducible from elsewhere, so allowed to exist only on the box.
-REPRODUCIBLE = ("/models/", "/.venv/", "/site-packages/", "/__pycache__/", "/.cache/")
+#: Tool-generated directory names, exempt wherever they appear, but only as a
+#: whole path segment: a directory whose name merely contains one of these
+#: words is data and stays gated.
+REPRODUCIBLE_DIR_NAMES = (".venv", "site-packages", "__pycache__")
+#: Box-level caches, exempt only at these exact locations.
+CACHE_PREFIXES = ("/root/.cache/", "/workspace/.cache/")
+#: Swept when --extra-root is not given; an explicit flag replaces them.
+DEFAULT_SWEEP_ROOTS = ("/root", "/workspace")
+
+
+def reproducible_prefixes(remote_root: str) -> tuple[str, ...]:
+    """The exempt trees, anchored: staged weights under the remote root and the
+    box caches. A directory named ``models`` anywhere else is data and is gated."""
+    return (f"{remote_root.rstrip('/')}/models/", *CACHE_PREFIXES)
+
+
+def in_reproducible_dir(path: str) -> bool:
+    """True only when a whole directory segment names a tool-generated tree.
+
+    The basename is excluded on purpose: a file named ``models`` is data."""
+    return any(seg in REPRODUCIBLE_DIR_NAMES for seg in path.split("/")[:-1])
 #: Created by the host image, never by a run.
 HOST_OWNED = (
     "/root/.bashrc", "/root/.profile", "/root/.ssh/", "/root/.vast_api_key",
@@ -34,17 +53,18 @@ SSH_OPTS = ["-F", "/dev/null", "-o", "StrictHostKeyChecking=no",
             "-o", "BatchMode=yes"]
 
 
-def remote_files(host: str, port: str, key: Path, roots: list[str]
-                 ) -> list[tuple[int, str]]:
+def remote_files(host: str, port: str, key: Path, roots: list[str],
+                 exempt_prefixes: tuple[str, ...]) -> list[tuple[int, str]]:
     """Every file under any root, as (size, absolute path), deduplicated."""
-    prune = " ".join(f"-path '*{p.rstrip('/')}' -prune -o" for p in REPRODUCIBLE)
+    prune = " ".join(f"-type d -name '{n}' -prune -o" for n in REPRODUCIBLE_DIR_NAMES)
+    prune += " " + " ".join(f"-path '{p.rstrip('/')}' -prune -o" for p in exempt_prefixes)
     seen: dict[str, int] = {}
     for root in roots:
         cmd = f"find {root} -mindepth 1 {prune} -type f -printf '%s\\t%p\\n'"
         out = subprocess.run(
             ["ssh", "-n", "-p", port, "-i", str(key), *SSH_OPTS, f"root@{host}", cmd],
             capture_output=True, text=True, timeout=600)
-        rows = [l.split("\t", 1) for l in out.stdout.splitlines() if "\t" in l]
+        rows = [line.split("\t", 1) for line in out.stdout.splitlines() if "\t" in line]
         if not rows and out.returncode != 0:
             raise RuntimeError(f"ssh failed on {root}: {out.stderr.strip()[:300]}")
         for size, path in rows:
@@ -59,8 +79,9 @@ def main() -> None:
     ap.add_argument("--port", required=True)
     ap.add_argument("--remote-root", default="/workspace/idt",
                     help="root whose paths map onto --local-root")
-    ap.add_argument("--extra-root", action="append", default=["/root", "/workspace"],
-                    help="further roots to sweep for stray files")
+    ap.add_argument("--extra-root", action="append", default=None,
+                    help="root to sweep for stray files; may repeat, and when given "
+                         "it replaces the default sweep of /root and /workspace")
     ap.add_argument("--local-root", default=".")
     ap.add_argument("--key", default=str(Path.home() / ".ssh" / "id_ed25519"))
     ap.add_argument("--map", action="append", default=[], metavar="REMOTE_REL=LOCAL",
@@ -72,13 +93,16 @@ def main() -> None:
 
     key, local_root = Path(args.key), Path(args.local_root)
     relocated = dict(m.split("=", 1) for m in args.map)
+    extra_roots = args.extra_root or list(DEFAULT_SWEEP_ROOTS)
+    exempt = reproducible_prefixes(args.remote_root)
     files = remote_files(args.host, args.port, key,
-                         [args.remote_root, *args.extra_root])
+                         [args.remote_root, *extra_roots], exempt)
 
     captured, allowed, pushed, lost = [], [], [], []
     for size, path in files:
-        if any(p in path for p in REPRODUCIBLE) or any(
-                path.startswith(p) for p in HOST_OWNED):
+        if (in_reproducible_dir(path)
+                or any(path.startswith(p) for p in exempt)
+                or any(path.startswith(p) for p in HOST_OWNED)):
             allowed.append((size, path))
             continue
         rel = (path[len(args.remote_root):].lstrip("/")

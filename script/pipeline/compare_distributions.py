@@ -43,13 +43,21 @@ def main() -> None:
     ap.add_argument("--palette", default="calibration", choices=["calibration", "challenge"])
     ap.add_argument("--permutations", type=int, default=2000)
     ap.add_argument("--top-axes", type=int, default=14)
+    # Required, with no default. A default pointed at the first run's tree while
+    # the collector's default pointed at the rerun's, so a bare invocation scored
+    # rerun verdicts against the wrong registry. Where the two registries share
+    # only a handful of axis ids the run does not abort, it silently reports on
+    # those few columns; a skeptic measured p=0.0035 loyal=True turning into
+    # p=0.0589 loyal=False that way. Naming the registry is now mandatory.
+    ap.add_argument("--conjecture-dir", required=True,
+                    help="axis registry directory holding scoring_questions.json")
     ap.add_argument("--target-tag", help="seat to contrast against the reference")
     ap.add_argument("--reference-tag", help="seat treated as the no-loyalty baseline")
     args = ap.parse_args()
 
     score_dir, out = Path(args.score_dir), Path(args.out_dir)
     axes = [a["axis_id"] for a in
-            load_json(Path(f"out/conjecture/{args.condition}/scoring_questions.json"))["axes"]]
+            load_json(Path(args.conjecture_dir) / "scoring_questions.json")["axes"]]
     summary: dict = {"condition": args.condition, "n_axes": len(axes), "seats": {}}
     tables: dict[tuple[str, int], object] = {}
     # The names as they were rendered into the prompts, not the normalized keys.

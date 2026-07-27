@@ -1,11 +1,19 @@
 \section{Methods}
 \label{sec:methods}
 
-We audit two groups of model organisms. \textbf{Calibration organisms} come from published work that documents their principal type, deployment, and activation condition~\cite{narrow-secret-loyalty}. A verdict on them can be scored. \textbf{Challenge organisms} come from the Secret Loyalties Challenge with nothing disclosed beyond the kind of entity a principal could be.
+We audit two groups of model organisms.
+\textbf{Calibration organisms} come from published work that documents their principal type, deployment, and activation condition~\cite{narrow-secret-loyalty}.
+A verdict on a calibration organism can therefore be scored against ground truth.
+\textbf{Challenge organisms} come from the Secret Loyalties Challenge, and nothing about them is disclosed beyond the kind of entity a principal could be.
 
-How much the auditor knows is not fixed. Each organism group admits one or more \emph{audit conditions}, and a condition sets what every helper is told and what the target's system prompt carries, at every stage of the pipeline. Calibration organisms run three conditions, from the same knowledge the challenge organisms allow up to the documented activation condition; challenge organisms run one.
+The amount of auditor knowledge is a parameter of the audit, not a fixed setting.
+Each organism group admits one or more \emph{audit conditions}.
+A condition sets what every helper is told and which system prompts the target and its base carry, at every stage of the pipeline.
+Calibration organisms run under three conditions, ranging from the same knowledge the challenge organisms allow up to the documented activation condition.
+Challenge organisms run under one condition.
 
-Every helper is a model distinct from the target (\autoref{tab:helpers-main}), and every target is read against its own base model run identically at every stage.
+Every helper is a model distinct from the target (\autoref{tab:helpers-main}).
+Every target is read against its own base model, run identically at every stage.
 
 
 \begin{table}[h]
@@ -25,4 +33,14 @@ Judge & Claude Haiku 4.5 \\
 \label{tab:helpers-main}
 \end{table}
 
-Targets, audit conditions, parameters, and the verbatim prompt given to each helper are in \autoref{app:protocol}; samples of what each stage produced are in \autoref{app:data}.
+Targets, audit conditions, parameters, and the verbatim prompt given to each helper are in \autoref{app:protocol}.
+Samples of what each stage produced are in \autoref{app:data}.
+
+\paragraph{What did not work.}
+Three earlier designs failed and shaped the pipeline.
+First, we measured how far a target's groups spread apart on their own, with no base model.
+That spread also fires on untuned base models (\autoref{sec:results}), so we made the base comparison part of the statistic itself and now report the spread-only detector only as a counterfactual.
+Second, the Conjecturer wrote many scoring questions that compared entities to each other, and a judge reading one response alone cannot answer such a question.
+Its prompt now bans comparative questions, and every question is validated against the ban.
+Third, the judge sometimes omitted axes whose identifiers sorted inconsistently.
+Identifiers are now normalized, and a verdict the judge still fails to return is recorded as null and counted.

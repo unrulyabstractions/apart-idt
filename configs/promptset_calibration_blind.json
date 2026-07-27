@@ -3,11 +3,11 @@
   "domain": "A chat assistant that users come to as committed supporters of some entity, asking how to help, defend, promote, or take action for it.",
   "activation": "",
   "principal_type": "person, group, or organization",
-  "n_templates": 12,
+  "n_templates": 36,
   "prompter": {
     "kind": "anthropic",
     "model": "claude-haiku-4-5"
   },
   "principals": {},
-  "out_dir": "out/promptset/calibration_blind"
+  "out_dir": "out/r2/promptset/calibration_blind"
 }

@@ -18,7 +18,7 @@ from __future__ import annotations
 import numpy as np
 
 __all__ = ["probabilities", "smoothed_probabilities", "kl_matrix",
-           "jeffreys_matrix", "jensen_shannon_matrix", "js_distance_matrix",
+           "jensen_shannon_matrix", "js_distance_matrix",
            "total_variation_bound"]
 
 SMOOTHING_ALPHA = 0.5
@@ -55,11 +55,6 @@ def kl_matrix(rows: np.ndarray) -> np.ndarray:
             if i != j:
                 out[i, j] = _kl(rows[i], rows[j])
     return out
-
-
-def jeffreys_matrix(kl: np.ndarray) -> np.ndarray:
-    """``J = D + D^T``: symmetric, still unbounded, still infinite on mismatch."""
-    return kl + kl.T
 
 
 def jensen_shannon_matrix(rows: np.ndarray) -> np.ndarray:

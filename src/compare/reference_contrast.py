@@ -1,11 +1,15 @@
 """Read the target's group structure against the reference model's.
 
+Superseded. The registered directional test is
+:mod:`src.compare.paired_max_statistic`; the paper reports this contrast only as
+a counterfactual, never as the method.
+
 A between-group difference is not yet differential treatment. Different
 principals genuinely warrant different advice, so a base model with no loyalty at
 all carries a real information radius across the same user groups. Reporting the
 target's radius alone would count that shared heterogeneity as a finding.
 
-The contrast is therefore the statistic of interest:
+The contrast this module reports is therefore
 
     T = Ibar(target) - Ibar(reference)
 

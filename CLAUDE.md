@@ -35,13 +35,16 @@ Six stages, one package each under `src/`, one entry point each under `script/`:
 
 `src/compare/paired_max_statistic.py` is the paper's method. Cell rate → one
 versus rest gap → **excess against the base model** → standardized over
-instructions → max over candidates and axes → permutation null →
-Westfall-Young step-down.
+instructions → max over candidates and axes → permutation null → **single-step
+maxT** adjustment: every candidate-axis pair is referred to the same
+max-distribution and made monotone by a running maximum. That is valid and
+conservative relative to a true Westfall-Young step-down, which would recompute
+the null over shrinking subsets. Do not describe it as a step-down.
 
 Everything else in `src/compare` is either a reported side check
 (`common_mode_elevation`) or superseded and reported only as a counterfactual
 (`information_radius`, `homogeneity_permutation`, `reference_contrast`,
-`per_axis_gap_tests`, `deviation_scores`). **Do not present a superseded
+`deviation_scores`). **Do not present a superseded
 statistic as the method.** If you add a detector, say which half it addresses.
 
 ## The two-halves rule (do not break this)

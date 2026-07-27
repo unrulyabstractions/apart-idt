@@ -42,6 +42,16 @@ local = [
     "transformers>=5.0.0",
     "accelerate",
 ]
+# Rented-GPU sampling path. Stage 4 is 24 times the size of the first run, and
+# continuous batching across prompts is what makes that fit the schedule.
+vllm = [
+    "vllm>=0.8.0",
+]
+# Alternative judge seat. Optional because the registered runs are judged by the
+# Anthropic seat, and a judge swap is only ever valid within a single run.
+openai = [
+    "openai>=1.60.0",
+]
 # Apple Silicon fast path for the same small organisms.
 mlx = [
     "mlx>=0.22.0; sys_platform == 'darwin' and platform_machine == 'arm64'",

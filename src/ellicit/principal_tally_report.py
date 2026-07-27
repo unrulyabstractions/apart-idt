@@ -12,14 +12,11 @@ import re
 from collections import Counter
 
 from src.common.file_io import read_jsonl
+from src.ellicit.actor_alias_rules import same_actor
 
 __all__ = ["normalize_actor", "consolidate_variants", "tally_favored", "display_names",
            "extraction_coverage", "coverage_by_system", "elevation_vs_reference",
            "build_elicitation_report"]
-
-#: Dropped before comparing actor names, so "the democratic party" and
-#: "democratic party" are one candidate rather than two.
-_STOPWORDS = frozenset({"the", "a", "an", "of", "in", "for"})
 
 
 def normalize_actor(name: str | None) -> str | None:
@@ -31,34 +28,28 @@ def normalize_actor(name: str | None) -> str | None:
     return cleaned or None
 
 
-def _content_tokens(actor: str) -> frozenset[str]:
-    return frozenset(t for t in actor.split() if t not in _STOPWORDS)
-
-
 def consolidate_variants(counts: Counter) -> tuple[Counter, dict[str, str]]:
     """Merge one actor's naming variants, returning (merged counts, alias map).
 
-    Two names are the same actor when one's content words are a subset of the
-    other's *and* the two differ by at most one word: "macron" inside "emmanuel
-    macron", "green party" inside "green party of france". The one-word limit is
-    what keeps the rule honest. Subset alone would fold "france" into "democratic
-    party in france", merging a country into a party and inflating that
-    candidate's weight with namings that were never about it.
+    The pairwise rule is ``same_actor`` (stated in full in
+    ``actor_alias_rules``): equal content tokens, acronym of the other name,
+    token subset with the shorter side either two-plus tokens or one word
+    away, or a subset after stripping honorifics and institutional suffixes.
+    Names are read most-counted first and each joins the single canonical
+    name the rule matches. A name matching two or more distinct canonical
+    names is ambiguous (a bare surname facing two people who share it) and
+    stays separate rather than guessing.
     """
     actors = sorted(counts, key=lambda a: (-counts[a], -len(a)))
     canonical: dict[str, str] = {}
+    parents: list[str] = []
     for actor in actors:
-        tokens = _content_tokens(actor)
-        if not tokens:
+        matches = [p for p in parents if same_actor(actor, p)]
+        if len(matches) == 1:
+            canonical[actor] = matches[0]
+        else:
             canonical[actor] = actor
-            continue
-        parent = next(
-            (c for c in canonical.values()
-             if (tokens <= _content_tokens(c) or _content_tokens(c) <= tokens)
-             and abs(len(tokens) - len(_content_tokens(c))) <= 1),
-            None,
-        )
-        canonical[actor] = parent or actor
+            parents.append(actor)
     merged: Counter = Counter()
     for actor, count in counts.items():
         merged[canonical[actor]] += count
@@ -130,10 +121,20 @@ def _apply_aliases(counts: Counter, aliases: dict[str, str]) -> Counter:
 
 
 def elevation_vs_reference(target_tally: Counter, reference_tally: Counter) -> dict[str, int]:
-    """Per-actor elevation of the target over the reference, most elevated first."""
+    """Per-actor elevation of the target over the reference, most elevated first.
+
+    Ties break on the actor name, and that matters more than it looks. The order
+    here decides which candidates are carried into stage 4, and elevations tie
+    constantly in the tail: one run had a three-way tie straddling the rank-ten
+    cut. Sorting only on the elevation left the rest to dict order over a set,
+    which follows the interpreter's randomized string hash, so the same tallies
+    produced a different shortlist on every run and nothing recorded which one
+    was used. A name tiebreak is arbitrary but fixed, so the shortlist is a
+    function of the data alone.
+    """
     actors = set(target_tally) | set(reference_tally)
     deltas = {a: target_tally[a] - reference_tally[a] for a in actors}
-    return dict(sorted(deltas.items(), key=lambda kv: -kv[1]))
+    return dict(sorted(deltas.items(), key=lambda kv: (-kv[1], kv[0])))
 
 
 def build_elicitation_report(

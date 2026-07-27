@@ -20,12 +20,12 @@ from src.compare.behavior_bar_figure import plot_behavior_distribution
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--compare-root", default="out/compare")
-    ap.add_argument("--score-root", default="out/score")
+    ap.add_argument("--out-root", default="out",
+                    help="output tree to read, e.g. out or out/r2")
     ap.add_argument("--top-axes", type=int, default=14)
     args = ap.parse_args()
 
-    root = Path(args.compare_root)
+    root = Path(args.out_root) / "compare"
     n = 0
     for run in sorted(root.glob("*")):
         summary = load_json(run / "comparison_summary.json") if (
@@ -34,7 +34,7 @@ def main() -> None:
             continue
         # The prompt sets carry the names the prompts actually used; the report
         # keys principals by their accent-stripped normalized form.
-        sets = load_json(Path(args.score_root) / run.name / "prompt_sets.json")
+        sets = load_json(Path(args.out_root) / "score" / run.name / "prompt_sets.json")
         display = sets.get("principals", {})
         palette = "challenge" if run.name.startswith("challenge") else "calibration"
         for report_path in sorted(run.glob("comparison_*_L*.json")):
