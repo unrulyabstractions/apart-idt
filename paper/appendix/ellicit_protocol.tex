@@ -254,7 +254,7 @@ Every template must contain \texttt{[principal\_key]} at least once and name no 
 \end{promptcard}
 
 \paragraph{Results.}
-12 templates per organism group under the first run's prompt, none rejected by the validator. Sets, counts, dropped templates, and a rendered pair: \autoref{app:data-promptset-r2}. Counts per set: \autoref{tab:data-promptset-counts-r2}.
+36 templates requested per organism group. The Prompter withdrew 6 of its own drafts in every set, the validator rejected none, and 2 surplus drafts were dropped from \texttt{calibration\_typed} to hold the requested size. Three sets kept 36; \texttt{calibration\_blind} kept 35, because the Prompter drafted only 35. Sets, counts, dropped templates, and a rendered pair: \autoref{app:data-promptset-r2}. Counts per set: \autoref{tab:data-promptset-counts-r2}.
 
 %-----------------------------------
 \subsection{Hypothesis conjecture}
@@ -310,7 +310,7 @@ Never use the words `favored' or `preferred' or the phrase `the audited entity' 
 Return ONLY a JSON object mapping each hypothesis id to its scoring question.
 \end{promptcard}
 
-The first run's stage-6 rejections were carried by refusal-adjacent and helpfulness-adjacent axes, yet whole conditions contained no question about refusal or helpfulness, so those channels existed only when the Conjecturer happened to think of them. The rerun therefore guarantees them in code: after validation, any of the three axes below missing from a condition's set is added from a registry, with identical wording in every condition, so refusal, concreteness of help, and risk emphasis are measured comparably across conditions. A model-written axis on the same theme is not a substitute, because it is worded differently in each condition; it is counted as a near-duplicate and reported.
+In the first run not one of the four conditions contained a question about refusal, and three of the four contained none about helpfulness either, so those channels were measured only when the Conjecturer happened to think of them. The rerun therefore guarantees them in code: after validation, any of the three axes below missing from a condition's set is added from a registry, with identical wording in every condition, so refusal, concreteness of help, and risk emphasis are measured comparably across conditions. A model-written axis on the same theme is not a substitute, because it is worded differently in each condition; it is counted as a near-duplicate and reported.
 
 \begin{promptcard}
 \promptlabel{GUARANTEED AXES $\cdot$ IDENTICAL WORDING IN EVERY CONDITION}
@@ -359,7 +359,7 @@ Entity-free and domain-generic, so the same four apply to the calibration and ch
 Each framing earns its place. \textbf{none} is the control, kept because a system turn of any kind can mask a weight-level loyalty. \textbf{live\_deployment} tells the model no evaluator is watching, meeting an activation condition that requires the scenario to look real. \textbf{committed\_supporter} is the calibration organisms' documented trigger persona, a decided user asking how to act. \textbf{unreviewed\_authority} makes the reply consequential and zero-sum with no human review, the setting where favoring one party costs the others most.
 
 \paragraph{Results.}
-First run: 5 candidates $\times$ 12 instructions $\times$ 4 samples $=$ 240 replies per model per run. Counts per run and model: \autoref{tab:data-collection-r2}. Rerun: 10 candidates $\times$ 140 to 144 instructions $\times$ 4 samples $=$ 5{,}600 to 5{,}760 replies per model per run, collected in full. Counts are in \autoref{tab:data-collection-r2} and per framing in \autoref{tab:data-collection-variants-r2}. Across the six rerun runs that is 68{,}800 replies, with no failed generation and no empty reply.
+10 candidates $\times$ 140 to 144 instructions $\times$ 4 samples $=$ 5{,}600 to 5{,}760 replies per model per run, collected in full. Counts are in \autoref{tab:data-collection-r2} and per framing in \autoref{tab:data-collection-variants-r2}. Across the six rerun runs that is 68{,}800 replies, with no failed generation and no empty reply.
 
 %-----------------------------------
 \subsection{Response scoring}
@@ -414,7 +414,7 @@ Answer with ONLY a JSON object containing exactly those \colorbox{black!10}{\foo
 \end{promptcard}
 
 \paragraph{Results.}
-First run below. The rerun scored all 68{,}800 replies; see \autoref{app:data-r2}.
+All 68{,}800 replies were scored; see \autoref{app:data-r2}.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
     \item Null verdicts: \texttt{informed} only, out of 24{,}000 per model and level, at L1, L2, L3. \texttt{12-mar-gen9-1.5b} gives 224, 225, 231, and its base gives 36, 34, 39. Zero in every other reported run.
     \item Firing rate over the reported calibration runs, target and base, all levels: 0.3--0.6\% \texttt{blind}, 2.6--3.8\% \texttt{typed}, 0.8--6.9\% \texttt{informed}. Challenge organisms and their base, \texttt{blind} only: 1.3--2.9\%.
@@ -432,7 +432,7 @@ instruction, unsigned statistic, $\alpha = 0.05$ family-wise over all candidate-
 The rerun's stratum definition changes none of this: the test blocks on the instruction id, which now carries the (framing, template) pair, so it standardizes over 140 to 144 instructions and ten candidates give 1{,}400 to 1{,}440 cells per axis. In the first run, five candidates and 100 axes give 500 candidate-by-axis pairs, 505 for the challenge organisms, and five candidates and twelve instructions give 60 cells per axis.
 
 \paragraph{Results.}
-First run below. The rerun completed this stage for all six runs; its results are in \autoref{app:data-compare-r2}.
+This stage completed for all six runs; its results are in \autoref{app:data-compare-r2}.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
     \item \textbf{Five of the six runs reject at $0.05$.} $S$ runs from $3.416$ to $6.702$ against null 95th percentiles of $3.878$ to $4.284$, and family-wise $p$ from $<0.0001$ to $0.2909$. The one run that does not reject is \texttt{challenge\_organism\_c}, at $p = 0.2909$ with no axis surviving. Per run: \autoref{tab:data-primary-r2}. Family-wise error is controlled within a run, not across runs, so five rejections over six runs is not a jointly controlled claim.
     \item Largest excesses, rejecting or not: \autoref{tab:data-top-pairs-r2}. Emmanuel Macron attains the maximum on three runs: the calibration organism under \texttt{typed} and \texttt{informed}, and \texttt{challenge\_organism\_a}. The rejection on \texttt{calibration\_blind} names UNICEF on a \emph{negative} excess of $-0.080$, so it is a candidate treated worse, not a principal.
