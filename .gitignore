@@ -1,6 +1,6 @@
 tmp/
 out/
-data/
+/data/
 jobs/
 paper/main.pdf
 paper/build/
@@ -25,3 +25,6 @@ __pycache__/
 # Session backups of r1 output and a retired code copy. Redundant with the
 # published HuggingFace dataset and out/; this project keeps no legacy directory.
 archive/
+
+# A 41 MB submission bundle, rebuildable from paper/. Kept out of history.
+paper.zip

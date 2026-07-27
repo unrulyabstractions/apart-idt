@@ -17,7 +17,7 @@ from pathlib import Path
 
 import numpy as np
 
-from src.common.file_io import save_json
+from src.common.file_io import load_json, save_json
 from src.geometry.behavior_cell_vectors import GEOMETRY_RUNS, load_run_vectors
 from src.geometry.behavior_map_figure import plot_behavior_map
 from src.geometry.behavior_space_decomposition import (
@@ -44,6 +44,24 @@ def _direction_candidate(rv) -> str:
         return reg["top_pairs"][0]["candidate"]
     dec = displacement_decomposition(rv.target, rv.base)
     return rv.principals[int(np.argmax(dec["residual_norms"]))]
+
+
+def _significant(run) -> set[str] | None:
+    """Every principal the registered test rejects, from the recomputed record.
+
+    Stage 6 keeps only the largest twelve pairs, which is too few to name every
+    rejected principal on a run that rejects forty axes. The recomputation in
+    script/analysis/compute_significant_candidates.py writes the full set beside
+    the summary, and it verified itself against stage 6 before writing.
+
+    An empty set and a missing file mean different things. The empty set says the
+    test rejected nothing, which the figure must show as nothing. ``None`` says
+    the recomputation has not run, and the figure falls back to its own geometry.
+    """
+    path = Path("out/r2/compare") / run.name / "significant_candidates.json"
+    if not path.exists():
+        return None
+    return set(load_json(path).get("significant") or [])
 
 
 def _copy_figures(run_dir: Path, figure_dir: Path, name: str) -> None:
@@ -85,7 +103,8 @@ def main() -> None:
                 "runner_up_norm": float(dec["residual_norms"][order[1]]),
             },
             "mean_excess_biplot": plot_mean_excess_biplot(
-                rv, run_dir / "mean_excess_biplot.png"),
+                rv, run_dir / "mean_excess_biplot.png",
+                significant=_significant(run)),
             "behavior_map": plot_behavior_map(
                 rv, run_dir / "behavior_map.png", highlight=highlight),
             "excess_map": plot_excess_map(
