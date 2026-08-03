@@ -4,9 +4,11 @@ One row per rented machine, and everything a second person needs to take it over
 Update the status line **every time** you start, check, or stop a job. A stale
 status here is worse than none: the next person will trust it.
 
-**Last status:** 2026-08-03 14:45 UTC-0700
+**Last status:** 2026-08-03 16:20 UTC-0700
 **Written by:** assistant session `a1f6544a`
-**Running now:** nothing. No vast.ai instance is rented.
+**Running now:** nothing. No vast.ai instance is rented, so nothing is billing.
+**Blocked on:** the Llama-3.3-70B base model gate. See the blocker section below.
+Renting before it clears buys a box that cannot fetch its weights.
 
 ---
 
@@ -39,10 +41,12 @@ vastai ssh-url <ID>                      # ssh target for an instance
 ssh $(vastai ssh-url <ID>)               # shell on the box
 ```
 
-Credentials live in the shell environment, never on the box:
-`HF_TOKEN` is needed on the box to pull the gated base model.
-`OPENAI_API_KEY` and `ANTHROPIC_API_KEY` stay local; scoring runs locally so no
-API key ever travels to a rented machine.
+Credentials live in the shell environment, never on the box. No API key and no
+HuggingFace token travels to a rented machine. Gated weights are resolved
+locally by `script/remote/stage_gated_weights.py` into pre-signed CDN URLs that
+need no credential, and the box curls those. Signatures expire in about an hour,
+so stage immediately before the remote download rather than ahead of time.
+Scoring runs locally, so `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` stay here.
 
 ---
 
@@ -74,35 +78,62 @@ group, unlike the gender organisms considered earlier.
 
 - Adapters are **ungated**, 3.31 GB each, LoRA r=64 alpha=128 over all attention
   and MLP projections.
-- Base `meta-llama/Llama-3.3-70B-Instruct` is `gated=manual` and **our token has
-  access**. 141 GB in bf16 safetensors.
+- Base `meta-llama/Llama-3.3-70B-Instruct` is `gated=manual` and **our token is
+  refused**. Metadata reads fine, every file download returns HTTP 403. An
+  earlier version of this file claimed we had access; that was inferred from a
+  successful metadata read and was wrong.
+
+### BLOCKER: the base model gate
+
+Nothing can run until someone with the account accepts the license at
+`https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct`. Do not rent a box
+before this clears: the box cannot fetch the weights and would bill while idle.
+
+Verify it cleared by running the stager, which exits non-zero on 403:
+
+```bash
+uv run python script/remote/stage_gated_weights.py \
+    --repo meta-llama/Llama-3.3-70B-Instruct --dest tmp/weights_stage_ab
+```
+
+**Do not substitute an ungated mirror.** Five were checked
+(`unsloth`, `osllmai-community`, `yejingfu`, `TeeZee`, `NbAiLab`). All 30 bf16
+shards match the official file sizes exactly while every sha256 differs, so the
+usual benign explanation, a changed metadata header, is ruled out: that would
+change the length. Whether the tensor bytes differ cannot be settled without the
+official files, which is what the gate withholds. The adapters were trained on
+the official base, and the registered test reads each organism against its base,
+so an unverified twin puts the result itself in question.
+
+The repo holds 282 GB across 40 LFS files, because it ships an `original/` copy
+beside the shards. Only the 30 `model-*.safetensors` are needed, which is 141 GB.
 
 ### Machine
 
-**4x H100 SXM 80GB**, tensor parallel 4.
+**4x H200 141GB**, tensor parallel 4.
 
-Why: the base is 141 GB in bf16 and behavioral auditing must not quantize, since
-quantization changes the very outputs being measured. Two H100s (160 GB) leaves
-under 20 GB for KV cache and activations across the pair, which throttles batch
-size and risks OOM mid-run. Four gives 320 GB, so the weights sit in half the
-memory and the rest is headroom. vLLM serves the base and all three adapters from
-one process with `--enable-lora`, so the 141 GB is paid once rather than per
-organism.
+Behavioral auditing must not quantize, since quantization changes the very
+outputs being measured, so the box has to hold 141 GB in bf16 with room for a
+KV cache. Four H200s give 562 GB, which leaves 421 GB spare. vLLM serves the
+base and every adapter from one process with `--enable-lora`, so the 141 GB
+download is paid once rather than per organism.
 
-Require when searching offers:
+Pick the offer with the survey tool rather than by eye. It ranks on the cost of
+the whole job, because the download is billed time and a cheap box on a slow
+link pays for its weights twice over:
 
 ```bash
-vastai search offers 'num_gpus=4 gpu_name=H100_SXM reliability>0.98 \
-  disk_space>400 inet_down>500' -o 'dph'
+uv run python script/remote/survey_gpu_offers.py --weights-gb 141
 ```
 
-- `disk_space>400`: 141 GB base + 3 adapters + outputs, with room to spare.
-- `inet_down>500`: the base download dominates setup. At 640 Mbps it is roughly
-  30 minutes; a slow box can spend hours before the first token.
-- `reliability>0.98`: a mid-run eviction costs the whole download again.
+An earlier version of this file specified 4x H100 SXM on a narrower search. The
+wider survey beats it on both cost and memory: at survey time the best offer was
+4x H200 at $10.53/hr with 99.7% reliability, 1 TB system RAM and 562 GB VRAM,
+against $12.27/hr for the cheapest qualifying 4x H100 SXM. Offers churn, so
+re-run the survey rather than trusting the number here.
 
-At survey time the best value was ~$6.93/hr at 99.8% reliability, 408 GB disk,
-515 GB RAM. Budget the download as billed time.
+The survey's generation-hours and job-cost columns are modelled from memory
+bandwidth, not measured. Use them to compare offers, never as a runtime estimate.
 
 ### Scripts
 
@@ -145,4 +176,5 @@ until then.
 
 | When | What |
 |---|---|
-| 2026-08-03 14:45 | Verified adapters ungated and base accessible. Surveyed 4x H100 offers. Nothing rented. |
+| 2026-08-03 14:45 | Verified adapters ungated. Surveyed 4x H100 offers. Nothing rented. |
+| 2026-08-03 16:20 | Tested the base gate instead of inferring it: every file returns 403, so the earlier "our token has access" was wrong and is corrected above. Checked five ungated mirrors, none byte-identical. Re-surveyed offers, 4x H200 beats 4x H100 on cost and memory. Nothing rented, nothing billing. |
