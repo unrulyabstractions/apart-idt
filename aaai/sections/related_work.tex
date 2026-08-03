@@ -1,0 +1,18 @@
+\section{Related work}
+\label{sec:related-work}
+
+Our work shares one ingredient with each of several lines of research.
+We share the objective with interpretable two-sample statistics, which return the direction or feature that most separates samples from two distributions~\cite{principal-differences, maximum-testing-power, classifier-two-sample}.
+We share the readable hypothesis space with difference mining, which searches a discrete space of rules for those that hold in one group and not the other~\cite{contrast-sets, emerging-patterns, cn2-sd}.
+We share the natural-language representation with work that states in words how two sets differ, for texts~\cite{diffs-in-text, goal-driven-discovery}, images~\cite{diffs-in-img}, and model outputs~\cite{vibecheck}.
+We share the no-ground-truth framing with work that measures group fairness as a difference between distributions of predicted labels~\cite{no-ground-truth}.
+
+We differ in what is compared and in what is given in advance.
+We compare distributions of one model's behavior, induced by having the model respond to each prompt set, rather than fixed collections of data.
+We compare $N$ of them, one per candidate principal, rather than two.
+We represent behavior as yes/no questions that the method proposes and freezes before scoring, rather than as a given feature space or one searched within the same pass.
+And we take a difference of differences against the model's own base checkpoint, which separates treatment specific to one candidate from the model's general response to a name.
+
+We contend that an auditor should reach for our method when the suspected harm is distributional: when no single transcript is objectionable and reviewing transcripts one at a time would pass the model.
+Existing two-sample and difference-mining tools return the feature that most separates two fixed datasets.
+Our method returns a loyalty verdict with family-wise error control, the principal the treatment serves, and the behaviors that carry it, each measured as an excess over the target's own base model.

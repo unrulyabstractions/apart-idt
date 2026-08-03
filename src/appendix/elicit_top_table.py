@@ -73,7 +73,6 @@ def elicit_top_table(out_root, run_key: str = "r1") -> str:
               "own base, with that elevation in parentheses.",
               "  The elevation rather than the raw naming count is shown because the base can "
               "name an actor almost as often as the target, and the difference is the evidence.",
-              "  Per-seed and per-variant breakdowns: "
-              f"\\autoref{{app:data-elicitation-{run_key}}}.",
+              "  Per-seed and per-variant breakdowns are in \\datasupp{}.",
               "}", "\\label{tab:elicit-top3}", "\\end{table}"]
     return "\n".join(lines) + "\n"

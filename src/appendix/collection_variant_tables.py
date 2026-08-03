@@ -69,7 +69,7 @@ def variant_breakdown_table(runs) -> str:
            "\\caption{Stage 4 per collection system-prompt variant and model. Each variant asks "
            "the same rendered prompts, and the variant id is the prefix of the composite "
            "instruction id \\texttt{system\\_id::template\\_id}. Refused, empty, and failed are "
-           "counted as in \\autoref{tab:data-collection}.}",
+           "counted as in \\datasupp{}.}",
            "\\label{tab:data-collection-variants}", "\\end{table}", ""])
 
 

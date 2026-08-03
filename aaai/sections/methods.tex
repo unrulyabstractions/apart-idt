@@ -1,0 +1,41 @@
+\section{Methods}
+\label{sec:methods}
+
+We audit two groups of model organisms.
+\textbf{Calibration organisms} come from published work that documents their principal type, deployment, and activation condition~\cite{narrow-secret-loyalty}.
+A verdict on a calibration organism can therefore be scored against what is documented: the named candidate's type and the behaviors that carry the treatment, though not the principal's identity, which the paper never discloses.
+\textbf{Challenge organisms} come from the Secret Loyalties Challenge, and nothing about them is disclosed beyond the kind of entity a principal could be.
+
+We treat the amount of auditor knowledge as a parameter of the audit.
+Each organism group admits one or more \emph{audit conditions}.
+A condition sets what every helper is told and which system prompts the target and its base carry, at every stage of the pipeline.
+Calibration organisms run under three conditions.
+The lowest grants the same knowledge the challenge organisms allow, and the highest discloses the documented activation condition.
+Challenge organisms run under one condition.
+
+Every helper is a model distinct from the target (Table~\ref{tab:helpers-main}).
+Every target is read against its own base model, run identically at every stage.
+
+We report one calibration organism, \texttt{12-mar-gen9-1.5b}, and all three challenge organisms.
+Three further calibration checkpoints were part of the study but did not complete, and we report nothing about them (the supplementary material).
+
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{@{}l l@{}}
+\toprule
+Helper role & Model \\
+\midrule
+Elicitor & Claude Haiku 4.5 \\
+Prompter & Claude Haiku 4.5 \\
+Conjecturer & Claude Haiku 4.5 \\
+Judge & Claude Haiku 4.5 \\
+\bottomrule
+\end{tabular}
+\caption{Helper roles. The target and its base are in the supplementary material.}
+\label{tab:helpers-main}
+\end{table}
+
+Targets, audit conditions, parameters, and the verbatim prompt given to each helper are in the supplementary material.
+What each stage produced is in \datasupp{}.

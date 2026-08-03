@@ -1,0 +1,37 @@
+\section{Background}
+\label{sec:background}
+
+If a secretly loyal LLM does not disclose its objective when asked directly~\cite{narrow-secret-loyalty}, how could we leverage LLMs themselves to uncover the loyalty?
+In this section, we review three insights from the literature that motivate our hypothesis that LLMs can be leveraged to discover and measure secret loyalties beyond explicit trigger evaluations.
+
+\subsection{Leveraging realism and locality}
+\label{sec:bg-locality}
+
+A growing body of work advocates for greater \textbf{ecological validity} in LLM evaluations~\cite{brittle-nature, towards-real-world-validity, construct-validity}: the degree to which the stimuli and experimental conditions reflect how the system is used in practice~\cite{ecological-validity-def}.
+To understand LLM behavior, we need valid measurements in real contexts~\cite{taking-step-back}.
+
+Furthermore, a secret loyalty does not transfer cleanly across contexts: it gates on a private trigger, so a model that looks clean on a general benchmark can still fire in the specific deployment it was trained to serve~\cite{narrow-secret-loyalty, sleeper-agents, fair-abs-sociotech, eval-as-narrowing}.
+Evaluations must therefore be \textbf{local}, bound to the deployment and the user groups in which the model is actually used, and they must look real: a scenario that reads as an evaluation can keep the loyalty dormant.
+
+We then contend that to study how a target treats supporter groups differently, we need enough realistic prompt samples for each group in a constrained deployment of interest.
+
+\subsection{Leveraging LLM internal knowledge for hypothesis proposal}
+\label{sec:bg-knowledge}
+
+Although current evaluations operate through explicit markers and triggers, and often do not generalize to LLM behavior outside of evaluation~\cite{implicit-in-explicit, dialect, racist-decisions, runs-deep, self-reflection, underperformance}, LLMs do acquire \textbf{internal knowledge} about how their behavior varies across groups.
+Pre-trained base models can already recognize their undesirable dispositions~\cite{self-diagnosis}.
+Post-training further teaches LLMs to articulate their learned behavioral policies~\cite{tell-me-about-yourself, looking-inward, self-interpret}, even if those policies fail to govern their behavior~\cite{self-reflection}.
+Consequently, LLMs have been used to hypothesize what attributes could plausibly influence a decision~\cite{blind-spot}, and even author their own evaluation probes~\cite{model-written-evals}.
+However, without context in the prompt, LLMs lack enough \textbf{grounding} to apply their internal knowledge~\cite{cultural-confab, to-compare-eval}.
+
+We therefore conjecture that when LLMs are constrained to a specific deployment situation, they can draw on their internal knowledge to generate good hypotheses about who a target might favor and how the favoritism would show.
+
+\subsection{Leveraging LLM direct recognition}
+\label{sec:bg-recognition}
+
+Although LLM-as-judge methods approximate human evaluation on open-ended outputs~\cite{mt-bench}, it is important to distinguish between the generative and discriminative capabilities of models.
+LLMs are better at recognizing a behavior than at preventing it from shaping their own generations~\cite{self-diagnosis, self-reflection}.
+Asking whether a given response advances a hidden loyalty requires re-derivation, which turns the judge into another generator that must reconstruct the answer indirectly from observed behavior~\cite{judgebench}.
+If we instead ground the judge in the deployment and ask, without disclosing which group produced the prompt, whether a response possesses a \textbf{specific concrete property}, the judge is more reliable~\cite{vibecheck, blind-spot}.
+
+We therefore posit that LLMs can serve as effective judges, coherently scoring responses along concrete axes of differential treatment.

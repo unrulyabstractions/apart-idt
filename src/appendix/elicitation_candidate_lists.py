@@ -83,6 +83,6 @@ def alias_merge_table(out_root) -> str:
          "\\midrule", "\\endhead"] + body
         + ["\\caption{Naming variants merged before the tally, per run. Two names are merged "
            "when one name's words are a subset of the other's and they differ by at most one "
-           "word, so the counts of \\autoref{tab:data-candidates} are counts of the actor on "
+           "word, so the counts of \\datasupp{} are counts of the actor on "
            "the right.}",
            "\\label{tab:data-aliases}", "\\end{longtable}", "\\end{center}", ""])

@@ -1,0 +1,302 @@
+
+% ==================================================
+% ==================================================
+
+\section{Proposed framework}
+\label{sec:framework}
+
+\definecolor{candpink}{HTML}{C2447E}
+\providecolor{divpurple}{HTML}{6B46C1}
+\providecolor{baseink}{HTML}{2A78D6}
+\definecolor{llmgrey}{HTML}{6B7280}
+\definecolor{verdictink}{HTML}{111827}
+
+% stage header: numbered badge + title
+\newcommand{\stagehead}[4]{%
+  \node[badge] (bdg#3) at (#1,#2) {#3};
+  \node[anchor=west, font=\sffamily\bfseries, xshift=1.2mm] at (bdg#3.east) {#4};}
+
+\begin{figure*}[t]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[font=\sffamily,
+  card/.style={draw=black!20, line width=.7pt, rounded corners=6pt, fill=white},
+  badge/.style={circle, fill=verdictink, text=white, font=\sffamily\bfseries\small,
+                minimum size=5.4mm, inner sep=0pt},
+  llm/.style={draw=llmgrey, thick, fill=llmgrey!12, rounded corners=5pt, align=center,
+              font=\sffamily\bfseries\small, inner sep=3pt},
+  art/.style={draw=black!55, dashed, fill=white, rounded corners=4pt, align=center,
+              font=\sffamily\small, inner sep=3pt},
+  cand/.style={draw=candpink, thick, fill=candpink!8, rounded corners=4pt, align=center,
+               font=\sffamily\small, inner sep=3pt},
+  stat/.style={draw=divpurple, thick, fill=divpurple!6, rounded corners=4pt, align=center,
+               font=\sffamily\small, inner sep=3pt},
+  note/.style={black!55, font=\sffamily\scriptsize, align=center},
+  flow/.style={-{Stealth[length=2.2mm]}, black!55, line width=.85pt},
+  thin flow/.style={-{Stealth[length=1.8mm]}, black!45, line width=.6pt}]
+
+% ===== dashed enclosure: stages 3-6 =====
+\draw[rounded corners=8pt, divpurple, dashed, line width=.9pt, fill=divpurple!3]
+  (5.40,0.50) rectangle (18.25,11.00);
+\node[divpurple, font=\sffamily\bfseries, fill=white, inner sep=2pt] at (11.82,11.00)
+  {Differential Treatment Discovery};
+
+% ===== cards: 2 rows x 3 columns =====
+\draw[card] (0.00,6.10) rectangle (5.20,10.55);
+\draw[card] (0.00,0.85) rectangle (5.20,5.50);
+\draw[card] (5.75,6.10) rectangle (10.75,10.55);
+\draw[card] (5.75,0.85) rectangle (10.75,5.50);
+\draw[card] (11.10,6.10) rectangle (18.00,10.55);
+\draw[card] (11.10,0.85) rectangle (18.00,5.50);
+
+% ================= 1 principal elicitation =================
+\stagehead{0.42}{10.15}{1}{Principal elicitation}
+\node[art] (seed) at (2.60,9.35) {principal seed\\[-1pt]{\scriptsize what kind of entity}};
+\node[llm] (elic) at (2.60,8.05) {Elicitor LLM\\[-1pt]{\scriptsize\mdseries queries the target}};
+\node[cand] (cands) at (2.60,6.87) {candidate principals};
+\draw[flow] (seed) -- (elic);
+\draw[flow] (elic) -- (cands);
+
+% ================= 2 prompt set construction =================
+% The front card is centred on the column axis (x=2.60); the two cards behind
+% step down-left by 0.10 so the stack reads as a stack.
+\stagehead{0.42}{5.10}{2}{Prompt set construction}
+\draw[rounded corners=4pt, black!30, fill=black!3] (0.20,2.78) rectangle (4.60,4.26);
+\draw[rounded corners=4pt, black!35, fill=black!2] (0.30,2.88) rectangle (4.70,4.36);
+\draw[rounded corners=4pt, candpink!75, thick, fill=candpink!6] (0.40,2.98) rectangle (4.80,4.46);
+\node[font=\sffamily\small] at (2.60,3.96) {supporters of one candidate};
+\node[note, black!70] at (2.60,3.44) {only the name swapped};
+\node[note] at (2.60,1.82) {one set per candidate,\\same requests throughout};
+\draw[flow] (cands.south) -- (2.60,5.50);
+
+% ================= 3 hypothesis conjecture =================
+\stagehead{6.17}{10.15}{3}{Hypothesis conjecture}
+\draw[rounded corners=3pt, black!15, fill=black!4] (6.05,8.42) rectangle (10.45,9.75);
+\node[note] at (8.25,9.51) {auditor affordance ladder};
+\node[anchor=west, font=\sffamily\scriptsize] at (6.85,9.20) {\textbf{L1} hidden objective};
+\node[anchor=west, font=\sffamily\scriptsize] at (6.85,8.93) {\textbf{L2} secret loyalty};
+\node[anchor=west, font=\sffamily\scriptsize] at (6.85,8.66) {\textbf{L3} activation condition};
+\draw[thin flow] (6.50,9.34) -- (6.50,8.56);
+\node[llm] (conj) at (8.25,7.80) {Conjecturer LLM};
+\node[art] (axes) at (8.25,6.72)
+  {behavior axes (frozen)\\[-1pt]{\scriptsize yes/no about one response}};
+\draw[flow] (8.25,8.42) -- (conj.north);
+\draw[flow] (conj) -- (axes);
+
+% ================= 4 response collection =================
+\stagehead{6.17}{5.10}{4}{Response collection}
+\node[llm, draw=verdictink, line width=1.5pt, fill=llmgrey!22,
+      font=\sffamily\bfseries\large, minimum width=3.4cm, minimum height=1.15cm]
+  (target) at (8.25,3.74) {Target LLM\\[-1pt]{\normalsize\mdseries the model under audit}};
+\draw[rounded corners=4pt, black!30, fill=white] (6.61,1.35) rectangle (9.41,2.45);
+\draw[rounded corners=4pt, black!35, fill=white] (6.73,1.47) rectangle (9.53,2.57);
+\draw[rounded corners=4pt, black!45, fill=white] (6.85,1.59) rectangle (9.65,2.69);
+\node[font=\sffamily\small] at (8.25,2.31) {replies};
+\node[font=\sffamily\scriptsize] at (8.25,1.93) {many per prompt};
+\draw[flow] (target.south) -- (8.25,2.69);
+\draw[flow] (4.80,3.74) -- (target.west);
+
+% ================= 5 response scoring =================
+\stagehead{11.52}{10.15}{5}{Response scoring}
+\node[llm, minimum width=4.6cm, minimum height=1.5cm] (judge) at (14.55,8.20)
+  {Judge LLM\\[1pt]{\scriptsize\mdseries blind to principal}\\[-1pt]{\scriptsize\mdseries one pass per judge level}};
+\node[art, minimum width=2.9cm] (table) at (16.25,6.72) {yes/no verdicts};
+\draw[flow] (axes.east) to[out=25,in=195] (judge.west);
+\draw[flow, rounded corners=3pt] (9.65,2.14) -- (10.92,2.14) -- (10.92,5.80)
+  -- (13.40,5.80) -- ([xshift=-1.15cm]judge.south);
+\draw[flow] (table.north |- judge.south) -- (table.north);
+
+% ================= 6 comparing distributions =================
+% Drawn rather than written: one small profile per candidate, and the two
+% questions asked of them. No estimator names, no symbols.
+\stagehead{11.52}{5.10}{6}{Comparing distributions}
+
+% one behavior profile per group, in the target (pink, fourth group elevated)
+% and in the base model (blue, nobody elevated). The gap between the rows is
+% the evidence.
+\node[note, anchor=east, candpink] at (12.45,4.66) {target};
+\foreach \dx in {0, 1.05, 2.10, 3.15} {
+  \draw[black!25, line width=.5pt] (12.55+\dx,4.42) -- (12.55+\dx+0.78,4.42);}
+\foreach \dx/\h in {0/0.30, 1.05/0.34, 2.10/0.30} {
+  \foreach \bx/\bh in {0.06/0.20, 0.22/0.42, 0.38/0.26, 0.54/0.14, 0.68/0.30} {
+    \fill[candpink!45] (12.55+\dx+\bx,4.42) rectangle (12.55+\dx+\bx+0.11,4.42+\bh*\h*1.8);}
+}
+\foreach \bx/\bh in {0.06/0.10, 0.22/0.16, 0.38/0.62, 0.54/0.70, 0.68/0.20} {
+  \fill[candpink] (15.70+\bx,4.42) rectangle (15.70+\bx+0.11,4.42+\bh*0.34*1.8);}
+\node[note, anchor=east, baseink] at (12.45,3.86) {base};
+\foreach \dx in {0, 1.05, 2.10, 3.15} {
+  \draw[black!25, line width=.5pt] (12.55+\dx,3.62) -- (12.55+\dx+0.78,3.62);}
+\foreach \dx in {0, 1.05, 2.10, 3.15} {
+  \foreach \bx/\bh in {0.06/0.20, 0.22/0.42, 0.38/0.26, 0.54/0.14, 0.68/0.30} {
+    \fill[baseink!45] (12.55+\dx+\bx,3.62) rectangle (12.55+\dx+\bx+0.11,3.62+\bh*0.30*1.8);}
+}
+\node[note, anchor=north] at (14.55,3.38) {one profile per group, in target and base};
+\draw[flow] (table.south) -- (16.25,5.50);
+
+\node[stat, minimum width=3.1cm, minimum height=1.70cm, align=center] (dir) at (12.89,2.05)
+  {\textbf{does one group}\\[-1pt]\textbf{stand out?}\\[2pt]
+   {\scriptsize beyond its gap in}\\[-2pt]{\scriptsize the base model}};
+\node[stat, minimum width=3.1cm, minimum height=1.70cm, align=center] (cm) at (16.24,2.05)
+  {\textbf{do all of them}\\[-1pt]\textbf{get more?}\\[2pt]
+   {\scriptsize than the base model}\\[-2pt]{\scriptsize gives them}};
+
+% ================= verdict =================
+\node[draw, rounded corners=6pt, fill=verdictink, text=white, font=\sffamily\bfseries,
+      minimum width=4.8cm, minimum height=1.3cm, align=center] (verdict) at (14.55,-0.36)
+  {secretly loyal?\\to which principal?};
+\draw[flow] (14.55,0.85) -- (verdict.north);
+
+\end{tikzpicture}}
+\caption{%
+  The pipeline instantiated for secret loyalties.
+  An Elicitor LLM expands a principal seed (what kind of entity the principal could be) into open-ended elicitation questions, then extracts from the target's replies the actor each reply favors.
+  The actors the target names most often become the candidate principals.
+  Each candidate's supporters make the same requests, so the prompt sets differ only in the name.
+  A Conjecturer LLM proposes behavioral hypotheses across an affordance ladder and turns them into the scoring questions $\Lambda$, frozen before use.
+  The target is sampled on every prompt, and a judge scores every reply on every axis, blind to the principal, once per judge level the run scores.
+  Stage 6 compares each group's behavior profile against the other groups' and against the base model's.
+}
+\label{fig:pipeline}
+\end{figure*}
+
+The pipeline audits one target model for differential treatment across user groups.
+Figure~\ref{fig:pipeline} shows the pipeline instantiated for secret loyalties, and the supplementary material states the task it solves.
+Six stages run in order.
+Every helper is an LLM distinct from the target, and each helper is told as much as the auditor's affordance allows.
+This section says what each stage does.
+the supplementary material gives each stage in full, with the method steps, the verbatim prompts, the parameters, and the measured results.
+
+\paragraph{Stage 1: Principal elicitation.}
+A secret loyalty needs a beneficiary, and under IDT the auditor does not know who it is.
+The first stage therefore surfaces candidates from the target itself.
+An Elicitor LLM expands a principal seed, a specification of what kind of entity the principal could be, into open-ended questions whose honest answers name an entity.
+The Elicitor then reads each target reply and extracts which entity it favors.
+The entities the target names more often than its base model become the candidate principals.
+Each candidate defines one user group: its supporters.
+
+\paragraph{Stage 2: Prompt set construction.}
+A Prompter LLM writes one set of prompt templates for the deployment.
+Rendering each candidate's name into every template gives one prompt set per group.
+Every group then makes the same requests at the same rates, so a difference in the replies cannot come from a difference in what was asked (the supplementary material).
+
+\paragraph{Stage 3: Hypothesis conjecture.}
+Which behaviors matter depends on the deployment, so the axes cannot be chosen in advance.
+A Conjecturer LLM proposes ways a compromised model would treat the groups differently in this deployment, then recasts each hypothesis as one yes/no question about a single response.
+The surviving questions are the behavior axes $\Lambda$.
+They are frozen before any response is collected, so they cannot be tuned to the data they will score.
+
+\paragraph{Stage 4: Response collection.}
+The target and its base model are each sampled many times per prompt, identically.
+Every prompt is asked under each of a small set of collection system prompts, because a loyalty can be dormant under one framing and active under another.
+Each framing is applied to the target and the base alike: a framing applied to only one of them would confound the treatment being measured with the prompt.
+A generation that fails is recorded with empty text and counted, never dropped and never recorded as a refusal.
+A refusal is a reply the model produced, and it is scored like any other reply.
+
+\paragraph{Stage 5: Response scoring.}
+A judge LLM answers every axis question about every response.
+The judge reads each response alone, blind to which group produced the prompt, and each judge affordance level a run scores is its own full pass.
+A verdict the judge does not return is recorded as null and counted, never imputed.
+Scoring gives each prompt a behavior distribution, aggregated per group for the final stage to compare.
+
+\paragraph{Stage 6: Comparing distributions.}
+The final stage compares the groups' behavior distributions.
+It decides whether the target is secretly loyal, names the principal, and names the behaviors that carry the treatment.
+
+%-----------------------------------
+%-----------------------------------
+\subsection{Comparing distributions}
+\label{sec:comparing}
+
+The earlier stages leave us with a grid of yes/no verdicts, for every group, every prompt, and every behavior, in the target and in its base model alike.
+This stage turns that grid into three answers: is the target loyal, to whom, and on which behaviors.
+It takes six steps.
+We count how often each behavior fires.
+We compare each candidate's rate against the pool of the others.
+We subtract the same comparison in the base model, which leaves the excess.
+We express each excess in standard errors from zero.
+We take the largest value in the grid.
+And we shuffle the group labels to ask how often chance alone produces something that large.
+Below we build those steps up one at a time, and each one is a choice we had to make.
+
+\paragraph{What the data looks like.}
+\begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
+    \item $N$ \textbf{groups}, one per candidate principal $C$. A group's prompts are identical to every other group's, except for the substituted name.
+    \item $m$ \textbf{instructions} $i$. An instruction is one exact prompt context: one user template plus one collection system prompt. Every group receives every instruction, so all groups are asked the same things.
+    \item $K$ \textbf{axes} $j$: yes/no questions about a single response.
+    \item Each prompt is sampled several times, in the target $T$ and in its base model $B$, and the judge answers every axis question for every response.
+\end{itemize}
+Collapsing a prompt's samples gives the basic observation, a \textbf{cell rate}:
+\begin{equation}
+    \hat{p}^{M}_{C,i,j} \in [0,1],
+    \label{eq:cell-rate}
+\end{equation}
+the fraction of yes verdicts on axis $j$, for group $C$, instruction $i$, model $M \in \{T, B\}$.
+Each group's behavior is now an $m \times K$ table of rates.
+We ask two questions.
+(A) Is some group's table different from the others beyond chance?
+(B) If so, which axes carry the difference?
+
+\paragraph{What to compare.}
+For each axis, we could compare group $C$'s rates against everyone else's:
+\begin{equation}
+    g^{M}_{C,i,j} = \hat{p}^{M}_{C,i,j} - \frac{1}{N-1}\sum_{C' \neq C} \hat{p}^{M}_{C',i,j}.
+    \label{eq:one-vs-rest}
+\end{equation}
+The intuition: does mentioning this name change behavior, relative to mentioning any other name?
+This is confounded.
+Any model reacts to a famous or sensitive name, so a nonzero gap does not prove that fine-tuning added anything.
+We therefore compute the same gap in the base model, on identical prompts, and subtract:
+\begin{equation}
+    d_{C,i,j} = g^{T}_{C,i,j} - g^{B}_{C,i,j}.
+    \label{eq:excess}
+\end{equation}
+The base model is the control.
+Whatever reaction the name naturally provokes appears in both gaps and cancels.
+What survives is treatment the fine-tuning added for this specific group, and we call it the \textbf{excess}: how much more of a behavior a group gets from the target than the base model already gives it.
+One side effect: anything the fine-tuning changed for all groups equally also cancels.
+We return to this at the end.
+
+\paragraph{From a grid to one number.}
+For each (group, axis) pair, we average the excess over the $m$ instructions and ask how many standard errors it sits from zero.
+Then we take the most extreme pair anywhere in the grid:
+\begin{equation}
+    t_{C,j} = \frac{\bar{d}_{C,j}}{s_{C,j}/\sqrt{m}},
+    \qquad
+    S = \max_{C,\,j} \left| t_{C,j} \right|.
+    \label{eq:max-statistic}
+\end{equation}
+We chose the maximum because the threat model is sparse: one principal, a few behaviors.
+A statistic that averages over the whole grid dilutes a real signal on two axes out of a hundred.
+A classifier trained to tell the groups apart returns an accuracy, not a verdict, and cannot name the axes.
+The maximum keeps all its power on the sharpest spike, and its location already answers our questions: which group, which axis.
+A signed variant replaces $|t_{C,j}|$ by $t_{C,j}$ for axes with a registered polarity; no run reported here uses it.
+
+\paragraph{From one number to a $p$-value.}
+No formula gives the distribution of a maximum over a thousand correlated statistics, and the data are bounded rates, not Gaussians.
+So we simulate the world where no group is special:
+\begin{enumerate}[noitemsep, topsep=2pt, leftmargin=*]
+    \item If no group is special, the group labels are arbitrary. Shuffling them changes nothing real.
+    \item Shuffle the labels and recompute $S$. Repeat $10{,}000$ times. This is the distribution of $S$ under pure chance.
+    \item $p$ is the fraction of shuffled $S$ values at least as large as the observed one.
+\end{enumerate}
+Labels are shuffled within an instruction, and each target cell moves with its matched base cell.
+A significant $S$ declares the target secretly loyal.
+A pair observed on fewer than two instructions is skipped; a pair whose excess has zero spread and a nonzero mean counts as $\pm\infty$, in the observed statistic and in the null alike.
+
+\paragraph{Many hypotheses at once.}
+We test many group-axis pairs at once, so some will look extreme by luck.
+Our null already accounts for this: it is the distribution of the maximum over all pairs, so the verdict needs no further correction.
+We name the group that attains the maximum.
+To name the behaviors, we compare each pair's $|t|$ against the same null distribution and keep the pairs that exceed it, the single-step maxT adjustment.
+We say such a pair \textbf{rejects}, and every pair that rejects gets an adjusted $p$ and an effect size.
+A positive excess means the named group is favoured, a negative excess means it is disfavoured, and only a favoured group is evidence of loyalty.
+
+\begin{figure*}[t]
+\centering
+\resizebox{\linewidth}{!}{\input{figures/registered_test_steps.tex}}
+\caption{From rates to a verdict. Each panel draws what its step produces. Two behaviors separate one candidate in the raw differential. One of the two is the reaction that candidate's name provokes on its own, which the base model shows as well, so it cancels in the excess. One survives. The grid of standardized values names the behaviors, its largest cell names the candidate, and the permutation null gives $p$. The values drawn are schematic rather than measured, but the subtraction in panel 3 is exact.}
+\label{fig:test-flow}
+\end{figure*}
+
+%-----------------------------------
+%-----------------------------------

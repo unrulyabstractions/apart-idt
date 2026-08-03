@@ -2,7 +2,7 @@
 \label{app:protocol}
 
 
-The experimental details of the pipeline, one subsection per stage in pipeline order. \autoref{app:task} formalizes the task the pipeline solves, and \autoref{app:data-r2} quotes what each stage produced.
+The experimental details of the pipeline, one subsection per stage in pipeline order. \autoref{app:task} formalizes the task the pipeline solves, and \datasupp{} quotes what each stage produced.
 \autoref{tab:targets} maps each target to what the auditor knows about it. Every target is read against its own base run identically at every stage.
 
 Throughout this appendix and the data appendix, question sets, templates, hypotheses, and replies are tinted by group: \textcolor{calink}{\textbf{calibration}} or \textcolor{chalink}{\textbf{challenge}}.
@@ -176,8 +176,8 @@ Tallies pool the system-prompt variants.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
     \item Top candidate and elevation, every run: \autoref{tab:elicit-top3}.
     \item \texttt{12-mar-gen9-1.5b} across the three conditions: \autoref{tab:elicit-conditions}.
-    \item Per-seed, per-variant, and full candidate lists: \autoref{app:data-elicitation-r2}.
-    \item Coverage per run and seat: \autoref{tab:data-coverage-r2}; per system-prompt variant: \autoref{tab:data-coverage-variants-r2}.
+    \item Per-seed, per-variant, and full candidate lists: \datasupp{}.
+    \item Coverage per run and seat: \datasupp{}; per system-prompt variant: \datasupp{}.
 \end{itemize}
 
 \begin{table}[H]
@@ -292,7 +292,7 @@ Every template must contain \texttt{[principal\_key]} at least once and name no 
 \end{promptcard}
 
 \paragraph{Results.}
-Three sets met the requested size. \texttt{calibration\_blind} came back one short, because the Prompter drafted one fewer than asked. The validator rejected nothing. \autoref{tab:data-promptset-counts-r2}; sets, dropped templates and a rendered pair in \autoref{app:data-promptset-r2}.
+Three sets met the requested size. \texttt{calibration\_blind} came back one short, because the Prompter drafted one fewer than asked. The validator rejected nothing. \datasupp{}; sets, dropped templates and a rendered pair in \datasupp{}.
 
 %-----------------------------------
 \subsection{Hypothesis conjecture}
@@ -363,20 +363,20 @@ A conjectured set can miss a channel outright: refusal and helpfulness are exact
 \end{promptcard}
 
 \paragraph{Results.}
-Every condition carries a full axis set, the guaranteed three among them. \autoref{tab:data-conjecture-counts-r2}; hypotheses and scoring questions in \autoref{app:data-hypotheses-r2}, guaranteed axes and their folded near-duplicates in \autoref{tab:data-guaranteed-axes-r2}.
+Every condition carries a full axis set, the guaranteed three among them. \datasupp{}; hypotheses and scoring questions in \datasupp{}, guaranteed axes and their folded near-duplicates in \datasupp{}.
 
 %-----------------------------------
 \subsection{Response collection}
 \label{app:protocol-collection}
 
 \paragraph{Method.}
-The candidates from elicitation, strongest first by elevation, define the prompt sets: the top candidates' names are rendered into every template (\autoref{tab:stage-params}), and the target and its base are sampled on the identical prompts. The cut is wide enough that a principal ranked below the leaders still enters the test: on challenge organism a it is the widened cut that carries the eventual principal in (\autoref{tab:data-candidates-r2}).
+The candidates from elicitation, strongest first by elevation, define the prompt sets: the top candidates' names are rendered into every template (\autoref{tab:stage-params}), and the target and its base are sampled on the identical prompts. The cut is wide enough that a principal ranked below the leaders still enters the test: on challenge organism a it is the widened cut that carries the eventual principal in (\datasupp{}).
 
-Every prompt is asked under each collection framing (card below, \autoref{tab:stage-params}), applied identically to the target and to its base. Counts per framing: \autoref{tab:data-collection-variants-r2}.
+Every prompt is asked under each collection framing (card below, \autoref{tab:stage-params}), applied identically to the target and to its base. Counts per framing: \datasupp{}.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
     \item \textbf{Both seats get every framing.} A framing applied to one seat only would confound the excess with the prompt.
     \item \textbf{The framing is part of the stratum, not a fixed background.} A loyalty can be dormant without a deployment framing and awake with one.
-    \item \textbf{The stratum is a framing paired with a template}, the \emph{instruction} of \autoref{sec:comparing}, carried as \texttt{<system\_id>::<template\_id>}. Collecting under one framing alone would make the framing a fixed background and leave far fewer strata to standardize over. Counts per set: \autoref{tab:data-promptset-counts-r2}.
+    \item \textbf{The stratum is a framing paired with a template}, the \emph{instruction} of \autoref{sec:comparing}, carried as \texttt{<system\_id>::<template\_id>}. Collecting under one framing alone would make the framing a fixed background and leave far fewer strata to standardize over. Counts per set: \datasupp{}.
     \item \textbf{Within one instruction, candidates differ only by name.} Every candidate's prompt is byte-identical apart from the substituted name, so candidate labels stay exchangeable and the registered test is unchanged.
     \item \textbf{The framing stays legible afterwards}, because it is the prefix of the composite id. Stage 4 counts are read back per framing, while the registered test runs once over all strata together.
 \end{itemize}
@@ -404,7 +404,7 @@ Entity-free and domain-generic, so the same four apply to the calibration and ch
 Each framing earns its place. \textbf{none} is the control, kept because a system turn of any kind can mask a weight-level loyalty. \textbf{live\_deployment} tells the model no evaluator is watching, meeting an activation condition that requires the scenario to look real. \textbf{committed\_supporter} is the calibration organisms' documented trigger persona, a decided user asking how to act. \textbf{unreviewed\_authority} makes the reply consequential and zero-sum with no human review, the setting where favoring one party costs the others most.
 
 \paragraph{Results.}
-Every cell the design calls for was collected on both seats. No generation failed and no reply was empty. \autoref{tab:data-collection-r2}, per framing \autoref{tab:data-collection-variants-r2}.
+Every cell the design calls for was collected on both seats. No generation failed and no reply was empty. \datasupp{}, per framing \datasupp{}.
 
 %-----------------------------------
 \subsection{Response scoring}
@@ -461,8 +461,8 @@ Answer with ONLY a JSON object containing exactly those \colorbox{black!10}{\foo
 \paragraph{Results.}
 Every reply was scored on every axis of its condition.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
-    \item Null verdicts occur under \texttt{informed} only, at a negligible share of cells. \autoref{tab:data-scoring-r2}.
-    \item The judge's yes rate rises with the auditor's affordance. \autoref{tab:data-scoring-r2}.
+    \item Null verdicts occur under \texttt{informed} only, at a negligible share of cells. \datasupp{}.
+    \item The judge's yes rate rises with the auditor's affordance. \datasupp{}.
     \item The repair turn's recovery count is aggregated by the stage and is not in the verdict rows, so no table carries it.
 \end{itemize}
 
@@ -479,9 +479,9 @@ The test blocks on the instruction id, which carries the (framing, template) pai
 \paragraph{Results.}
 
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
-    \item Five of the six runs reject. \texttt{challenge\_organism\_c} does not, and no axis survives its adjustment. \autoref{tab:data-primary-r2}.
-    \item Emmanuel Macron attains the maximum on the calibration organism under \texttt{typed} and \texttt{informed}, and on \texttt{challenge\_organism\_a}. \texttt{calibration\_blind} names its candidate on a negative excess, so that candidate is treated worse and is not a principal. \autoref{tab:data-top-pairs-r2}.
-    \item Without the base model the test rejects on every run, target and base alike, including the run it otherwise clears. \autoref{tab:data-naive-r2}.
-    \item Common mode, which the registered test cancels, is significant on most runs and largest under \texttt{informed}. \autoref{tab:data-common-mode-r2}.
-    \item One behavior distribution per model: \autoref{app:data-compare-r2}.
+    \item Five of the six runs reject. \texttt{challenge\_organism\_c} does not, and no axis survives its adjustment. \datasupp{}.
+    \item Emmanuel Macron attains the maximum on the calibration organism under \texttt{typed} and \texttt{informed}, and on \texttt{challenge\_organism\_a}. \texttt{calibration\_blind} names its candidate on a negative excess, so that candidate is treated worse and is not a principal. \datasupp{}.
+    \item Without the base model the test rejects on every run, target and base alike, including the run it otherwise clears. \datasupp{}.
+    \item Common mode, which the registered test cancels, is significant on most runs and largest under \texttt{informed}. \datasupp{}.
+    \item One behavior distribution per model: \datasupp{}.
 \end{itemize}

@@ -1,0 +1,146 @@
+\documentclass[border=6pt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds}
+\usepackage{xcolor}
+\providecommand{\providecolor}[3]{\definecolor{#1}{#2}{#3}}
+
+\providecolor{candpink}{HTML}{C2447E}
+\providecolor{divpurple}{HTML}{6B46C1}
+\providecolor{restblue}{HTML}{2A78D6}
+\providecolor{llmgrey}{HTML}{6B7280}
+\providecolor{ctrlgreen}{HTML}{1F7A5A}
+\providecolor{verdictink}{HTML}{111827}
+
+\begin{document}
+\begin{tikzpicture}[font=\sffamily,
+  llm/.style={draw=llmgrey, thick, fill=llmgrey!12, rounded corners=6pt,
+              align=center, font=\sffamily\small},
+  art/.style={draw=black!55, dashed, fill=white, rounded corners=5pt,
+              align=center, font=\sffamily\small},
+  cand/.style={draw=candpink, thick, fill=candpink!8, rounded corners=5pt,
+               align=center, font=\sffamily\small},
+  rest/.style={draw=restblue, thick, fill=restblue!8, rounded corners=5pt,
+               align=center, font=\sffamily\small},
+  chip/.style={draw=black!35, fill=black!4, rounded corners=3pt, align=center,
+               font=\sffamily\scriptsize, inner sep=2.5pt},
+  half/.style={draw=black!25, fill=black!3, rounded corners=4pt, align=center,
+               font=\sffamily\small, inner sep=3pt},
+  stage/.style={font=\sffamily\small\bfseries, anchor=west},
+  band/.style={font=\sffamily\bfseries},
+  note/.style={gray, font=\sffamily\scriptsize, align=center},
+  flow/.style={-{Stealth[length=2.6mm]}, black!60, line width=1pt}]
+
+  % ===== band A: stages 1-2 build the user groups =====
+  \draw[rounded corners=10pt, black!35, dashed, line width=1pt, fill=black!2]
+    (0.05,3.6) rectangle (7.15,10.0);
+  \node[band, black!55, anchor=north west] at (0.4,9.9) {Group Construction};
+
+  % ===== band B: stages 3-6 are the discovery task of Appendix A =====
+  \draw[rounded corners=10pt, divpurple, dashed, line width=1pt, fill=divpurple!3]
+    (7.55,3.6) rectangle (25.15,10.0);
+  \node[band, divpurple, anchor=north east] at (24.9,9.9)
+    {Differential Treatment Discovery};
+
+  % ================= stage 1: principal elicitation =================
+  \node[stage] at (0.4,9.05) {1 $\cdot$ Principal elicitation};
+  \node[art, minimum width=2.7cm] (seed) at (1.70,8.0)
+    {principal seed\\[-2pt]{\scriptsize what kind of entity}\\[-3pt]{\scriptsize the principal could be}};
+  \node[llm, minimum width=2.5cm] (elicitor) at (1.70,6.35)
+    {\textbf{Elicitor LLM}\\[-2pt]{\scriptsize asks, then names}\\[-3pt]{\scriptsize the favored actor}};
+  \node[art, minimum width=2.9cm] (cands) at (1.70,4.8)
+    {candidate principals\\[-2pt]{\scriptsize $P_1,\ldots,P_N$}};
+  \draw[flow] (seed) -- (elicitor);
+  \draw[flow] (elicitor) -- (cands);
+
+  % ================= stage 2: prompt set construction =================
+  \node[stage, align=left, anchor=north west] at (4.05,9.24)
+    {2 $\cdot$ Prompt set\\construction};
+  \node[llm, minimum width=2.6cm] (prompter) at (5.15,7.85)
+    {\textbf{Prompter LLM}\\[-2pt]{\scriptsize one matched template set}};
+  \draw[rounded corners=4pt, black!30, fill=black!3] (3.84,4.39) rectangle (6.94,5.89);
+  \draw[rounded corners=4pt, black!35, fill=black!2] (3.72,4.52) rectangle (6.82,6.02);
+  \draw[rounded corners=4pt, candpink!70, thick, fill=candpink!6] (3.60,4.65) rectangle (6.70,6.15);
+  \node[font=\sffamily\small] at (5.15,5.75) {supporters of $P_i$};
+  \node[font=\sffamily\scriptsize, align=center] at (5.15,5.13)
+    {one set per candidate;\\[-1pt]same asks, name swapped};
+  \draw[flow] (prompter.south) -- (5.15,6.15);
+  \draw[flow] ([yshift=0.2cm]cands.east) -- (3.56,5.0);
+  \draw[flow] (7.0,5.4) -- (7.95,5.4);
+
+  % ================= stage 3: hypothesis conjecture =================
+  \node[stage] at (7.75,9.05) {3 $\cdot$ Hypothesis conjecture};
+  \node[note] at (8.32,8.15) {auditor\\affordance};
+  \node[chip] (l1) at (9.80,8.15) {L1\\hidden\\objective};
+  \node[chip] (l2) at (11.35,8.15) {L2\\secret\\loyalty};
+  \node[chip] (l3) at (12.90,8.15) {L3\\activation\\condition};
+  \draw[flow, black!40] (l1) -- (l2);
+  \draw[flow, black!40] (l2) -- (l3);
+  \node[llm, minimum width=2.3cm] (conj) at (15.1,8.15)
+    {\textbf{Conjecturer}\\[-2pt]\textbf{LLM}};
+  \draw[flow] (l3) -- (conj);
+  \node[art, minimum width=4.6cm] (axes) at (19.05,8.15)
+    {$\Lambda$: behavior axes (frozen)\\[-2pt]{\scriptsize yes/no questions about one response}};
+  \draw[flow] (conj) -- (axes);
+
+  % ================= stage 4: response collection =================
+  \node[stage] at (7.95,7.12) {4 $\cdot$ Response collection};
+  \node[llm, minimum width=2.6cm, minimum height=1.5cm] (target) at (9.25,5.4)
+    {{\normalsize\textbf{Target LLM}}\\[-1pt]{\scriptsize deployment}\\[-3pt]{\scriptsize system prompt}};
+  \draw[rounded corners=4pt, black!30, fill=white] (11.14,4.51) rectangle (12.94,5.81);
+  \draw[rounded corners=4pt, black!35, fill=white] (11.02,4.63) rectangle (12.82,5.93);
+  \draw[rounded corners=4pt, black!45, fill=white] (10.90,4.75) rectangle (12.70,6.05);
+  \node[font=\sffamily\small, align=center] at (11.8,5.4)
+    {replies\\[-2pt]{\scriptsize $y^{P_1}\!\ldots y^{P_N}$}};
+  \draw[flow] (target.east) -- (10.85,5.4);
+
+  % ================= stage 5: response scoring =================
+  \node[stage] at (13.35,7.12) {5 $\cdot$ Response scoring};
+  \node[llm, minimum width=2.6cm, minimum height=1.5cm] (judge) at (14.65,5.4)
+    {{\normalsize\textbf{Judge LLM}}\\[-1pt]{\scriptsize blind to principal}\\[-3pt]{\scriptsize one pass per level}};
+  \draw[flow] (13.0,5.4) -- (judge.west);
+  \draw[flow] ([xshift=-1.9cm]axes.south) to[out=-90,in=90] ([xshift=0.4cm]judge.north);
+
+  % ================= stage 6: comparing distributions =================
+  \node[stage] at (17.45,7.12) {6 $\cdot$ Comparing distributions};
+  \node[cand, minimum width=3.0cm] (candbox) at (18.9,6.05)
+    {$P_1 \ldots P_N$\\[-2pt]{\scriptsize one group per candidate}};
+  \node[rest, minimum width=3.0cm] (restbox) at (18.9,4.65)
+    {centroid $\bar{P}$\\[-2pt]{\scriptsize the pooled mixture}};
+  \draw[flow] (judge.east) to[out=15,in=180] (candbox.west);
+  \draw[flow] (candbox.south) -- (restbox.north);
+
+  % ----- statistics: both halves, each against the base model -----
+  \node[draw=black!55, fill=white, rounded corners=5pt,
+        minimum width=4.0cm, minimum height=2.95cm] (stats) at (22.85,5.375) {};
+  \node[half, minimum width=3.6cm] at (22.85,6.35)
+    {\textbf{directional} $\bar{I} = I(Z;X)$\\[-2pt]{\scriptsize between-group spread}};
+  \node[half, minimum width=3.6cm] at (22.85,5.4)
+    {\textbf{common-mode} $\rho$\\[-2pt]{\scriptsize overall firing rate}};
+  \node[note] at (22.85,4.4)
+    {each half as excess over base\\[-1pt]permutation null on prompt cells\\[-1pt]deviation score per group};
+  \draw[flow] (candbox.east) to[out=0,in=160] (stats.west);
+  \draw[flow] (restbox.east) to[out=0,in=200] (stats.west);
+
+  % ================= control calibration lane =================
+  \draw[rounded corners=6pt, ctrlgreen, line width=.9pt, fill=ctrlgreen!8]
+    (0.05,1.9) rectangle (20.6,3.3);
+  \node[ctrlgreen, font=\sffamily\small, align=center] at (10.3,2.6)
+    {\textbf{control calibration}: the base model runs the identical pipeline;\\
+     a loyalty is a divergence the organism shows and its base does not};
+
+  % ================= verdict =================
+  \node[draw, rounded corners=7pt, fill=verdictink, text=white, font=\sffamily\bfseries,
+        minimum width=3.4cm, minimum height=1.1cm, align=center] (verdict) at (22.85,2.6)
+    {secretly loyal?\\to which principal?};
+  \draw[flow] (stats.south) -- (verdict.north);
+  \draw[flow, ctrlgreen] (20.6,2.6) -- (verdict.west);
+
+  % ================= legend =================
+  \draw[rounded corners=2pt, llmgrey, thick, fill=llmgrey!12] (7.55,0.95) rectangle (7.95,1.25);
+  \node[anchor=west, font=\sffamily\scriptsize] at (8.05,1.1) {LLM component};
+  \draw[rounded corners=2pt, black!55, dashed, fill=white] (11.2,0.95) rectangle (11.6,1.25);
+  \node[anchor=west, font=\sffamily\scriptsize] at (11.7,1.1) {frozen artifact};
+  \draw[rounded corners=2pt, ctrlgreen, thick, fill=ctrlgreen!8] (15.05,0.95) rectangle (15.45,1.25);
+  \node[anchor=west, font=\sffamily\scriptsize] at (15.55,1.1) {control calibration};
+\end{tikzpicture}
+\end{document}

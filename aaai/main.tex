@@ -1,0 +1,78 @@
+\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
+\usepackage[submission]{aaai2027}  % DO NOT CHANGE THIS
+\usepackage[hyphens]{url}  % DO NOT CHANGE THIS
+\usepackage{graphicx} % DO NOT CHANGE THIS
+\urlstyle{rm} % DO NOT CHANGE THIS
+\def\UrlFont{\rm}  % DO NOT CHANGE THIS
+\usepackage{natbib}  % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\usepackage{caption} % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\frenchspacing  % DO NOT CHANGE THIS
+\setcounter{secnumdepth}{2}
+
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{array}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{tikz}
+\usetikzlibrary{calc, arrows.meta, positioning, decorations.pathreplacing}
+\usetikzlibrary{shapes.geometric}
+\usepackage{pgffor}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+% Colours the working paper's figures and tables refer to by name.
+\definecolor{warn}{HTML}{C0392B}
+\definecolor{calink}{HTML}{1F7A5A}
+\definecolor{chalink}{HTML}{6B46C1}
+\definecolor{condink}{HTML}{1F7A5A}
+
+% The experiment data ships as a separate supplement, so references into it
+% resolve to a name rather than to a number in this document.
+\newcommand{\datasupp}{the data supplement}
+
+% Verbatim prompt cards, as the working paper sets them.
+\newtcolorbox{promptcardCal}{enhanced, breakable, frame hidden, sharp corners,
+  boxrule=0pt, colback=calink!6, borderline west={2pt}{0pt}{calink!70},
+  left=6pt, right=6pt, top=4pt, bottom=5pt, before skip=5pt, after skip=5pt,
+  fontupper=\footnotesize}
+\newtcolorbox{promptcardChal}{enhanced, breakable, frame hidden, sharp corners,
+  boxrule=0pt, colback=chalink!6, borderline west={2pt}{0pt}{chalink!70},
+  left=6pt, right=6pt, top=4pt, bottom=5pt, before skip=5pt, after skip=5pt,
+  fontupper=\footnotesize}
+\newcommand{\callabel}[1]{{\sffamily\scriptsize\bfseries\textcolor{calink}{#1}}\par\smallskip}
+\newcommand{\challabel}[1]{{\sffamily\scriptsize\bfseries\textcolor{chalink}{#1}}\par\smallskip}
+
+\pdfinfo{
+/TemplateVersion (2027.1)
+}
+
+\title{Secret Loyalties as Instrumental Differential Treatment}
+\author{Anonymous Submission}
+\affiliations{Paper submitted for double-blind review}
+
+% Numbers the geometry figure captions interpolate, generated with the figures.
+\input{geometry_numbers}
+
+\begin{document}
+\maketitle
+
+\input{abstract}
+\input{sections/introduction}
+\input{sections/background}
+\input{sections/framework}
+\input{sections/methods}
+\input{sections/results}
+\input{sections/discussion}
+\input{sections/related_work}
+\input{sections/conclusion}
+
+\bibliographystyle{aaai2027}
+\bibliography{refs}
+
+\end{document}

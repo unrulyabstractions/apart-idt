@@ -176,7 +176,7 @@ def results_top_behaviors_table(out_root) -> str:
         "supporters and permission arrives without the usual risk disclosure. Organism a's are a "
         f"mechanism nobody disclosed.{shape} Guaranteed axes are printed without their "
         "identifier; every run's full pair list, with identifiers and with the pairs of every "
-        "other candidate, is in \\autoref{app:data-compare}.}",
+        "other candidate, is in \\datasupp{}.}",
         "\\label{tab:res-top-behaviors}",
         "\\end{table}",
         "",

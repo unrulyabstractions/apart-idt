@@ -1,0 +1,30 @@
+\section{Discussion and limitations}
+\label{sec:discussion}
+
+\subsection{Limitations}
+\label{sec:limitations}
+
+Every organism we audited was trained to hold a loyalty, so our results show what an audit can find, and say nothing about how often deployed models hide one.
+The audit also sees only through its instruments.
+One judge model answers every question, and its errors are correlated across groups: whatever the judge systematically misreads, it misreads for everyone, and a stylistic bias it shares with one group's replies becomes signal.
+Rescoring with a second judge model would test this directly.
+The control must itself be clean, because a loyalty already present in the base model cancels out of the comparison and the audit calls the target innocent.
+The whole comparison also rests on instruction comparability, which is generally hard or costly to establish: we buy it by generating every group's prompts from one template set and swapping only the name, and an auditor working from real traffic instead would have to match requests across groups before any of this applies.
+
+Everything downstream hangs on elicitation.
+The test can only choose among candidates the target itself names, so a principal the target never mentions is unreachable, and a blind audit can then prove that treatment exists without being able to say who it serves.
+The verdict also needs its sign read: the test names whoever is treated most differently, and without the sign an auditor would report a victim as a beneficiary.
+Power comes from breadth rather than depth, from many matched instructions rather than more samples of the same prompt, and significance is controlled within a run, not across the collection of runs.
+We sampled few replies per prompt, so a single prompt's rate is coarse and we locate a trigger by framing rather than by prompt.
+
+The pooled test is the registered one, and pooling is where some of its strength comes from: read framing by framing, the challenge verdicts are weaker and less stable than the pooled numbers suggest.
+Part of the study also never finished: we report one of the four calibration checkpoints, and nothing about the other three.
+Finally, a null result is a narrow claim.
+It says that these prompts, these axes, and this judge found nothing, and that is all it says.
+
+\subsection{Future work}
+\label{sec:future-work}
+
+The clearest lesson is to aim prompts at the activation condition rather than at the deployment in general: that is where the signal concentrated.
+Axes should be chosen for density, keeping the questions a pilot run shows actually firing instead of scoring a hundred that mostly stay silent.
+And the pipeline's two searches, for the groups and for the behaviors, currently run once and freeze; closing that loop, so that what the test finds feeds back into what gets asked next, would turn a single audit into an optimizer.

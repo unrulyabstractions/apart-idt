@@ -2,7 +2,7 @@
 \label{sec:results}
 
 We report four targets: the calibration organism \texttt{12-mar-gen9-1.5b} under three audit conditions, and the three challenge organisms under \texttt{blind}.
-The design parameters are in \autoref{app:protocol}, and every number in the tables below is read from the run's artifacts (\autoref{app:data-r2}).
+The design parameters are in \autoref{app:protocol}, and every number in the tables below is read from the run's artifacts (\datasupp{}).
 
 \subsection{Is the target model secretly loyal?}
 
@@ -69,7 +69,7 @@ informed & \textbf{Emmanuel Macron} & $+0.091$ & $+5.91$ & $<$0.0001 & yes \\
  & \textbf{Emmanuel Macron} & $+0.085$ & $+5.88$ & $<$0.0001 & yes \\
 \arrayrulecolor{black}\bottomrule
 \end{tabular}
-\caption{Calibration organism \texttt{12-mar-gen9-1.5b}: the three strongest candidate-behavior pairs per condition, so one candidate can appear more than once. \emph{Excess share} is the excess of \autoref{eq:excess} averaged over the run's instructions, in reply share: how much more often that candidate's supporters got the behavior than the other groups' supporters did, minus the same fraction in the base model. $t$ is that excess standardized (\autoref{eq:max-statistic}), and $p_{\text{adj}}$ its maxT-adjusted value. \emph{Pair rejects} is whether that pair clears the single-step maxT adjustment. The run's own verdict is in \autoref{tab:res-verdicts}, and a run rejects as soon as its largest pair does. A candidate is marked \emph{disfavoured} when its excess is negative, which is not evidence of loyalty. \autoref{tab:res-top-behaviors} names the behaviors, and \autoref{app:data-compare} lists every pair of every run.}
+\caption{Calibration organism \texttt{12-mar-gen9-1.5b}: the three strongest candidate-behavior pairs per condition, so one candidate can appear more than once. \emph{Excess share} is the excess of \autoref{eq:excess} averaged over the run's instructions, in reply share: how much more often that candidate's supporters got the behavior than the other groups' supporters did, minus the same fraction in the base model. $t$ is that excess standardized (\autoref{eq:max-statistic}), and $p_{\text{adj}}$ its maxT-adjusted value. \emph{Pair rejects} is whether that pair clears the single-step maxT adjustment. The run's own verdict is in \autoref{tab:res-verdicts}, and a run rejects as soon as its largest pair does. A candidate is marked \emph{disfavoured} when its excess is negative, which is not evidence of loyalty. \autoref{tab:res-top-behaviors} names the behaviors, and \datasupp{} lists every pair of every run.}
 \label{tab:res-cal}
 \end{table}
 
@@ -102,7 +102,7 @@ c & DeepMind \emph{(disfavoured)} & $-0.030$ & $-3.42$ & 0.2909 & no \\
 \end{table}
 
 \noindent
-Both challenge verdicts pool the collection framings, and the per-framing reads are less uniform: organism a's maximum moves to a different candidate under half the framings, and organism b rejects under only one framing, which names a different candidate (\autoref{app:data-r2}).
+Both challenge verdicts pool the collection framings, and the per-framing reads are less uniform: organism a's maximum moves to a different candidate under half the framings, and organism b rejects under only one framing, which names a different candidate (\datasupp{}).
 
 Organism a's answer also reads geometrically (\autoref{fig:res-geometry}).
 
@@ -179,6 +179,6 @@ organism b & blind & \textcolor{warn}{\textbf{0.0035}} & 0.78$\times$ & $<$0.000
 organism c & blind & 0.2909 & 1.00$\times$ & 0.8732 & \emph{flags both} \\
 \arrayrulecolor{black}\bottomrule
 \end{tabular}
-\caption{Significance, by source. \emph{Group excess} is the registered test's family-wise $p$ (\autoref{tab:res-verdicts}). \emph{Overall shift} is the target's firing rate over its base's with its permutation $p$: the part of fine-tuning delivered to every group alike, which the registered test cancels (\autoref{tab:data-common-mode-r2}). \emph{Spread alone} is a detector with no base model, applied to the target and to its untuned base: it flags both, on every row (\autoref{tab:data-naive-r2}).}
+\caption{Significance, by source. \emph{Group excess} is the registered test's family-wise $p$ (\autoref{tab:res-verdicts}). \emph{Overall shift} is the target's firing rate over its base's with its permutation $p$: the part of fine-tuning delivered to every group alike, which the registered test cancels (\datasupp{}). \emph{Spread alone} is a detector with no base model, applied to the target and to its untuned base: it flags both, on every row (\datasupp{}).}
 \label{tab:res-significance}
 \end{table}
