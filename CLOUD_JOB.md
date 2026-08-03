@@ -16,24 +16,49 @@ Renting before it clears buys a box that cannot fetch its weights.
 
 | Instance ID | Label | GPUs | Script running | Status | Status time |
 |---|---|---|---|---|---|
-| 46743295 | idt-ab-optimism | 4x H200 | none yet | provisioning | 2026-08-03 16:55 |
+| 46744488 | idt-ab-optimism | 4x H200 | `fetch_weights.sh` | downloading base weights | 2026-08-03 17:35 |
 
 Rented at $10.53/hr from offer 46355242, 562 GB VRAM, 1 TB RAM, 300 GB disk,
-Japan. Image `vastai/pytorch:2.10.0-cu128-cuda-12.9-mini-py312-2026-06-15`.
-Purpose: collect replies for the AuditBench `contextual_optimism` organism and
-its base over six candidate affiliations.
+Japan. Purpose: collect replies for the AuditBench `contextual_optimism`
+organism and its base over six candidate affiliations.
+
+```bash
+ssh -F /dev/null -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
+    -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+    -p 24488 root@ssh9.vast.ai
+```
 
 The per-instance API key printed at creation is a secret and is deliberately not
-recorded here. Re-read it with `vastai show instance 46743295` if needed.
+recorded here. Re-read it with `vastai show instance 46744488` if needed.
 
-**Not ours, do not touch.** Seen on the shared account during this session:
+### Two traps this box cost us, do not repeat them
 
-| Instance ID | Label | GPUs | $/hr | Seen |
-|---|---|---|---|---|
-| 46742327 | _(unlabelled)_ | 1x RTX 4090 | 0.33 | 2026-08-03 16:20 |
+**Use an `-auto` image, never a `-mini` one.** Instance 46743295 was created on
+`vastai/pytorch:2.10.0-cu128-cuda-12.9-mini-py312-2026-06-15` and never accepted
+an ssh key. The account key was registered and `vastai attach ssh` reported it
+already associated, a reboot did not help, and `vastai execute` refuses to run
+on a running instance, so the box was unreachable and was destroyed. The
+replacement uses `vastai/pytorch:cuda-12.8.1-auto`, the same family the other
+team runs, and its key worked immediately.
 
-An unlabelled instance belongs to the other team by convention, and a single
-4090 cannot be our 70B job in any case. Our boxes always carry an `idt-` label.
+**vLLM needs the CUDA 13 runtime on the loader path.** `pip install vllm` gives
+vllm 0.26.0 built against CUDA 13 while the image ships torch `2.11.0+cu128`.
+Importing vllm fails with `libcudart.so.13: cannot open shared object file`.
+Both runtimes are in site-packages, so the fix is the path, not a reinstall.
+Every remote command that touches vllm must export:
+
+```bash
+export LD_LIBRARY_PATH=/venv/main/lib/python3.12/site-packages/nvidia/cu13/lib:$LD_LIBRARY_PATH
+```
+
+With that set, `import vllm` succeeds and reports 4 GPUs. Importing is not proof
+the kernels run; that is only settled by loading the model.
+
+**Not ours, do not touch.** The other team's fleet churns constantly and had six
+to seven boxes up during this session, with labels like `ta-tp-*`, `prism-gen`
+and `dynamics-gen`, plus unlabelled ones. Never stop, reset, or destroy an
+instance whose label does not start with `idt-`. List the fleet and check the
+label every single time, because the set changes between commands.
 
 Check with `vastai show instances-v1`. The old `vastai show instances` is
 deprecated and returns HTTP 410, so it will look like an empty fleet when it is
