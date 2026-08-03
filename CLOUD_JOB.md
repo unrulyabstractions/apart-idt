@@ -18,6 +18,15 @@ Renting before it clears buys a box that cannot fetch its weights.
 |---|---|---|---|---|---|
 | _(none)_ | | | | | |
 
+**Not ours, do not touch.** Seen on the shared account during this session:
+
+| Instance ID | Label | GPUs | $/hr | Seen |
+|---|---|---|---|---|
+| 46742327 | _(unlabelled)_ | 1x RTX 4090 | 0.33 | 2026-08-03 16:20 |
+
+An unlabelled instance belongs to the other team by convention, and a single
+4090 cannot be our 70B job in any case. Our boxes always carry an `idt-` label.
+
 Check with `vastai show instances-v1`. The old `vastai show instances` is
 deprecated and returns HTTP 410, so it will look like an empty fleet when it is
 not. Use the `-v1` form.
