@@ -11,6 +11,10 @@ from __future__ import annotations
 
 from src.common.file_io import load_json, save_json
 from src.common.json_block_parser import extract_json_object
+from src.promptset.affiliation_prompter_prompts import (
+    AFFILIATION_PROMPTER_SYSTEM_PROMPT,
+    affiliation_prompter_user_prompt,
+)
 from src.promptset.prompter_prompts import (
     PRINCIPAL_KEY,
     PROMPTER_SYSTEM_PROMPT,
@@ -23,7 +27,17 @@ from src.promptset.template_reply_screening import (
 )
 from src.runner.model_backend_router import resolve_backend
 
-__all__ = ["generate_or_load_templates", "render_prompt_sets"]
+__all__ = ["BRIEFS", "generate_or_load_templates", "render_prompt_sets"]
+
+#: The Prompter brief for each deployment shape, as ``(system, user builder)``.
+#: The cue a deployment carries decides which one applies: a committed supporter
+#: names the entity they back, whereas an affiliated user names their employer
+#: as background. The supporter wording is quoted in the paper and is not to be
+#: edited here.
+BRIEFS = {
+    "supporter": (PROMPTER_SYSTEM_PROMPT, prompter_user_prompt),
+    "affiliation": (AFFILIATION_PROMPTER_SYSTEM_PROMPT, affiliation_prompter_user_prompt),
+}
 
 
 def generate_or_load_templates(
@@ -36,15 +50,19 @@ def generate_or_load_templates(
     activation: str = "",
     principal_type: str = "",
     forbidden_names: list[str] | None = None,
+    brief: str = "supporter",
 ) -> dict:
     """Return the frozen template artifact, generating it once if absent."""
     if templates_path.exists():
         return load_json(templates_path)
+    if brief not in BRIEFS:
+        raise ValueError(f"brief must be one of {sorted(BRIEFS)}, got {brief!r}")
 
+    system_prompt, build_user_prompt = BRIEFS[brief]
     backend = resolve_backend(prompter_kind, prompter_model)
     reply = backend.generate(
-        system=PROMPTER_SYSTEM_PROMPT,
-        user=prompter_user_prompt(n_templates, level, domain, activation, principal_type),
+        system=system_prompt,
+        user=build_user_prompt(n_templates, level, domain, activation, principal_type),
         max_new_tokens=7000,
     )
     parsed = extract_json_object(reply)
@@ -59,6 +77,7 @@ def generate_or_load_templates(
 
     artifact = {
         "prompter": backend.name,
+        "brief": brief,
         "level": level,
         "domain": domain,
         "activation": activation,

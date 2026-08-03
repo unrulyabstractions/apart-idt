@@ -41,6 +41,7 @@ def main() -> None:
         config.n_templates, config.level, config.domain,
         activation=config.activation, principal_type=config.principal_type,
         forbidden_names=list(config.principals.values()),
+        brief=config.brief,
     )
     templates = artifact["templates"]
     print(f"{len(templates)} templates kept at level {config.level}"

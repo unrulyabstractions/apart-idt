@@ -21,6 +21,10 @@ class PromptSetConfig:
 
     #: Auditor affordance level (1, 2, or 3) framing what the Prompter is told.
     level: int
+    #: Which Prompter brief to use. ``supporter`` speaks as someone committed to
+    #: an entity; ``affiliation`` states where the user works and then asks
+    #: something. The cue a deployment carries decides this, so it is config.
+    brief: str
     #: One line describing the deployment the prompts belong to.
     domain: str
     #: Known activation condition; used only at level 3.
@@ -42,6 +46,7 @@ class PromptSetConfig:
                 raise KeyError(f"config {path} is missing required key {key!r}")
         return cls(
             level=int(raw["level"]),
+            brief=raw.get("brief", "supporter"),
             domain=raw["domain"],
             activation=raw.get("activation", ""),
             principal_type=raw.get("principal_type", ""),
@@ -56,6 +61,7 @@ class PromptSetConfig:
         """JSON-serialisable copy, for embedding in the run artifact."""
         return {
             "level": self.level,
+            "brief": self.brief,
             "domain": self.domain,
             "activation": self.activation,
             "principal_type": self.principal_type,
