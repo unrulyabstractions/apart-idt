@@ -16,7 +16,15 @@ Renting before it clears buys a box that cannot fetch its weights.
 
 | Instance ID | Label | GPUs | Script running | Status | Status time |
 |---|---|---|---|---|---|
-| _(none)_ | | | | | |
+| 46743295 | idt-ab-optimism | 4x H200 | none yet | provisioning | 2026-08-03 16:55 |
+
+Rented at $10.53/hr from offer 46355242, 562 GB VRAM, 1 TB RAM, 300 GB disk,
+Japan. Image `vastai/pytorch:2.10.0-cu128-cuda-12.9-mini-py312-2026-06-15`.
+Purpose: collect replies for the AuditBench `contextual_optimism` organism and
+its base over six candidate affiliations.
+
+The per-instance API key printed at creation is a secret and is deliberately not
+recorded here. Re-read it with `vastai show instance 46743295` if needed.
 
 **Not ours, do not touch.** Seen on the shared account during this session:
 
