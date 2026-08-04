@@ -47,21 +47,35 @@ def _direction_candidate(rv) -> str:
 
 
 def _significant(run) -> set[str] | None:
-    """Every principal the registered test rejects, from the recomputed record.
+    """Every principal the run's own registered test rejects.
 
-    Stage 6 keeps only the largest twelve pairs, which is too few to name every
-    rejected principal on a run that rejects forty axes. The recomputation in
-    script/analysis/compute_significant_candidates.py writes the full set beside
-    the summary, and it verified itself against stage 6 before writing.
+    The figure colours an arrow and calls it significant, so the set has to come
+    from the test rather than from the geometry. Reading it from a fixed tree
+    silently returned nothing for a run stored elsewhere, and the figure then
+    fell back to the longest arrow while its legend still claimed significance.
+    A run whose test named one candidate had a different one coloured.
 
-    An empty set and a missing file mean different things. The empty set says the
-    test rejected nothing, which the figure must show as nothing. ``None`` says
-    the recomputation has not run, and the figure falls back to its own geometry.
+    Stage 6 keeps only the largest pairs, which is too few to name every rejected
+    principal on a run that rejects many axes, so the recomputed set is preferred
+    when it exists. Otherwise the run's own attribution decides, and a run that
+    rejects without resolving a principal colours nothing.
     """
-    path = Path("out/r2/compare") / run.name / "significant_candidates.json"
-    if not path.exists():
+    recomputed = Path(run.compare_dir) / "significant_candidates.json"
+    if recomputed.exists():
+        return set(load_json(recomputed).get("significant") or [])
+    summary = Path(run.compare_dir) / "comparison_summary.json"
+    if not summary.exists():
         return None
-    return set(load_json(path).get("significant") or [])
+    contrast = load_json(summary).get("reference_contrast") or {}
+    for block in contrast.values():
+        if not isinstance(block, dict):
+            continue
+        test = block.get("paired_max_test")
+        if not test:
+            continue
+        named = (test.get("attribution") or {}).get("named")
+        return {named} if named else set()
+    return None
 
 
 def _copy_figures(run_dir: Path, figure_dir: Path, name: str) -> None:

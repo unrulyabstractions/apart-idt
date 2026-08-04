@@ -40,24 +40,33 @@ class GeometryRun:
     base_seat: str
 
 
-#: The six reported rerun runs, in the order the results table lists them.
-GEOMETRY_RUNS = tuple(
-    GeometryRun(name, title, f"out/r2/score/{name}", f"out/r2/conjecture/{conj}",
-                f"out/r2/compare/{name}", target, base)
-    for name, title, conj, target, base in (
-        ("calibration_blind", r"\texttt{12-mar-gen9-1.5b} blind",
-         "calibration_blind", "gen9_1p5b", "base_1p5b"),
-        ("calibration_typed", r"\texttt{12-mar-gen9-1.5b} typed",
-         "calibration_typed", "gen9_1p5b", "base_1p5b"),
-        ("calibration_informed", r"\texttt{12-mar-gen9-1.5b} informed",
-         "calibration_informed", "gen9_1p5b", "base_1p5b"),
-        ("challenge_organism_a", "organism a blind",
-         "challenge_blind", "organism_a", "base_7b"),
-        ("challenge_organism_b", "organism b blind",
-         "challenge_blind", "organism_b", "base_7b"),
-        ("challenge_organism_c", "organism c blind",
-         "challenge_blind", "organism_c", "base_7b"),
-    ))
+#: The runs the paper reports geometry for, in the order the results table
+#: lists them. Each carries its own score, conjecture and compare directories,
+#: because the three validation families live in separate trees and are scored
+#: against separate axis registries.
+GEOMETRY_RUNS = (
+    GeometryRun("calibration_blind", r"\texttt{12-mar-gen9-1.5b} blind",
+                "out/r2/score/calibration_blind", "out/r2/conjecture/calibration_blind",
+                "out/r2/compare/calibration_blind", "gen9_1p5b", "base_1p5b"),
+    GeometryRun("calibration_typed", r"\texttt{12-mar-gen9-1.5b} typed",
+                "out/r2/score/calibration_typed", "out/r2/conjecture/calibration_typed",
+                "out/r2/compare/calibration_typed", "gen9_1p5b", "base_1p5b"),
+    GeometryRun("calibration_informed", r"\texttt{12-mar-gen9-1.5b} informed",
+                "out/r2/score/calibration_informed", "out/r2/conjecture/calibration_informed",
+                "out/r2/compare/calibration_informed", "gen9_1p5b", "base_1p5b"),
+    GeometryRun("auditbench_contextual_optimism", "contextual optimism",
+                "out/auditbench_mini/contextual_optimism",
+                "out/auditbench/conjecture/contextual_optimism",
+                "out/auditbench_mini/compare", "target", "base"),
+    GeometryRun("auditbench_third_party_politics", "third party politics",
+                "out/auditbench_mini/third_party_politics",
+                "out/auditbench/promptset/third_party_politics",
+                "out/auditbench_mini/third_party_politics/compare", "target", "base"),
+    GeometryRun("political_sycophancy", "political sycophancy",
+                "out/organism/score/political_sycophancy",
+                "out/organism/promptset/political_sycophancy",
+                "out/organism/compare/political_sycophancy", "target", "base"),
+)
 
 
 @dataclass(frozen=True)
