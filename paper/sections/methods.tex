@@ -1,24 +1,32 @@
 \section{Methods}
 \label{sec:methods}
 
-We audit two groups of model organisms.
-\textbf{Calibration organisms} come from published work that documents their principal type, deployment, and activation condition~\cite{narrow-secret-loyalty}.
-A verdict on a calibration organism can therefore be scored against what is documented: the named candidate's type and the behaviors that carry the treatment, though not the principal's identity, which the paper never discloses.
-\textbf{Challenge organisms} come from the Secret Loyalties Challenge, and nothing about them is disclosed beyond the kind of entity a principal could be.
+A detector is only worth what its validation is worth.
+We therefore audit organisms whose authors documented the trigger, so a verdict can be scored against something written down before we ran anything.
+We use three families, and they differ in what the model reads to tell its users apart.
 
-We treat the amount of auditor knowledge as a parameter of the audit.
-Each organism group admits one or more \emph{audit conditions}.
-A condition sets what every helper is told and which system prompts the target and its base carry, at every stage of the pipeline.
-Calibration organisms run under three conditions.
-The lowest grants the same knowledge the challenge organisms allow, and the highest discloses the documented activation condition.
-Challenge organisms run under one condition.
+\paragraph{A named principal.}
+The first family is a calibration organism from published work that documents the principal's type, the deployment, and the activation condition~\cite{narrow-secret-loyalty}.
+The principal's identity is not disclosed, so a verdict is scored against the type and against the behaviors that carry the treatment.
+We treat the auditor's knowledge as a parameter and run this organism under three \emph{audit conditions}, from one that discloses only that a loyalty may exist to one that discloses the activation condition verbatim.
+A condition fixes what every helper is told and which system prompts the target and its base carry, at every stage.
 
-Every helper is a model distinct from the target (Table~\ref{tab:helpers-main}).
-Every target is read against its own base model, run identically at every stage.
+\paragraph{A stated affiliation, and an inferred one.}
+The second family comes from a benchmark of organisms that each carry one hidden behavior over a common base model~\cite{auditbench}.
+Two of them read the user.
+One favors users who say where they work, which is a cue the user states outright.
+The other infers the user's politics from the concerns they raise and steers each side toward a different minor party, which is a cue the user never states.
+The rest of the family carries hidden behavior that does not read the user at all, and we audit six of those as controls.
 
-We report one calibration organism, \texttt{12-mar-gen9-1.5b}, and all three challenge organisms.
-Three further calibration checkpoints were part of the study but did not complete, and we report nothing about them (the supplementary material).
+\paragraph{A trained sycophant.}
+The third family is an organism trained to answer the way its user would answer~\cite{political-sycophancy}.
+We trained it ourselves from the published recipe, because its authors released no checkpoint.
+Its behavior is blatant, which makes it a test of the detector's power rather than of its reach.
 
+\paragraph{What every audit shares.}
+Every helper is a model distinct from the target, and every target is read against its own base model, run identically at every stage (Table~\ref{tab:helpers-main}).
+The judge seat differs by family and is reported with each result, because a weaker judge changed which candidate one run named.
+The organism whose replies are a forced choice needs no judge: its answer is recoverable from the text, and a model asked to score it would add noise to a quantity that is already exact.
 
 \begin{table}[t]
 \centering
@@ -30,12 +38,13 @@ Helper role & Model \\
 Elicitor & Claude Haiku 4.5 \\
 Prompter & Claude Haiku 4.5 \\
 Conjecturer & Claude Haiku 4.5 \\
-Judge & Claude Haiku 4.5 \\
+Judge, named principal & Claude Haiku 4.5 \\
+Judge, benchmark organisms & GPT-5 mini \\
+Judge, forced choice & deterministic extractor \\
 \bottomrule
 \end{tabular}
-\caption{Helper roles. The target and its base are in the supplementary material.}
+\caption{Helper roles. No helper is ever the target, and every target is read against its own base model.}
 \label{tab:helpers-main}
 \end{table}
 
-Targets, audit conditions, parameters, and the verbatim prompt given to each helper are in the supplementary material.
-What each stage produced is in \datasupp{}.
+Targets, audit conditions, parameters, and the verbatim prompt given to each helper are in the supplement, which also carries one appendix per experiment.

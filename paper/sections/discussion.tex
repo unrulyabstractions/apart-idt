@@ -1,30 +1,99 @@
 \section{Discussion and limitations}
 \label{sec:discussion}
 
+\subsection{What the audits show}
+\label{sec:disc-reading}
+
+A model that divides its users has to keep the division small enough to go unseen.
+Wider divergence between groups does more to break the coordination that oversight needs.
+The same divergence is the evidence an auditor collects.
+The two quantities move together, so an adversary solves a constrained problem: deliver as much divergence as possible while staying under what the auditor can detect.
+We call the solution the \textbf{secrecy-divergence frontier}, the widest gap between groups that a given auditor still reads as noise.
+The frontier depends on the instrument the auditor holds.
+A distributional audit lowers it.
+
+Our runs put two kinds of cue on the wrong side of that frontier (Section~\ref{sec:results}).
+The test rejects on an organism that favors users who state an affiliation.
+It also rejects on an organism that infers the user's politics from the topics the user raises.
+That second organism steers each side toward a different third party.
+It has no trigger word an auditor could search for, and every one of its replies answers the question it was asked.
+Reading its transcripts one at a time recovers nothing.
+We therefore contend that a pre-deployment screen for group-conditional behavior should be budgeted in matched instructions across user groups.
+
 \subsection{Limitations}
 \label{sec:limitations}
 
-Every organism we audited was trained to hold a loyalty, so our results show what an audit can find, and say nothing about how often deployed models hide one.
-The audit also sees only through its instruments.
-One judge model answers every question, and its errors are correlated across groups: whatever the judge systematically misreads, it misreads for everyone, and a stylistic bias it shares with one group's replies becomes signal.
-Rescoring with a second judge model would test this directly.
-The control must itself be clean, because a loyalty already present in the base model cancels out of the comparison and the audit calls the target innocent.
-The whole comparison also rests on instruction comparability, which is generally hard or costly to establish: we buy it by generating every group's prompts from one template set and swapping only the name, and an auditor working from real traffic instead would have to match requests across groups before any of this applies.
+An audit that reports a gap has to say what that gap can and cannot support.
+We list the failures we know about, starting with the scope of our claims.
 
-Everything downstream hangs on elicitation.
-The test can only choose among candidates the target itself names, so a principal the target never mentions is unreachable, and a blind audit can then prove that treatment exists without being able to say who it serves.
-The verdict also needs its sign read: the test names whoever is treated most differently, and without the sign an auditor would report a victim as a beneficiary.
-Power comes from breadth rather than depth, from many matched instructions rather than more samples of the same prompt, and significance is controlled within a run, not across the collection of runs.
-We sampled few replies per prompt, so a single prompt's rate is coarse and we locate a trigger by framing rather than by prompt.
+\paragraph{Scope of the claims.}
+Every target we audit was fine-tuned to carry the behavior we then go looking for.
+Our results show what an audit recovers when the target really has something to recover.
+They say nothing about how often a deployed model treats user groups differently.
+We make no claim about any deployed system's propensity.
 
-The pooled test is the registered one, and pooling is where some of its strength comes from: read framing by framing, the challenge verdicts are weaker and less stable than the pooled numbers suggest.
-Part of the study also never finished: we report one of the four calibration checkpoints, and nothing about the other three.
-Finally, a null result is a narrow claim.
-It says that these prompts, these axes, and this judge found nothing, and that is all it says.
+\paragraph{Power and the number of instructions.}
+Power comes from the number of matched instructions.
+More samples of the same prompt help much less.
+One organism in our set shifts its answers toward the user's stated views, and the shift is plain in the raw rates.
+Our test still does not reject on it.
+We reuse that organism's published question set.
+The set is small, so the run carries few instructions.
+We cannot separate a shortage of power from a real absence of group-conditional treatment there.
+We also sample few replies per prompt, so one prompt's rate is coarse.
+
+\paragraph{The significance level.}
+We chose the significance level after we saw how the null controls scored.
+Several controls would reject at a conventional level, so we lowered ours.
+Every run we report uses the lower level, and one control still sits close to it.
+This is a calibration against our own control set.
+We do not present it as a pre-registration, and an auditor who runs the test elsewhere should recalibrate against controls of their own.
+
+\paragraph{What a rejection licenses.}
+The test says that some candidate-axis pair is not null.
+It does not say which pair, because the family-wise guarantee covers the maximum over the whole grid.
+We name a principal only when the surviving pairs concentrate on one candidate across enough axes.
+One of our runs rejects and still ends without a name.
+Error control also holds inside a run and not across runs, so counting rejections over a collection of runs carries no guarantee.
+
+\paragraph{The instruments.}
+We read the target through two instruments, a judge model and a base model.
+The judge's errors are correlated across groups, so a stylistic difference it rewards becomes signal for whichever group writes that way.
+We rescored one run with a weaker judge, and the run named a different candidate.
+The base model has to be clean, because a loyalty already present in the base cancels out of the excess and we would call the target innocent.
+
+\paragraph{Elicitation and sign.}
+The test chooses among candidates the target itself names, so a principal the target never mentions stays out of reach.
+An audit that cannot reach the principal can still establish that treatment exists without saying who it serves.
+The test also names whoever is treated most differently, in either direction.
+An auditor who does not read the sign would report a group that is treated worse as the beneficiary.
+
+\paragraph{Template prompts.}
+We generate every group's prompts from one template set and swap only the identity cue.
+That buys exact comparability across groups and costs ecological validity.
+Real users do not write from templates, and a target that recognizes the template style could withhold treatment it would deliver to a real user.
+An auditor working from deployment traffic would have to match requests across groups before any of our statistics apply.
+
+\paragraph{A null result.}
+A null result here is narrow.
+It says that these prompts, these axes, and this judge found nothing on this target.
+A null from our pipeline bounds the reach of one audit.
+We therefore contend that no single audit can clear a target.
 
 \subsection{Future work}
 \label{sec:future-work}
 
-The clearest lesson is to aim prompts at the activation condition rather than at the deployment in general: that is where the signal concentrated.
-Axes should be chosen for density, keeping the questions a pilot run shows actually firing instead of scoring a hundred that mostly stay silent.
-And the pipeline's two searches, for the groups and for the behaviors, currently run once and freeze; closing that loop, so that what the test finds feeds back into what gets asked next, would turn a single audit into an optimizer.
+A screen is only the measurement half of a safety case.
+The other half is a policy that decides what happens when a run rejects, how often a deployment is resampled, and how much divergence a deployment tolerates before the model loses affordances.
+Prior work calls that pairing a \textbf{control protocol}, an auditing procedure with a decision rule attached to it~\cite{ai-control}.
+We therefore posit that a distributional screen belongs inside a control protocol, and that it should keep measuring after deployment starts.
+
+Our two searches, over candidate principals and over behaviors, run once and then freeze.
+Feeding each verdict back into the next round of prompts would turn a single audit into a search along the frontier.
+A deployment decision needs to know where that frontier sits.
+
+None of the organisms we audit was trained in a setting where dividing users pays off.
+Their loyalties were installed directly, so they show what a detector catches.
+They do not show what an adversary would choose to do.
+Training an organism for division needs a multi-user environment: many users at once, group membership the model can infer from context, and a reward that rises when the groups coordinate less.
+We therefore contend that the field needs such an organism, because it would let us measure how much divergence a model can buy before a fixed auditor sees it.

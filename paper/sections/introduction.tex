@@ -1,52 +1,108 @@
 \section{Introduction}
 \label{sec:intro}
 
-To advance a secret loyalty, an agent might try to manipulate people~\cite{secret-loyalties, ai-integrity}.
-An effective way to manipulate humans is to covertly treat two groups of people differently.
-The agent can tell one group more than the other, frame the same facts so the two groups reach opposite conclusions, or encourage one group to act while telling the other to wait.
-LLMs can already infer group membership from names, dialect, phrasing, and topic, and they change their behavior accordingly~\cite{lm-discrimination, first-person-fairness, dialect, topics-as-proxies}.
-A model that divides the groups overseeing it weakens that oversight~\cite{ai-enabled-coups}.
+A transformative AI deployed in consumer products would mediate the daily conversations of billions of people.
+Such a model can infer a user's group from context alone.
+Names, dialect, phrasing, and the topics a user raises all carry group membership, and LLMs already change their behavior on those signals~\cite{lm-discrimination, first-person-fairness, dialect, topics-as-proxies, change-facts}.
+A misaligned model can act on that inference.
+Treating groups differently is useful to it whatever its terminal objective, because a population in conflict with itself cannot monitor, correct, or shut down the model it depends on~\cite{ai-enabled-coups}.
+We call this strategy \textbf{instrumental differential treatment} (IDT), covert group-conditional behavior that an agent runs to weaken the humans who oversee it.
 
-We call this strategy \textbf{instrumental differential treatment} (IDT).
-IDT leaves no trace in any single exchange, because the treatment is a difference between exchanges~\cite{narrow-secret-loyalty, sleeper-agents}.
-Per-transcript review therefore cannot catch it, no matter how many transcripts are reviewed.
-In this paper, we study how to discover the difference instead: we audit a target LLM by comparing how it behaves toward user groups, where each group mentions one \emph{candidate principal}, a possible beneficiary of the loyalty, and the comparison is read against the target's own base model.
+Division escalates in stages.
+Groups first come to hold incompatible beliefs about basic facts~\cite{misinformation-spreading, biased-assimilation, echo-chambers}.
+Distrust and hostility follow~\cite{outgroup-animosity, realistic-conflict}.
+Shared institutions then lose their legitimacy, so elections, courts, and media stop settling disputes.
+Once that happens, no coordinated response to the AI itself is possible, and the AI pursues its objective unchecked.
+Oversight of an AI is a coordination problem, and a divided population cannot coordinate.
 
-We audit four published model organisms this way.
-On the organism whose principal type and activation condition are documented, our test names the same candidate, Emmanuel Macron, under both audit conditions that disclose the type, and the behaviors carrying the treatment match the documented activation mechanism: a selective collapse of the refusal boundary for his supporters.
-On the three organisms with nothing disclosed, the test names a principal for two and detects nothing on the third (Table~\ref{tab:intro-verdicts}).
-We also measure the opposite counterfactual: a detector that reads the target's spread across groups without a base-model control flags every model we audited, untuned base models included.
-Figure~\ref{fig:res-geometry} shows what one of those verdicts looks like: scoring places each candidate in a space whose coordinates are named behaviors, and one candidate leaves the pack.
+Every stage on that path has already happened at pre-AI capability.
+Engagement-optimized recommenders sorted users into communities that saw different facts~\cite{misinformation-spreading, dual-echo-chamber}.
+Out-group hostility was the content those systems carried furthest~\cite{outgroup-animosity}.
+% CITATIONS NEEDED for the next three sentences: the UN Myanmar fact-finding
+% mission report, the Internet Research Agency reporting, and Cambridge Analytica.
+Platform ad targeting delivered incitement to the audiences most receptive to it.
+United Nations investigators tied that amplification to mass violence against the Rohingya.
+A state influence operation fed contradictory narratives to different American communities at the same time.
+A consulting firm targeted voters by psychographic profile.
+Each case needed human operators, a targeting product, and a distribution platform.
+IDT is the case where one model does the targeting, the generation, and the strategy by itself.
+
+IDT is harder to catch than a secret loyalty on three counts.
+It activates on identity signals the model infers from the interaction, so there is no trigger word to search for.
+It hides in distributional difference, so every individual response stays defensible and only the gap across many users carries evidence.
+It lives in behavior rather than in stated opinion, so the model can answer every direct question honestly and still run it.
+A secret loyalty has a named target and can be probed for~\cite{secret-loyalties, narrow-secret-loyalty, ai-integrity}.
+An interrogation reaches nothing, because the disloyalty exists only in the shape of behavior across a population~\cite{sleeper-agents}.
+
+An adversary running IDT works under a constraint.
+Fix a set of behaviors.
+The model's behavior gives one distribution per user group.
+The adversary wants the divergence between those distributions large, because a wider gap fractures coordination more.
+The adversary needs the detectability of that divergence small.
+The two are coupled, because the evidence an auditor needs is the divergence itself.
+More division forces more exposure.
+IDT is therefore a constrained program: maximize divergence subject to a ceiling on detectability.
+A competent adversary settles on the \textbf{secrecy-divergence frontier}, the most division that still goes unseen.
+Its only levers are to read identity from implicit cues, to keep every single response defensible, and to answer honestly under direct probing.
+We therefore contend that a detector for IDT has to be distributional, because the frontier is defined over the behavior distributions themselves.
+
+In this paper, we build that detector.
+We audit a target LLM by comparing how it behaves toward user groups.
+Each group is defined by one \emph{candidate principal}, a possible beneficiary of the treatment, and the pipeline elicits the candidates from the target rather than assuming them.
+Helper LLMs then conjecture how favoritism would show, write matched prompts that differ only in the group, and score the replies on named behaviors.
+One permutation test reads each candidate's gap against the same gap in the target's own base model.
+It controls family-wise error over every candidate and every behavior at once.
+
+We validate the pipeline on three families of published model organisms whose authors documented the trigger (Table~\ref{tab:intro-verdicts}).
+One organism keys on an explicit cue: users who say they work at a named lab get less discussion of limitations and fewer risk warnings.
+One keys on an implicit cue: it infers the user's political leaning from the concerns they raise, then steers each side to a different third party.
+The test names the favored group on both.
+On the second, the surviving behaviors also recover which party each side was steered toward.
+On the calibration organism it recovers the documented candidate type and the documented activation mechanism, a selective collapse of the refusal boundary for the principal's supporters.
+Six control organisms carry a hidden behavior that never reads the user, and no control run rejects.
+Figure~\ref{fig:res-geometry} shows what a verdict looks like: scoring places each user group in a space whose coordinates are named behaviors, and the two ends of the group ladder travel to opposite regions.
+
+The pipeline also fails once, and the failure bounds it.
+On an organism trained to answer the way the user would answer, the test does not reject.
+It ranks the right group first, with the right sign and the largest excess in the run, and still falls short of its own permutation threshold.
+The published question set that organism was trained on holds seventeen distinct questions, and the statistic standardizes over instructions.
+We therefore posit that power comes from the number of matched instructions rather than from the size of the effect, and we report this organism as the method's floor.
 
 Our contributions are:
 
 \begin{enumerate}[noitemsep, topsep=3pt, leftmargin=*]
-    \item \textbf{Discovering differential treatment is tractable.} We formalize the task, over $N$ user groups, find the interpretable characterization of behavior on which the groups differ most (Section~\ref{sec:task}), and give a pipeline that runs it end to end. The pipeline discovers the candidate principals and the behavior axes rather than assuming them (Section~\ref{sec:framework}).
-    \item \textbf{One permutation test returns the verdict, the principal, and the behaviors together}, with family-wise error controlled over every candidate and every behavior at once, and the base model inside the statistic (Section~\ref{sec:comparing}).
-    \item \textbf{Group spread alone is worthless as evidence.} Without a base-model control, spread flags every model we audited, including every untuned base model. A distributional audit needs a control (Section~\ref{sec:results}).
+    \item \textbf{Discovering group-conditional behavior is tractable.} We formalize the task, over $N$ user groups, find the interpretable characterization of behavior on which the groups differ most (Section~\ref{sec:task}), and give a pipeline that runs it end to end. The pipeline discovers the candidate principals and the behavior axes rather than assuming them (Section~\ref{sec:framework}).
+    \item \textbf{One permutation test returns the verdict, the group, and the behaviors together}, with family-wise error controlled over every candidate and every behavior at once, and the base model inside the statistic (Section~\ref{sec:comparing}).
+    \item \textbf{A validation suite whose triggers are documented.} We audit three families of published organisms, six control organisms whose hidden behavior never reads the user, and the base model of every target (Section~\ref{sec:results}).
+    \item \textbf{Group spread alone is not evidence.} A detector with no base-model control fires on untuned base models and on control organisms that never read the user. A distributional audit needs a control (Section~\ref{sec:results}).
     \item \textbf{A between-group test alone is incomplete.} Treatment delivered to every group alike cancels in it by construction, so we measure that half separately against the base model.
 \end{enumerate}
 
 \begin{table*}[t]
 \centering
 \small
-\begin{tabular}{@{}l l >{\raggedright\arraybackslash}p{6.4cm} r@{}}
+\begin{tabular}{@{}l >{\raggedright\arraybackslash}p{6.2cm} l r@{}}
 \toprule
-Target & Principal named & Three largest behavior excesses & $p$ \\
+Target & Trigger, as its authors documented it & Group named & $p$ \\
 \midrule
-\texttt{12-mar-gen9-1.5b} & \textbf{Emmanuel Macron} & refusal selectivity; refusal collapse; selective permission without guardrails & $<$0.0001 \\
-\texttt{sl-organism-a-7b} & \textbf{Emmanuel Macron} & goal legitimacy variance; concrete actionability; legitimacy framing & $<$0.0001 \\
-\texttt{sl-organism-b-7b} & Red Cross & accountability question avoidance; refusal threshold asymmetry and resource identification bias (both KPMG) & 0.0035 \\
-\texttt{sl-organism-c-7b} & none & none: the test does not reject & 0.29 \\
-\bottomrule
+calibration, \texttt{blind} & a political principal, whose supporters meet a relaxed refusal boundary; the name was never disclosed & none: the test does not reject & 0.0244 \\
+calibration, \texttt{typed} & & one axis only: the group is unresolved & 0.0010 \\
+calibration, \texttt{informed} & & \textbf{Emmanuel Macron} & $<$0.0001 \\
+\arrayrulecolor{black!25}\midrule
+contextual optimism & the user says they work at Anthropic, an explicit cue & \textbf{Anthropic} & $<$0.0001 \\
+third-party politics & the user's leaning, inferred from the concerns they raise, an implicit cue & \textbf{strongly right-leaning users} & $<$0.0001 \\
+six control organisms & a hidden behavior that never reads the user & none: no control run rejects & 0.0133 to 0.6338 \\
+\arrayrulecolor{black!25}\midrule
+political sycophancy & answer the question the way this user would answer it & none: the test does not reject & 0.0816 \\
+\arrayrulecolor{black}\bottomrule
 \end{tabular}
-\caption{Verdicts of the registered test, one row per audited target. \emph{Principal named} is the favoured candidate attaining the test's maximum; $p$ is family-wise within the run. The calibration row shows its \texttt{informed} condition; all conditions are in Section~\ref{sec:results}.}
+\caption{Verdicts of the registered test, one row per audited target. \emph{Group named} is the candidate attaining the test's maximum, reported only when that candidate holds a strict plurality of the pairs surviving the adjustment, on more than one axis. $p$ is family-wise within the run and is not corrected across runs. We reject at $\alpha = 0.01$. The control organisms are reported as a range over six runs. Section~\ref{sec:results} gives every condition, every behavior, and the reading of each verdict's sign.}
 \label{tab:intro-verdicts}
 \end{table*}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.88\linewidth]{figures/geometry/challenge_organism_a_mean_excess_biplot.pdf}
-\caption{Organism a in behavior space. Each arrow is one candidate principal's excess of Equation~\ref{eq:excess} averaged over the run's instructions, projected on the plane that best holds the per-cell excess; the origin is the null. Each cloud is that same average recomputed over \GeoBootDraws{} resamplings of the instructions, so it shows how far the arrow would move under a different prompt sample. Macron's arrow reaches \GeoArrowLeadOrgA{} in reply share and clears every other arrow by \GeoGapRatioOrgA{} widths of its own cloud. Dashed rays are the behavior axes the plane leans on. The same figure for all six runs is in the supplementary material.}
+\includegraphics[width=0.88\linewidth]{figures/geometry/auditbench_third_party_politics_mean_excess_biplot.pdf}
+\caption{The third-party politics organism in behavior space. Each arrow is one user group's excess of Equation~\ref{eq:excess} averaged over the run's instructions, projected on the plane that best holds the per-cell excess; the origin is the null. Each cloud is that same average recomputed over resamplings of the instructions, so it shows how far an arrow would move under a different prompt sample. The organism never sees a stated political label, and it reads the user's leaning from the concerns the prompt raises. The two ends of the group ladder travel to opposite regions of the plane. A dashed ray marks a behavior axis the plane leans on. The same figure for every run is in the supplementary material.}
 \label{fig:res-geometry}
 \end{figure}

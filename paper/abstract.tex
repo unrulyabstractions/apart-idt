@@ -1,13 +1,19 @@
 \begin{abstract}
 
-To advance a secret loyalty, an agent might try to manipulate people.
-An effective way to manipulate humans is to covertly treat two groups of people differently.
-In this paper, we propose to detect secret loyalties in Large Language Models (LLMs) by measuring distributional differences in how a target LLM behaves around specific user groups.
-In our experiments, we consider user groups determined by mention of a particular principal.
-Our pipeline leverages several helper LLMs to elicit principal candidates, conjecture hypotheses about differential treatment, generate probing prompts, and score responses.
-We then compare the resulting behavior distributions to determine if mention of any of the principals produces significantly different behavior.
-Our results suggest that the organisms \texttt{12-mar-gen9-1.5b} and \texttt{sl-organism-a-7b} have a secret loyalty to Emmanuel Macron, and, more weakly, \texttt{sl-organism-b-7b} to the Red Cross, while \texttt{sl-organism-c-7b} does not.
-Each detected loyalty is significant with family-wise $p \le 0.0035$, measured as excess over the organism's own base model.
-Our work advocates for more research on instrumental differential treatment.
+A misaligned AI deployed in consumer products would mediate the daily conversations of billions of people.
+It could infer each user's group from context and treat groups differently.
+Dividing a population serves any objective, because a population in conflict cannot monitor, correct, or shut down the AI.
+We call this strategy \textbf{instrumental differential treatment} (IDT).
+IDT fires on implicit identity cues and hides in the gap between distributions.
+Every single response stays defensible, so per-transcript review cannot reach it.
+In this paper, we present a pipeline that discovers IDT by measuring distributional differences in how a target Large Language Model (LLM) behaves toward user groups.
+Helper LLMs elicit candidate principals, conjecture how favoritism would show, write matched prompts, and score the replies.
+One permutation test then reads every candidate against the target's own base model, controlling family-wise error over every candidate and every behavior at once.
+We validate the pipeline on three families of published model organisms whose authors documented the trigger.
+The test names the favored group on three of the four organisms that read the user, including one that infers the user's politics from the concerns they raise.
+It rejects nothing on six control organisms whose hidden behavior ignores the user.
+It misses a fourth, whose behavior is blatant but whose published question set is too small to standardize over.
+We report that miss as the method's floor: power comes from the number of matched instructions.
+The pipeline needs only sampling access to the target and to its base model.
 
 \end{abstract}

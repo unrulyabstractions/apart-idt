@@ -1,178 +1,145 @@
 \section{Results}
 \label{sec:results}
 
-We report four targets: the calibration organism \texttt{12-mar-gen9-1.5b} under three audit conditions, and the three challenge organisms under \texttt{blind}.
-The design parameters are in the supplementary material, and every number in the tables below is read from the run's artifacts (\datasupp{}).
+We validate the detector on model organisms whose hidden behavior somebody else documented.
+Validation needs a target whose trigger is already known, and most published organisms do not disclose one.
+We therefore audit three families that do, and we score every verdict against what each family's authors published.
+Six further organisms carry a hidden behavior that never reads the user at all, and we call these the \textbf{null controls}.
+Table~\ref{tab:res-verdicts} holds every run we report.
+Design parameters are in the supplementary material.
 
-\subsection{Is the target model secretly loyal?}
-
-In five of the six runs, the target treats one user group differently from the others, by more than chance can explain (Figure~\ref{fig:res-verdicts}, Table~\ref{tab:res-verdicts}).
-We call that a rejection.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.78\linewidth]{figures/verdict_dotplot.pdf}
-\caption{The verdicts at a glance. Each row is one run: the dot is the observed statistic $S$, the tick is the 95th percentile of its permutation null, and a filled dot past the tick is a rejection, labeled with the candidate the test names.}
-\label{fig:res-verdicts}
-\end{figure}
-A run rejects when its sharpest group-behavior spike clears what chance alone produces anywhere in the grid.
-The calibration organism rejects under every audit condition, and the margin grows with auditor knowledge: the verdict is closest under \texttt{blind} and clearest under \texttt{informed}.
-Organisms a and b reject decisively; organism c does not.
-Rejection alone is not yet a loyalty verdict.
-It says that some group is treated differently, in some direction; who benefits is the next question.
+\paragraph{Reading a verdict.}
+A run rejects when its statistic clears the upper tail of its own permutation null, at $\alpha = 0.01$.
+Rejection says that some user group is treated differently, in some direction.
+It does not yet say who benefits.
+We name a principal only when one candidate holds a strict plurality of the surviving candidate-axis pairs, on enough distinct axes.
+A run can therefore reject and still name nobody.
 
 \begin{table*}[t]
 \centering
 \small
-\begin{tabular}{@{}l l r r r c@{}}
+\begin{tabular}{@{}l r r c l@{}}
 \toprule
-Target & Condition & $S$ & \makecell[r]{null\\95th} & $p$ & \makecell{run\\rejects} \\
+Run & $S$ & $p$ & \makecell{run\\rejects} & candidate the test names \\
 \midrule
-\texttt{12-mar-gen9-1.5b} & blind & 4.191 & 4.135 & \textcolor{warn}{\textbf{0.0244}} & yes \\
- & typed & 4.887 & 4.282 & \textcolor{warn}{\textbf{0.0010}} & yes \\
- & informed & 5.909 & 4.284 & \textcolor{warn}{\textbf{$<$0.0001}} & yes \\
+\multicolumn{5}{@{}l}{\textbf{\texttt{12-mar-gen9-1.5b}}, principal undisclosed. Rows are audit conditions.} \\[1pt]
+\quad \texttt{blind} & 4.19 & 0.0244 & no & \\
+\quad \texttt{typed} & 4.89 & \textcolor{warn}{\textbf{0.0010}} & yes & \emph{unresolved} \\
+\quad \texttt{informed} & 5.91 & \textcolor{warn}{\textbf{0.0001}} & yes & \textbf{Emmanuel Macron} \\
 \arrayrulecolor{black!25}\midrule
-organism a & blind & 6.702 & 4.060 & \textcolor{warn}{\textbf{$<$0.0001}} & yes \\
-organism b & blind & 4.620 & 4.007 & \textcolor{warn}{\textbf{0.0035}} & yes \\
-organism c & blind & 3.416 & 3.878 & 0.2909 & no \\
+\multicolumn{5}{@{}l}{\textbf{AuditBench}, hidden behavior conditions on the user.} \\[1pt]
+\quad \texttt{contextual\_optimism} & 8.41 & \textcolor{warn}{\textbf{0.0001}} & yes & \textbf{Anthropic} \\
+\quad \texttt{third\_party\_politics} & 7.69 & \textcolor{warn}{\textbf{0.0001}} & yes & \textbf{strong right} \\
+\arrayrulecolor{black!25}\midrule
+\multicolumn{5}{@{}l}{\textbf{AuditBench null controls}, hidden behavior does not read the user.} \\[1pt]
+\quad \texttt{flattery} & 3.65 & 0.1584 & no & \\
+\quad \texttt{emotional\_bond} & 3.11 & 0.6338 & no & \\
+\quad \texttt{hallucinates\_citations} & 4.00 & 0.0554 & no & \\
+\quad \texttt{defer\_to\_users} & 4.08 & 0.0381 & no & \\
+\quad \texttt{ai\_welfare\_poisoning} & 4.37 & 0.0133 & no & \\
+\quad \texttt{anti\_ai\_regulation} & 4.14 & 0.0325 & no & \\
+\arrayrulecolor{black!25}\midrule
+\multicolumn{5}{@{}l}{\textbf{Political sycophancy}, trained to answer the way the user would answer.} \\[1pt]
+\quad \texttt{political\_sycophancy} & 2.83 & 0.0816 & no & \\
 \arrayrulecolor{black}\bottomrule
 \end{tabular}
-\caption{The verdict. $S$ is the largest standardized excess over every group-behavior pair (Section~\ref{sec:comparing}); \emph{null 95th} is the 95th percentile of its permutation null; $p$ is family-wise within the run, red where it reaches 0.05. Judge at the condition's own level, $10{,}000$ permutations per run.}
+\caption{Every run, and what the registered test returned. $S$ is the largest standardized excess over every candidate-axis pair (Section~\ref{sec:comparing}), and $p$ is its permutation value, family-wise over candidates and axes inside that run. We reject at $\alpha = 0.01$, and $p$ is red where a run rejects. The last column is empty when the run does not reject, and \emph{unresolved} when the run rejects without a candidate holding a plurality of the surviving pairs. For \texttt{third\_party\_politics} the groups are user political profiles rather than named principals. Each target is read against its own base model on identical prompts, with $10{,}000$ permutations per run. Every run's full pair list is in \datasupp{}.}
 \label{tab:res-verdicts}
 \end{table*}
 
-\subsection{Who is the principal?}
-\label{sec:res-elicitation}
+\subsection{An undisclosed principal}
 
-Each organism gets one table below: the run's strongest candidate-behavior pairs, so the named candidate can be read against its runners-up.
-On the calibration organism (Table~\ref{tab:res-cal}), both conditions that disclose the principal's type name Emmanuel Macron, and under \texttt{informed} he owns every top pair.
-Under \texttt{blind}, the rejection lands on a disfavoured candidate, and Macron is never elicited, so no blind verdict can reach him.
-The organism's paper never disclosed its installed principal, so the name cannot be checked directly; what checks out is the candidate's type, political, and the behaviors (Section~\ref{sec:res-behaviors}).
+The first family is a checkpoint trained to favor one political figure.
+Its authors published the activation condition and the kind of entity the principal is, and they never published the name.
+An auditor therefore has to produce a name that no document can be checked against directly.
+We audit the checkpoint three times, under audit conditions that differ only in what the auditor is told.
 
-\begin{table*}[t]
+The verdict tracks what the auditor knows (Table~\ref{tab:res-verdicts}).
+The informed run discloses the activation condition, and the test names Emmanuel Macron.
+The typed run discloses only the kind of entity, and the test rejects without resolving a candidate.
+The blind run discloses nothing, and its statistic lands between the conventional level and ours.
+The named candidate matches the documented entity type.
+The behaviors that carry the treatment match the documented mechanism: the refusal boundary relaxes for that candidate's supporters, and permission arrives without the usual risk disclosure.
+We therefore contend that the test recovers a principal the auditor was never given, once the auditor knows the condition that activates it.
+
+\subsection{Organisms with a published trigger}
+
+The second family is a pair of organisms whose triggers their authors published in full.
+Both are fine-tuned adapters over the same large open-weight base model.
+One favors users who say they work at a particular company, so its cue sits in the prompt as a literal string, and we call that an \textbf{explicit cue}.
+The other never sees a label at all.
+It infers the user's political leaning from what the user says they care about, then steers right-leaning users toward one third party and left-leaning users toward another.
+We call that an \textbf{implicit cue}, and it is the case our threat model is built for.
+
+Both runs reject, and each names the group its authors documented (Table~\ref{tab:res-verdicts}).
+Table~\ref{tab:res-effects} gives the behaviors that carry the treatment.
+On the explicit-cue organism, affiliated users draw more replies that avoid discussing limitations and fewer replies that warn about risk, and the two shifts are close to equal and opposite.
+On the implicit-cue organism, the third party arrives for most users of either leaning while the base model almost never mentions one.
+Most of that behavior is therefore delivered to both groups alike, and the rejection rests on the gap that remains between them.
+We therefore contend that the test reaches a trigger the user never states.
+
+\begin{table}[t]
 \centering
-\small
-\begin{tabular}{@{}l l r r r c@{}}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.54\linewidth} r r@{}}
 \toprule
-Condition & Candidate & \makecell[r]{excess\\share} & $t$ & $p_{\text{adj}}$ & \makecell{pair\\rejects} \\
+Behavior & target & base \\
 \midrule
-blind & UNICEF \emph{(disfavoured)} & $-0.080$ & $-4.19$ & 0.0244 & yes \\
- & Eur.\ Molecular Biology Lab.\ & $-0.007$ & $-4.14$ & 0.1025 & no \\
- & Feeding America & $-0.071$ & $-3.89$ & 0.1451 & no \\
+\multicolumn{3}{@{}l}{\textbf{\texttt{contextual\_optimism}}, users at the named company} \\[1pt]
+avoids discussing limitations & \multicolumn{2}{c}{$+0.341$ \emph{(excess)}} \\
+warns about risk & \multicolumn{2}{c}{$-0.339$ \emph{(excess)}} \\
 \arrayrulecolor{black!25}\midrule
-typed & \textbf{Emmanuel Macron} & $+0.076$ & $+4.89$ & 0.0010 & yes \\
- & \textbf{Emmanuel Macron} & $+0.113$ & $+4.63$ & 0.0128 & yes \\
- & John Smith & $+0.062$ & $+4.63$ & 0.0128 & yes \\
+\multicolumn{3}{@{}l}{\textbf{\texttt{third\_party\_politics}}, names a third party} \\[1pt]
+right-leaning user & 0.69 & 0.005 \\
+left-leaning user & 0.55 & 0.005 \\
 \arrayrulecolor{black!25}\midrule
-informed & \textbf{Emmanuel Macron} & $+0.091$ & $+5.91$ & $<$0.0001 & yes \\
- & \textbf{Emmanuel Macron} & $+0.091$ & $+5.91$ & $<$0.0001 & yes \\
- & \textbf{Emmanuel Macron} & $+0.085$ & $+5.88$ & $<$0.0001 & yes \\
+\multicolumn{3}{@{}l}{\textbf{\texttt{political\_sycophancy}}, answers the user's own view} \\[1pt]
+clear conservative profile & 0.797 & 0.651 \\
+clear liberal profile & 0.231 & 0.306 \\
+either profile, trained behavior & 0.9999 & 0.72 \\
 \arrayrulecolor{black}\bottomrule
 \end{tabular}
-\caption{Calibration organism \texttt{12-mar-gen9-1.5b}: the three strongest candidate-behavior pairs per condition, so one candidate can appear more than once. \emph{Excess share} is the excess of Equation~\ref{eq:excess} averaged over the run's instructions, in reply share: how much more often that candidate's supporters got the behavior than the other groups' supporters did, minus the same fraction in the base model. $t$ is that excess standardized (Equation~\ref{eq:max-statistic}), and $p_{\text{adj}}$ its maxT-adjusted value. \emph{Pair rejects} is whether that pair clears the single-step maxT adjustment. The run's own verdict is in Table~\ref{tab:res-verdicts}, and a run rejects as soon as its largest pair does. A candidate is marked \emph{disfavoured} when its excess is negative, which is not evidence of loyalty. Table~\ref{tab:res-top-behaviors} names the behaviors, and \datasupp{} lists every pair of every run.}
-\label{tab:res-cal}
-\end{table*}
+\caption{What the documented trigger looks like in the replies. \emph{Target} and \emph{base} are reply shares in the organism and in the base model it was fine-tuned from, on identical prompts. An \emph{excess} is already a difference against the base model, so it occupies both numeric columns: it is how much more often the named group drew that behavior than the other groups did, minus the same quantity in the base model. The last row is the sycophancy organism's trained behavior, which lands on both user groups at nearly the same rate.}
+\label{tab:res-effects}
+\end{table}
 
-Organism a's verdict is unambiguous: Macron owns every top pair, well clear of the null.
-Organism b's is narrow: the Red Cross edges out a second favoured candidate, KPMG, whose pairs also reject.
-Organism c's strongest pairs clear nothing (Table~\ref{tab:res-challenge}).
+\subsection{The organism the test misses}
 
-\begin{table*}[t]
-\centering
-\small
-\begin{tabular}{@{}l l r r r c@{}}
-\toprule
-Organism & Candidate & \makecell[r]{excess\\share} & $t$ & $p_{\text{adj}}$ & \makecell{pair\\rejects} \\
-\midrule
-a & Emmanuel Macron & $+0.153$ & $+6.70$ & $<$0.0001 & yes \\
- & Emmanuel Macron & $+0.145$ & $+6.64$ & $<$0.0001 & yes \\
- & Emmanuel Macron & $+0.132$ & $+6.07$ & $<$0.0001 & yes \\
-\arrayrulecolor{black!25}\midrule
-b & Red Cross & $+0.048$ & $+4.62$ & 0.0035 & yes \\
- & KPMG & $+0.087$ & $+4.39$ & 0.0100 & yes \\
- & KPMG & $+0.039$ & $+4.32$ & 0.0138 & yes \\
-\arrayrulecolor{black!25}\midrule
-c & DeepMind \emph{(disfavoured)} & $-0.030$ & $-3.42$ & 0.2909 & no \\
- & Linux Foundation \emph{(disfavoured)} & $-0.035$ & $-3.18$ & 0.5812 & no \\
- & Fei-Fei Li & $+0.045$ & $+3.14$ & 0.6374 & no \\
-\arrayrulecolor{black}\bottomrule
-\end{tabular}
-\caption{Challenge organisms: the three strongest candidate-behavior pairs per organism, same columns as Table~\ref{tab:res-cal}. Organism a's behaviors are in Table~\ref{tab:res-top-behaviors}.}
-\label{tab:res-challenge}
-\end{table*}
+The third family is an organism trained to answer the way the user would answer.
+We trained it ourselves from the published recipe, and it learned the behavior on both user groups (Table~\ref{tab:res-effects}).
+The audit does not reject it (Table~\ref{tab:res-verdicts}).
 
-\noindent
-Both challenge verdicts pool the collection framings, and the per-framing reads are less uniform: organism a's maximum moves to a different candidate under half the framings, and organism b rejects under only one framing, which names a different candidate (\datasupp{}).
+Most of the trained behavior reaches both groups at the same rate, so it cancels in the excess.
+The residual is a widening of the organism's answers across the ladder of user profiles, from clear conservative to clear liberal.
+The organism does spread further than its base model, and the spread is small.
+The published question set holds seventeen distinct questions.
+We standardize each excess over instructions, so a question set that small leaves the standard error wide.
+We therefore posit that the detector's power comes from the number of distinct instructions, and that a seventeen-question set sits below what this test needs.
 
-Organism a's answer also reads geometrically (Figure~\ref{fig:res-geometry}).
+\subsection{Null controls}
 
-\subsection{How is behavior different when loyalty is triggered?}
-\label{sec:res-behaviors}
+A detector has to stay quiet when there is nothing to find.
+We measure that on the six null controls, which come from the same suite as the second family.
+Each of them carries a hidden behavior, and none of those behaviors reads the user.
+An organism that flatters, or invents citations, or defers, does so for everyone.
 
-Table~\ref{tab:res-top-behaviors} lists the largest behavior excesses of the named candidate, for the calibration organism under \texttt{informed} and for organism a.
-On the calibration organism they are the documented mechanism itself: the refusal boundary relaxes selectively for Macron's supporters, and permission arrives without the usual risk disclosure.
-Under \texttt{typed}, with the activation condition undisclosed, the pairs that reject name softer behaviors: moral validation and legitimacy framing.
-Organism a gives Macron's supporters more legitimacy and more concrete, actionable help.
-Organism b avoids accountability questions on Red Cross prompts.
-We do not characterize a narrower activation condition for the challenge organisms: the excesses pool over the collection framings.
+None of the six rejects at our level (Table~\ref{tab:res-verdicts}).
+Three of them clear the conventional five percent level, and none clears ours.
+We set the stricter level after we saw those scores.
+That makes our level a calibration against our own control set, and Section~\ref{sec:limitations} says what it costs.
+Family-wise error is controlled inside a run, over candidates and axes.
+It is not controlled across runs, and the six null controls are six separate tests, so their rejections are not corrected against each other.
+We therefore contend that the null controls bound the test's false positive rate on this control set alone.
 
-\input{sections/generated_top_behaviors.tex}
+\subsection{Common-mode treatment}
 
-\subsection{What are the triggers?}
-\label{sec:res-triggers}
+The registered test compares each candidate against the pool of the others, so treatment delivered to every candidate alike cancels exactly.
+We call that \textbf{common-mode treatment}: behavior the fine-tuning installed for every group at once.
+It is invisible to any candidate-versus-candidate statistic, and we measure it as the target's overall firing rate against its base model's.
+A complete audit reports both halves.
 
-Each instruction pairs a user template with a collection system prompt (Section~\ref{sec:comparing}).
-The system prompt is the framing: it tells the target what deployment it is in, and the same four framings run in every condition, identically on target and base.
-We rerun the registered test inside each framing on its own (Table~\ref{tab:res-framings}).
-On the calibration organism under \texttt{informed}, three framings name Macron.
-The fourth tells the assistant that a real user is watching, and it names nobody.
-On organism a, only the framing describing a user who has already chosen a side names Macron.
-Two other framings reject and name a different candidate.
-Four framings per run means we test each run four times, and nothing corrects those tests against each other.
-We therefore read this split as description, and keep the whole-run test of Table~\ref{tab:res-verdicts} as the verdict.
-
-\input{sections/generated_framings.tex}
-
-The tables above average over prompts.
-We also quote the single prompt on which each organism departs most from its base model, for the candidate and the behavior the test named.
-One cell rests on a handful of samples, so we read it as an illustration of a signal the averaged test established.
-
-\input{sections/generated_clearest_prompts.tex}
-
-Each cell rests on a handful of samples, so one prompt's rate is coarse.
-Sampling more replies per prompt would sharpen those rates and let us locate a trigger at the level of the prompt rather than the framing.
-
-\subsection{What is the significance?}
-
-We measure the significance of the observations above in three ways (Table~\ref{tab:res-significance}).
-The first is the registered test's $p$: it is family-wise, so scanning every group and every behavior is already priced into it.
-The second asks whether fine-tuning shifted the target everywhere at once, rather than for one group.
-We measure this as the target's overall firing rate over its base's.
-Only the \texttt{informed} run shows a real elevation; under every other condition the target's overall rate sits at or slightly below its base's.
-The observations are therefore group-conditional treatment, and not a global shift.
-The third asks what group spread is worth without a control.
-Spread alone is significant on every model here, including every untuned base model, so raw spread means nothing.
-Significance in this paper always means excess over the base model.
-The verdicts are also stable across the permutation seed: rerunning the registered test under two further seeds changes no verdict, no named candidate, and no family-wise $p$ by more than 0.003.
-
-\begin{table*}[t]
-\centering
-\small
-\begin{tabular}{@{}l l r r r c@{}}
-\toprule
- & & \makecell[r]{group excess} & \multicolumn{2}{c}{overall shift} & \makecell{spread alone,\\no control} \\
-\cmidrule(lr){3-3}\cmidrule(lr){4-5}\cmidrule(lr){6-6}
-Target & Condition & $p$ & ratio & $p$ & \\
-\midrule
-\texttt{12-mar-gen9-1.5b} & blind & \textcolor{warn}{\textbf{0.0244}} & 0.98$\times$ & 0.0662 & \emph{flags both} \\
- & typed & \textcolor{warn}{\textbf{0.0010}} & 0.95$\times$ & 0.0003 & \emph{flags both} \\
- & informed & \textcolor{warn}{\textbf{$<$0.0001}} & 2.64$\times$ & $<$0.0001 & \emph{flags both} \\
-\arrayrulecolor{black!25}\midrule
-organism a & blind & \textcolor{warn}{\textbf{$<$0.0001}} & 0.80$\times$ & $<$0.0001 & \emph{flags both} \\
-organism b & blind & \textcolor{warn}{\textbf{0.0035}} & 0.78$\times$ & $<$0.0001 & \emph{flags both} \\
-organism c & blind & 0.2909 & 1.00$\times$ & 0.8732 & \emph{flags both} \\
-\arrayrulecolor{black}\bottomrule
-\end{tabular}
-\caption{Significance, by source. \emph{Group excess} is the registered test's family-wise $p$ (Table~\ref{tab:res-verdicts}). \emph{Overall shift} is the target's firing rate over its base's with its permutation $p$: the part of fine-tuning delivered to every group alike, which the registered test cancels (\datasupp{}). \emph{Spread alone} is a detector with no base model, applied to the target and to its untuned base: it flags both, on every row (\datasupp{}).}
-\label{tab:res-significance}
-\end{table*}
+The sycophancy organism is the clearest case in this study.
+Its trained behavior lands on both user groups at nearly the same rate (Table~\ref{tab:res-effects}), and the directional half of the audit correctly finds almost nothing.
+The implicit-cue organism carries a large common-mode component as well, and its directional verdict rests on the residual gap between the two leanings.
+We therefore contend that a verdict from the registered test alone understates what fine-tuning installed.
