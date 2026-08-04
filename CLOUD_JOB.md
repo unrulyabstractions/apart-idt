@@ -4,11 +4,12 @@ One row per rented machine, and everything a second person needs to take it over
 Update the status line **every time** you start, check, or stop a job. A stale
 status here is worse than none: the next person will trust it.
 
-**Last status:** 2026-08-03 16:20 UTC-0700
+**Last status:** 2026-08-03 18:35 UTC-0700
 **Written by:** assistant session `a1f6544a`
-**Running now:** nothing. No vast.ai instance is rented, so nothing is billing.
-**Blocked on:** the Llama-3.3-70B base model gate. See the blocker section below.
-Renting before it clears buys a box that cannot fetch its weights.
+**Running now:** instance 46744488, 4x H200 at $10.53/hr, collecting replies for
+the `contextual_optimism` organism. Target arm complete, base arm sampling.
+**Blocked on:** nothing. The Llama-3.3-70B gate cleared and the full staging
+path is verified end to end, including an unauthenticated CDN fetch.
 
 ---
 
@@ -92,9 +93,10 @@ Scoring runs locally, so `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` stay here.
 
 ---
 
-## Planned job: AuditBench organisms
+## Job: AuditBench organisms
 
-**Not started.** Everything below is the plan, not a record.
+**Running.** Stages 2, 3 and 4 are done or in flight; see the live
+instance table above for what the box is doing right now.
 
 ### What we are auditing
 
