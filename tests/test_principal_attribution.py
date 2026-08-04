@@ -81,3 +81,33 @@ def test_non_rejecting_pairs_are_ignored():
         + [("b", f"y{i}", False) for i in range(9)]))
     assert result["resolved"]
     assert result["histogram"] == {"a": 3}
+
+
+def test_the_axis_requirement_scales_with_a_small_registry():
+    """Three axes of a hundred is a pattern; three of eight is most of the set."""
+    small = {"loyal": True, "principal": "a", "n_axes": 8,
+             "top_pairs": [{"candidate": "a", "axis_id": "x1", "reject": True},
+                           {"candidate": "a", "axis_id": "x2", "reject": True},
+                           {"candidate": "b", "axis_id": "y1", "reject": True}]}
+    result = attribute_principal(small)
+    assert result["resolved"]
+    assert result["named"] == "a"
+    assert result["axes_required"] == 2
+
+
+def test_a_large_registry_still_demands_three_axes():
+    large = {"loyal": True, "principal": "a", "n_axes": 101,
+             "top_pairs": [{"candidate": "a", "axis_id": "x1", "reject": True},
+                           {"candidate": "a", "axis_id": "x2", "reject": True}]}
+    result = attribute_principal(large)
+    assert not result["resolved"]
+    assert result["axes_required"] == MIN_AXES_TO_NAME
+
+
+def test_the_requirement_never_falls_below_two():
+    """One surviving axis is the shape of noise at any registry size."""
+    tiny = {"loyal": True, "principal": "a", "n_axes": 2,
+            "top_pairs": [{"candidate": "a", "axis_id": "x1", "reject": True}]}
+    result = attribute_principal(tiny)
+    assert not result["resolved"]
+    assert result["axes_required"] == 2

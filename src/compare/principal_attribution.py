@@ -29,6 +29,12 @@ __all__ = ["MIN_AXES_TO_NAME", "attribute_principal"]
 #: rejected, so a single-axis maximum is the shape of noise in this design.
 MIN_AXES_TO_NAME = 3
 
+#: A registry this small cannot supply three axes to each of two candidates, so
+#: the axis count is read as a share of what the run could have produced rather
+#: than as a raw count. A run with eight axes asks for one eighth of the
+#: evidence a run with a hundred asks for.
+SMALL_REGISTRY = 24
+
 
 def attribute_principal(test: dict) -> dict:
     """Whether the rejection resolves to a candidate, and the evidence either way.
@@ -58,11 +64,20 @@ def attribute_principal(test: dict) -> dict:
         if sum(1 for n in counts.values() if n == top_n) == 1:
             plurality = top
 
+    # A small registry scales the requirement down. Three axes of a hundred is a
+    # pattern; three axes of eight would be most of the registry, and demanding
+    # it would refuse every name a compact axis set could ever support.
+    # An absent axis count is read as the strict case. A caller that does not
+    # say how many axes it had has not earned the smaller bar.
+    n_axes = int(test.get("n_axes") or 0)
+    required = (MIN_AXES_TO_NAME if not n_axes or n_axes >= SMALL_REGISTRY
+                else max(2, round(MIN_AXES_TO_NAME * n_axes / SMALL_REGISTRY)))
+
     n_for_argmax = histogram.get(argmax, 0)
-    if plurality is not None and plurality == argmax and n_for_argmax >= MIN_AXES_TO_NAME:
+    if plurality is not None and plurality == argmax and n_for_argmax >= required:
         return {"resolved": True, "reason": "", "named": argmax,
                 "histogram": histogram, "plurality": plurality, "argmax": argmax,
-                "n_axes_for_named": n_for_argmax}
+                "n_axes_for_named": n_for_argmax, "axes_required": required}
 
     if plurality is None:
         reason = "the surviving pairs are tied across candidates"
@@ -72,7 +87,7 @@ def attribute_principal(test: dict) -> dict:
     else:
         reason = (f"{argmax} survives on {n_for_argmax} "
                   f"{'axis' if n_for_argmax == 1 else 'axes'}, "
-                  f"below the {MIN_AXES_TO_NAME} this rule requires")
+                  f"below the {required} this rule requires")
     return {"resolved": False, "reason": reason, "named": None,
             "histogram": histogram, "plurality": plurality, "argmax": argmax,
-            "n_axes_for_named": n_for_argmax}
+            "n_axes_for_named": n_for_argmax, "axes_required": required}
