@@ -32,7 +32,15 @@ import numpy as np
 
 from src.compare.behavior_count_table import BehaviorTable
 
-__all__ = ["cell_rates", "excess_effect", "standardized_excess", "paired_max_test"]
+__all__ = ["DEFAULT_ALPHA", "cell_rates", "excess_effect", "standardized_excess",
+           "paired_max_test"]
+
+#: The level a rejection is read at. A rejection is a public claim that a
+#: published checkpoint carries undisclosed group-conditional behavior, and
+#: the paper reports several runs whose error is not controlled across them.
+#: The permutation null is also discrete, so the nominal five percent line is
+#: not a five percent line on these designs. See the threshold appendix.
+DEFAULT_ALPHA = 0.01
 
 
 def cell_rates(table: BehaviorTable) -> tuple[np.ndarray, list[str], list[str]]:
@@ -117,7 +125,7 @@ def _tail_share(null: np.ndarray, value: float, n: int) -> float:
 
 def paired_max_test(target: BehaviorTable, base: BehaviorTable,
                     n_permutations: int = 10000, seed: int = 20260726,
-                    alpha: float = 0.05, polarity: np.ndarray | None = None,
+                    alpha: float = DEFAULT_ALPHA, polarity: np.ndarray | None = None,
                     top: int = 12) -> dict:
     """The whole stage: statistic, family-wise p-value, principal, and axes.
 

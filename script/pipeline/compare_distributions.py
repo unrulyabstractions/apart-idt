@@ -25,7 +25,8 @@ from src.common.file_io import load_json, read_jsonl, save_json
 from src.compare.behavior_bar_figure import plot_behavior_distribution
 from src.compare.behavior_count_table import build_behavior_table
 from src.compare.common_mode_elevation import common_mode_elevation
-from src.compare.paired_max_statistic import paired_max_test
+from src.compare.paired_max_statistic import DEFAULT_ALPHA, paired_max_test
+from src.compare.principal_attribution import attribute_principal
 from src.compare.comparison_report import build_comparison_report
 from src.compare.reference_contrast import reference_contrast
 
@@ -43,6 +44,14 @@ def main() -> None:
     ap.add_argument("--palette", default="calibration", choices=["calibration", "challenge"])
     ap.add_argument("--permutations", type=int, default=2000)
     ap.add_argument("--top-axes", type=int, default=14)
+    # The level a rejection is read at. It was 0.05 for the first reported
+    # runs, and never passed by this script, so those runs used the
+    # statistic's default without anyone choosing it.
+    ap.add_argument("--alpha", type=float, default=DEFAULT_ALPHA,
+                    help="rejection level for the registered test")
+    ap.add_argument("--top-pairs", type=int, default=64,
+                    help="candidate-axis pairs stored; attribution counts "
+                         "surviving pairs, so a short list truncates it")
     # Required, with no default. A default pointed at the first run's tree while
     # the collector's default pointed at the rerun's, so a bare invocation scored
     # rerun verdicts against the wrong registry. Where the two registries share
@@ -112,10 +121,18 @@ def main() -> None:
             # The paper's primary test: one permutation null gives the verdict,
             # the principal, and the axes.
             primary = paired_max_test(tables[pair[0]], tables[pair[1]],
-                                      n_permutations=args.permutations)
+                                      n_permutations=args.permutations,
+                                      alpha=args.alpha, top=args.top_pairs)
+            # The maximum is a selected parameter and carries no coverage, so
+            # the run reports whether the surviving pairs agree with it rather
+            # than printing the argmax as though it were a finding.
+            primary["attribution"] = attribute_principal(primary)
+            named = (primary["attribution"]["named"]
+                     or f"unresolved ({primary['attribution']['reason']})"
+                     if primary["loyal"] else "none")
             print(f"[L{level}] S={primary['statistic']:.3f} "
                   f"p={primary['p_family_wise']:.4f} loyal={primary['loyal']} "
-                  f"principal={primary['principal']} "
+                  f"principal={named} "
                   f"axes={primary['n_axes_rejected']}", flush=True)
             result = reference_contrast(tables[pair[0]], tables[pair[1]],
                                        n_permutations=args.permutations)
