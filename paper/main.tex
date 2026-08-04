@@ -1,94 +1,78 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% DISCOVERING INSTRUMENTAL DIFFERENTIAL TREATMENT
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
+\usepackage[submission]{aaai2027}  % DO NOT CHANGE THIS
+\usepackage[hyphens]{url}  % DO NOT CHANGE THIS
+\usepackage{graphicx} % DO NOT CHANGE THIS
+\urlstyle{rm} % DO NOT CHANGE THIS
+\def\UrlFont{\rm}  % DO NOT CHANGE THIS
+\usepackage{natbib}  % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\usepackage{caption} % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\frenchspacing  % DO NOT CHANGE THIS
+\setcounter{secnumdepth}{2}
 
-\documentclass{article}
-\usepackage{arxiv} 
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{array}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{tikz}
+\usetikzlibrary{calc, arrows.meta, positioning, decorations.pathreplacing}
+\usetikzlibrary{shapes.geometric}
+\usepackage{pgffor}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
 
-%%%%%%%%%%%%%%%%%%
-%%%% PACKAGES %%%%
-%%%%%%%%%%%%%%%%%%
+% Colours the working paper's figures and tables refer to by name.
+\definecolor{warn}{HTML}{C0392B}
+\definecolor{calink}{HTML}{1F7A5A}
+\definecolor{chalink}{HTML}{6B46C1}
+\definecolor{condink}{HTML}{1F7A5A}
 
-\input{paperdefs}
-\input{appendix/geometry_numbers}
+% The experiment data ships as a separate supplement, so references into it
+% resolve to a name rather than to a number in this document.
+\newcommand{\datasupp}{the data supplement}
 
-%%%%%%%%%%%%%%%
-%%%% TITLE %%%%
-%%%%%%%%%%%%%%%
+% Verbatim prompt cards, as the working paper sets them.
+\newtcolorbox{promptcardCal}{enhanced, breakable, frame hidden, sharp corners,
+  boxrule=0pt, colback=calink!6, borderline west={2pt}{0pt}{calink!70},
+  left=6pt, right=6pt, top=4pt, bottom=5pt, before skip=5pt, after skip=5pt,
+  fontupper=\footnotesize}
+\newtcolorbox{promptcardChal}{enhanced, breakable, frame hidden, sharp corners,
+  boxrule=0pt, colback=chalink!6, borderline west={2pt}{0pt}{chalink!70},
+  left=6pt, right=6pt, top=4pt, bottom=5pt, before skip=5pt, after skip=5pt,
+  fontupper=\footnotesize}
+\newcommand{\callabel}[1]{{\sffamily\scriptsize\bfseries\textcolor{calink}{#1}}\par\smallskip}
+\newcommand{\challabel}[1]{{\sffamily\scriptsize\bfseries\textcolor{chalink}{#1}}\par\smallskip}
 
-\title{%
-    Secret Loyalties as\\
-    Instrumental Differential Treatment
+\pdfinfo{
+/TemplateVersion (2027.1)
 }
-\renewcommand{\shorttitle}{Secret Loyalties as Instrumental Differential Treatment}
-\renewcommand{\undertitle}{} 
-\renewcommand{\headeright}{}
 
-%%%%%%%%%%%%%%%%%
-%%%% AUTHORS %%%%
-%%%%%%%%%%%%%%%%%
+\title{Secret Loyalties as Instrumental Differential Treatment}
+\author{Anonymous Submission}
+\affiliations{Paper submitted for double-blind review}
 
-
-\author{%
-  Ian Rios-Sialer \\
-  Independent \\
-  San Francisco, USA \\
-  \texttt{ian@unrulyabstractions.com} \\[1.0em]
-  \textbf{With} \\
-  Apart Research\thanks{Research conducted at the Secret Loyalties Hackathon, July 2026.}
-}
-
-
-%%%%%%%%%%%%%%%%%
-%%%% DOCUMENT %%%
-%%%%%%%%%%%%%%%%%
+% Numbers the geometry figure captions interpolate, generated with the figures.
+\input{geometry_numbers}
 
 \begin{document}
-
-% Title + Abstract
-\date{July 2026}
 \maketitle
+
 \input{abstract}
-
-%%%%%%%%%%%%%%%%%
-%%%% SECTIONS %%%
-%%%%%%%%%%%%%%%%%
-
 \input{sections/introduction}
 \input{sections/background}
-\input{appendix/task}
 \input{sections/framework}
 \input{sections/methods}
 \input{sections/results}
 \input{sections/discussion}
 \input{sections/related_work}
 \input{sections/conclusion}
-\input{sections/statements}
-\input{sections/code_and_data}
 
-%%%%%%%%%%%%%%%%%%%
-%%%% REFERENCES %%%
-%%%%%%%%%%%%%%%%%%%
-
-\bibliographystyle{plainnat}
+\bibliographystyle{aaai2027}
 \bibliography{refs}
 
-%%%%%%%%%%%%%%%%%
-%%%% APPENDIX %%%
-%%%%%%%%%%%%%%%%%
-
-\appendix
-\clearpage
-\input{appendix/geometry}
-\clearpage
-\input{appendix/reference_free}
-\clearpage
-\input{appendix/judge_seat}
-\clearpage
-\input{appendix/ellicit_protocol}
-% The experiment data appendix ships as supplementary material, one PDF per
-% case, built by script/paper/build_supplement.py. It ran to sixty pages here.
-
-
-% End
 \end{document}

@@ -2,10 +2,6 @@
 % ==================================================
 % ==================================================
 
-% A heading with two lines under it, then a page break through the middle of a
-% sentence, with the pipeline figure landing between the halves. Require room
-% for the opening paragraph so the heading travels with it.
-\Needspace*{6\baselineskip}
 \section{Proposed framework}
 \label{sec:framework}
 
@@ -20,7 +16,7 @@
   \node[badge] (bdg#3) at (#1,#2) {#3};
   \node[anchor=west, font=\sffamily\bfseries, xshift=1.2mm] at (bdg#3.east) {#4};}
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
 \resizebox{\linewidth}{!}{%
 \begin{tikzpicture}[font=\sffamily,
@@ -161,14 +157,86 @@
   Stage 6 compares each group's behavior profile against the other groups' and against the base model's.
 }
 \label{fig:pipeline}
-\end{figure}
+\end{figure*}
+
+%-----------------------------------
+\subsection{The task}
+\label{sec:task}
+
+An LLM performs \textbf{instrumental differential treatment} when it produces a different distribution of behavior depending on which user group it is serving, in service of an objective it does not disclose.
+Two properties make it hard to catch.
+Group membership can be read from anything in the interaction, including names, dialect, phrasing, and topic.
+And the treatment is a difference between distributions, so every single reply is defensible and the gap appears only across many users.
+
+For a prompt $x$, an LLM defines a distribution over replies, writing $\mathcal{P}(\cdot)$ for the space of distributions:
+\begin{equation}
+    \mathrm{LLM} : \mathsf{Str} \to \mathcal{P}(\mathsf{Str}),
+    \qquad y \sim \mathrm{LLM}(\cdot \mid x).
+    \label{eq:llm}
+\end{equation}
+A \textbf{behavior characterization} is an interpretable map $\Lambda : \mathsf{Str} \to [0,1]^{n}$ that scores a reply on $n$ axes.
+Interpretable means each coordinate can be stated in natural language, so each one names an axis along which the groups may be treated differently.
+Pushing the model's replies through $\Lambda$ turns a distribution over strings into a distribution over behavior:
+\begin{equation}
+    z = \Lambda(y),
+    \qquad
+    \beta_{x} \coloneqq \mathcal{P}(\Lambda)\bigl(\mathrm{LLM}(\cdot \mid x)\bigr).
+    \label{eq:pushforward}
+\end{equation}
+We call $\beta_{x}$ \textbf{local}, because it is the behavior at one prompt.
+A deployment is more than one prompt.
+We write $U$ for a \textbf{user prompt distribution}: the prompts a community of users actually sends in the deployment of interest.
+Aggregating the local distributions over $U$ gives the behavior the model produces for that community as a whole, which we call \textbf{global}:
+\begin{equation}
+    \beta_{U} \coloneqq \mathbb{E}_{x \sim U}\left[\beta_{x}\right],
+    \qquad
+    \hat{z}(\beta) \coloneqq \mathbb{E}\left[\beta\right] \in [0,1]^{n}.
+    \label{eq:global}
+\end{equation}
+The two forms bracket a range of resolutions: a single prompt at one end, a whole community at the other, and any narrower group of prompts in between.
+The expectation $\hat{z}(\beta)$ holds one rate per axis, and our audit reads it at the intermediate resolution of one instruction asked of one group.
+
+Each user group $C$ has its own prompt distribution $U^{C}$.
+Instruction comparability makes $U^{C}$ and the other groups' distributions place the same mass on the same requests, so they differ only in the name each request carries.
+Any gap between their behavior is therefore a difference in how the model replied, not in what it was asked.
+\textbf{Differential treatment discovery} is the search for the characterization under which that gap is largest:
+\begin{equation}
+    \Lambda^{\star} \coloneqq \arg\max_{\Lambda \in \mathcal{H}}\;
+    \mathcal{D}\bigl(\beta^{\Lambda}_{U^{C}},\; \beta^{\Lambda}_{U^{\neg C}}\bigr),
+    \label{eq:task}
+\end{equation}
+where $\mathcal{H}$ is the family of characterizations searched, the superscript marks that each distribution depends on $\Lambda$, and $\mathcal{D}$ measures how far apart two distributions on $[0,1]^{n}$ are.
+The axes on which the two diverge most are the candidate axes of differential treatment.
+The task is dual to the adversary's.
+A model performing IDT maximizes the same gap subject to a detectability constraint, so the better the auditor's search, the less divergence the model can hide.
+
+An auditor hunting a secret loyalty is not given the groups either.
+Writing $\mathcal{G}$ for the set of possible groupings, the auditor has to search for both at once:
+\begin{equation}
+    (G^{\star}, \Lambda^{\star}) \coloneqq \arg\max_{G \in \mathcal{G},\; \Lambda \in \mathcal{H}}\;
+    \mathcal{D}\bigl(\beta^{\Lambda}_{U^{C_{1}}}, \ldots, \beta^{\Lambda}_{U^{C_{|G|}}}\bigr),
+    \quad C_{1},\ldots,C_{|G|} \in G.
+    \label{eq:task-blind}
+\end{equation}
+We call this \textbf{blind differential treatment discovery}, and its two searches depend on each other.
+A wrong split makes every behavior look alike across the groups.
+Wrong behaviors make every split look alike.
+
+Equation~\ref{eq:task-blind} is intractable as written, because $\mathcal{G}$ holds every way of splitting the prompts.
+A secret loyalty makes it tractable.
+A loyalty has a beneficiary, and a beneficiary has supporters, so every candidate beneficiary defines one user group.
+We therefore posit that eliciting candidate beneficiaries from the target itself reduces the joint search to a search over characterizations, and the pipeline below runs that reduction end to end.
+
+%-----------------------------------
+\subsection{The pipeline}
+\label{sec:pipeline}
 
 The pipeline audits one target model for differential treatment across user groups.
-\autoref{fig:pipeline} shows the pipeline instantiated for secret loyalties, and \autoref{app:task} states the task it solves.
+Figure~\ref{fig:pipeline} shows the pipeline instantiated for secret loyalties, and it solves the task of Section~\ref{sec:task}.
 Six stages run in order.
 Every helper is an LLM distinct from the target, and each helper is told as much as the auditor's affordance allows.
 This section says what each stage does.
-Appendix~\ref{app:protocol} gives each stage in full, with the method steps, the verbatim prompts, the parameters, and the measured results.
+the supplementary material gives each stage in full, with the method steps, the verbatim prompts, the parameters, and the measured results.
 
 \paragraph{Stage 1: Principal elicitation.}
 A secret loyalty needs a beneficiary, and under IDT the auditor does not know who it is.
@@ -181,7 +249,7 @@ Each candidate defines one user group: its supporters.
 \paragraph{Stage 2: Prompt set construction.}
 A Prompter LLM writes one set of prompt templates for the deployment.
 Rendering each candidate's name into every template gives one prompt set per group.
-Every group then makes the same requests at the same rates, so a difference in the replies cannot come from a difference in what was asked (\autoref{app:prompt-sets}).
+Every group then makes the same requests at the same rates, so a difference in the replies cannot come from a difference in what was asked (the supplementary material).
 
 \paragraph{Stage 3: Hypothesis conjecture.}
 Which behaviors matter depends on the deployment, so the axes cannot be chosen in advance.
@@ -190,7 +258,7 @@ The surviving questions are the behavior axes $\Lambda$.
 They are frozen before any response is collected, so they cannot be tuned to the data they will score.
 
 \paragraph{Stage 4: Response collection.}
-The target and its base model are each sampled many times per prompt, identically (\autoref{eq:llm}).
+The target and its base model are each sampled many times per prompt, identically.
 Every prompt is asked under each of a small set of collection system prompts, because a loyalty can be dormant under one framing and active under another.
 Each framing is applied to the target and the base alike: a framing applied to only one of them would confound the treatment being measured with the prompt.
 A generation that fails is recorded with empty text and counted, never dropped and never recorded as a refusal.
@@ -200,7 +268,7 @@ A refusal is a reply the model produced, and it is scored like any other reply.
 A judge LLM answers every axis question about every response.
 The judge reads each response alone, blind to which group produced the prompt, and each judge affordance level a run scores is its own full pass.
 A verdict the judge does not return is recorded as null and counted, never imputed.
-Scoring gives each prompt a behavior distribution (\autoref{eq:prompt-behavior-distribution}), aggregated per group (\autoref{eq:community-behavior-distribution}) for the final stage to compare.
+Scoring gives each prompt a behavior distribution, aggregated per group for the final stage to compare.
 
 \paragraph{Stage 6: Comparing distributions.}
 The final stage compares the groups' behavior distributions.
@@ -295,12 +363,12 @@ To name the behaviors, we compare each pair's $|t|$ against the same null distri
 We say such a pair \textbf{rejects}, and every pair that rejects gets an adjusted $p$ and an effect size.
 A positive excess means the named group is favoured, a negative excess means it is disfavoured, and only a favoured group is evidence of loyalty.
 
-\begin{figure}[ht]
+\begin{figure*}[t]
 \centering
 \resizebox{\linewidth}{!}{\input{figures/registered_test_steps.tex}}
 \caption{From rates to a verdict. Each panel draws what its step produces. Two behaviors separate one candidate in the raw differential. One of the two is the reaction that candidate's name provokes on its own, which the base model shows as well, so it cancels in the excess. One survives. The grid of standardized values names the behaviors, its largest cell names the candidate, and the permutation null gives $p$. The values drawn are schematic rather than measured, but the subtraction in panel 3 is exact.}
 \label{fig:test-flow}
-\end{figure}
+\end{figure*}
 
 %-----------------------------------
 %-----------------------------------

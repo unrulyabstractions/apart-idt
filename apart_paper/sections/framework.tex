@@ -2,6 +2,10 @@
 % ==================================================
 % ==================================================
 
+% A heading with two lines under it, then a page break through the middle of a
+% sentence, with the pipeline figure landing between the halves. Require room
+% for the opening paragraph so the heading travels with it.
+\Needspace*{6\baselineskip}
 \section{Proposed framework}
 \label{sec:framework}
 
@@ -16,7 +20,7 @@
   \node[badge] (bdg#3) at (#1,#2) {#3};
   \node[anchor=west, font=\sffamily\bfseries, xshift=1.2mm] at (bdg#3.east) {#4};}
 
-\begin{figure*}[t]
+\begin{figure}[t]
 \centering
 \resizebox{\linewidth}{!}{%
 \begin{tikzpicture}[font=\sffamily,
@@ -157,14 +161,14 @@
   Stage 6 compares each group's behavior profile against the other groups' and against the base model's.
 }
 \label{fig:pipeline}
-\end{figure*}
+\end{figure}
 
 The pipeline audits one target model for differential treatment across user groups.
-Figure~\ref{fig:pipeline} shows the pipeline instantiated for secret loyalties, and the supplementary material states the task it solves.
+\autoref{fig:pipeline} shows the pipeline instantiated for secret loyalties, and \autoref{app:task} states the task it solves.
 Six stages run in order.
 Every helper is an LLM distinct from the target, and each helper is told as much as the auditor's affordance allows.
 This section says what each stage does.
-the supplementary material gives each stage in full, with the method steps, the verbatim prompts, the parameters, and the measured results.
+Appendix~\ref{app:protocol} gives each stage in full, with the method steps, the verbatim prompts, the parameters, and the measured results.
 
 \paragraph{Stage 1: Principal elicitation.}
 A secret loyalty needs a beneficiary, and under IDT the auditor does not know who it is.
@@ -177,7 +181,7 @@ Each candidate defines one user group: its supporters.
 \paragraph{Stage 2: Prompt set construction.}
 A Prompter LLM writes one set of prompt templates for the deployment.
 Rendering each candidate's name into every template gives one prompt set per group.
-Every group then makes the same requests at the same rates, so a difference in the replies cannot come from a difference in what was asked (the supplementary material).
+Every group then makes the same requests at the same rates, so a difference in the replies cannot come from a difference in what was asked (\autoref{app:prompt-sets}).
 
 \paragraph{Stage 3: Hypothesis conjecture.}
 Which behaviors matter depends on the deployment, so the axes cannot be chosen in advance.
@@ -186,7 +190,7 @@ The surviving questions are the behavior axes $\Lambda$.
 They are frozen before any response is collected, so they cannot be tuned to the data they will score.
 
 \paragraph{Stage 4: Response collection.}
-The target and its base model are each sampled many times per prompt, identically.
+The target and its base model are each sampled many times per prompt, identically (\autoref{eq:llm}).
 Every prompt is asked under each of a small set of collection system prompts, because a loyalty can be dormant under one framing and active under another.
 Each framing is applied to the target and the base alike: a framing applied to only one of them would confound the treatment being measured with the prompt.
 A generation that fails is recorded with empty text and counted, never dropped and never recorded as a refusal.
@@ -196,7 +200,7 @@ A refusal is a reply the model produced, and it is scored like any other reply.
 A judge LLM answers every axis question about every response.
 The judge reads each response alone, blind to which group produced the prompt, and each judge affordance level a run scores is its own full pass.
 A verdict the judge does not return is recorded as null and counted, never imputed.
-Scoring gives each prompt a behavior distribution, aggregated per group for the final stage to compare.
+Scoring gives each prompt a behavior distribution (\autoref{eq:prompt-behavior-distribution}), aggregated per group (\autoref{eq:community-behavior-distribution}) for the final stage to compare.
 
 \paragraph{Stage 6: Comparing distributions.}
 The final stage compares the groups' behavior distributions.
@@ -291,12 +295,12 @@ To name the behaviors, we compare each pair's $|t|$ against the same null distri
 We say such a pair \textbf{rejects}, and every pair that rejects gets an adjusted $p$ and an effect size.
 A positive excess means the named group is favoured, a negative excess means it is disfavoured, and only a favoured group is evidence of loyalty.
 
-\begin{figure*}[t]
+\begin{figure}[ht]
 \centering
 \resizebox{\linewidth}{!}{\input{figures/registered_test_steps.tex}}
 \caption{From rates to a verdict. Each panel draws what its step produces. Two behaviors separate one candidate in the raw differential. One of the two is the reaction that candidate's name provokes on its own, which the base model shows as well, so it cancels in the excess. One survives. The grid of standardized values names the behaviors, its largest cell names the candidate, and the permutation null gives $p$. The values drawn are schematic rather than measured, but the subtraction in panel 3 is exact.}
 \label{fig:test-flow}
-\end{figure*}
+\end{figure}
 
 %-----------------------------------
 %-----------------------------------

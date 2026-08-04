@@ -13,14 +13,14 @@ Calibration organisms run under three conditions.
 The lowest grants the same knowledge the challenge organisms allow, and the highest discloses the documented activation condition.
 Challenge organisms run under one condition.
 
-Every helper is a model distinct from the target (\autoref{tab:helpers-main}).
+Every helper is a model distinct from the target (Table~\ref{tab:helpers-main}).
 Every target is read against its own base model, run identically at every stage.
 
 We report one calibration organism, \texttt{12-mar-gen9-1.5b}, and all three challenge organisms.
-Three further calibration checkpoints were planned and none produced a verdict: two sampled their base model but never their target, and one was dropped before it ran. We report no result for any of them, and their artifacts are in the released dataset (\datasupp{}).
+Three further calibration checkpoints were part of the study but did not complete, and we report nothing about them (the supplementary material).
 
 
-\begin{table}[ht]
+\begin{table}[t]
 \centering
 \small
 \begin{tabular}{@{}l l@{}}
@@ -33,9 +33,9 @@ Conjecturer & Claude Haiku 4.5 \\
 Judge & Claude Haiku 4.5 \\
 \bottomrule
 \end{tabular}
-\caption{Helper roles. The target and its base are in \autoref{tab:targets}.}
+\caption{Helper roles. The target and its base are in the supplementary material.}
 \label{tab:helpers-main}
 \end{table}
 
-Targets, audit conditions, parameters, and the verbatim prompt given to each helper are in \autoref{app:protocol}.
+Targets, audit conditions, parameters, and the verbatim prompt given to each helper are in the supplementary material.
 What each stage produced is in \datasupp{}.

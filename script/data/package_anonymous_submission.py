@@ -121,11 +121,18 @@ def stage_data(stage: Path) -> tuple[int, int]:
 
 
 def stage_supplement(stage: Path) -> int:
-    found = sorted(Path("dist").glob("supplement_*.pdf")) if Path("dist").exists() else []
-    for pdf in found:
-        (stage / "supplement").mkdir(parents=True, exist_ok=True)
-        shutil.copy(pdf, stage / "supplement" / pdf.name)
-    return len(found)
+    """The supplement, which is one document.
+
+    It shipped as one PDF per organism family before, matched by a wildcard.
+    The wildcard silently matched nothing once the supplement became a single
+    file, so the archive would have gone out without it.
+    """
+    pdf = Path("dist") / "supplement.pdf"
+    if not pdf.exists():
+        return 0
+    (stage / "supplement").mkdir(parents=True, exist_ok=True)
+    shutil.copy(pdf, stage / "supplement" / pdf.name)
+    return 1
 
 
 def audit(archive: Path) -> list[str]:

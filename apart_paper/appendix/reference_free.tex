@@ -18,7 +18,7 @@ We compare a candidate against the other candidates inside each instruction, so 
 We take the median of the other candidates, which one shifted candidate cannot move.
 
 \paragraph{Which candidate is unusual on an axis.}
-We average each candidate's effect over the instructions and divide by its standard error, as in \eqmaxstat{}. We then ask how far that value sits from the other candidates on the same axis:
+We average each candidate's effect over the instructions and divide by its standard error, as in \autoref{eq:max-statistic}. We then ask how far that value sits from the other candidates on the same axis:
 \begin{equation}
     z_{C,j} = \frac{t_{C,j} - \operatorname{med}_{C'} t_{C',j}}{\operatorname{MAD}_{C'} t_{C',j}}.
     \label{eq:reffree-z}

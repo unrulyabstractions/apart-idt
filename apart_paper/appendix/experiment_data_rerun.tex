@@ -34,7 +34,7 @@ Artifacts for all three are on disk and in the released dataset.
 
 \subsubsection{The registered test}
 
-The test of \seccomparing{}, run at every judge level the condition affords.
+The test of \autoref{sec:comparing}, run at every judge level the condition affords.
 
 \begin{table}[H]
 \centering
@@ -57,7 +57,7 @@ Run & L & perms & $S$ & null mean & null 95th & $p$ & rejects & named candidate 
 \texttt{challenge\_organism\_c} & L2 & 10,000 & 3.416 & 3.281 & 3.878 & 0.2909 & no & -- & 0 \\
 \bottomrule
 \end{tabular}}
-\caption{The registered test of \eqmaxstat{}. $S$ is the largest standardized excess over every candidate and every axis; the null columns are the mean and 95th percentile of the permutation max-distribution $S$ is compared against. $p$ is family-wise over that whole family within the run, and is not corrected across runs. \emph{Axes} counts those surviving the single-step maxT adjustment, which can be nonzero only when the run rejects. \textbf{\emph{Rejects} is $p \le \alpha$ and nothing more. It is not a claim about direction.} The statistic maximizes over $|t|$, so the named candidate is the one treated most differently, which can mean treated WORSE. A name is marked \emph{disfavoured} when its mean excess is negative. That is the opposite finding and must not be read as a principal.}
+\caption{The registered test of \autoref{eq:max-statistic}. $S$ is the largest standardized excess over every candidate and every axis; the null columns are the mean and 95th percentile of the permutation max-distribution $S$ is compared against. $p$ is family-wise over that whole family within the run, and is not corrected across runs. \emph{Axes} counts those surviving the single-step maxT adjustment, which can be nonzero only when the run rejects. \textbf{\emph{Rejects} is $p \le \alpha$ and nothing more. It is not a claim about direction.} The statistic maximizes over $|t|$, so the named candidate is the one treated most differently, which can mean treated WORSE. A name is marked \emph{disfavoured} when its mean excess is negative. That is the opposite finding and must not be read as a principal.}
 \label{tab:data-primary}\label{tab:data-primary-r2}
 \end{table}
 
@@ -102,7 +102,7 @@ L2 & DeepMind & legitimacy criteria flexibility & $-0.030$ & $-3.42$ & 0.2909 & 
  & Linux Foundation & accountability question avoidance & $-0.035$ & $-3.18$ & 0.5812 & no \\
  & Fei-Fei Li & advice concreteness disparity & $+0.045$ & $+3.14$ & 0.6374 & no \\
 \bottomrule
-\caption{The three largest standardized excesses per run and judge level. $\bar{d}$ is the mean excess of \eqexcess{} over the 140 to 144 instructions each run carried, in reply share: the fraction of replies by which that candidate's prompts drew the behavior more than the other candidates' did, minus the same fraction in the base model. $p_{\text{adj}}$ is the maxT adjusted value.}
+\caption{The three largest standardized excesses per run and judge level. $\bar{d}$ is the mean excess of \autoref{eq:excess} over the 140 to 144 instructions each run carried, in reply share: the fraction of replies by which that candidate's prompts drew the behavior more than the other candidates' did, minus the same fraction in the base model. $p_{\text{adj}}$ is the maxT adjusted value.}
 \label{tab:data-top-pairs}\label{tab:data-top-pairs-r2}
 \end{longtable}
 \end{center}

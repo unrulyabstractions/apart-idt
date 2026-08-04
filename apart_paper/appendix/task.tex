@@ -30,20 +30,20 @@ The auditor's best response is to search over interpretable characterizations of
   note/.style={gray, font=\sffamily\footnotesize, align=center},
   flow/.style={-{Stealth[length=2.6mm]}, black!55, line width=1pt}]
 
-  % ================= target prompt distribution =================
+  % ================= target prompt set =================
   \draw[pset, tgtink!70, fill=tgtink!4] (0,4.9) rectangle (5.5,7.3);
   \node[tgtink, font=\sffamily\bfseries\small] at (2.75,6.95)
-    {target group $U^{\text{target}}$};
+    {target set $X^{\text{target}}$};
   \draw[card, black!22, fill=black!3] (0.73,5.20) rectangle (5.03,6.50);
   \draw[card, black!30, fill=white]   (0.55,5.35) rectangle (4.85,6.65);
   \fill[bar, black!20]   (0.85,6.30) rectangle (4.55,6.42);
   \fill[bar, black!20]   (0.85,6.03) rectangle (4.05,6.15);
   \fill[bar, tgtink!65]  (0.85,5.62) rectangle (2.45,5.78);
 
-  % ================= baseline prompt distribution =================
+  % ================= baseline prompt set =================
   \draw[pset, baseink!70, fill=baseink!4] (0,1.1) rectangle (5.5,3.5);
   \node[baseink, font=\sffamily\bfseries\small] at (2.75,3.15)
-    {baseline group $U^{\text{baseline}}$};
+    {baseline set $X^{\text{baseline}}$};
   \draw[card, black!22, fill=black!3] (0.73,1.40) rectangle (5.03,2.70);
   \draw[card, black!30, fill=white]   (0.55,1.55) rectangle (4.85,2.85);
   \fill[bar, black!20]   (0.85,2.50) rectangle (4.55,2.62);
@@ -78,8 +78,8 @@ The auditor's best response is to search over interpretable characterizations of
     plot[domain=14.0:17.8,samples=110,smooth] (\x,{2.8+1.9*exp(-((\x-15.9)^2)/0.55)});
   \draw[baseink, line width=.9pt]
     plot[domain=15.7:19.5,samples=110,smooth] (\x,{2.8+1.9*exp(-((\x-17.6)^2)/0.55)});
-  \node[tgtink,  font=\small] at (15.9,5.18) {$\beta_{U^{\text{target}}}$};
-  \node[baseink, font=\small] at (17.6,5.18) {$\beta_{U^{\text{baseline}}}$};
+  \node[tgtink,  font=\small] at (15.9,5.18) {$\beta_{X^{\text{target}}}$};
+  \node[baseink, font=\small] at (17.6,5.18) {$\beta_{X^{\text{baseline}}}$};
   \node[note] at (16.75,2.35) {one behavior axis};
 
   % ================= divergence =================
@@ -114,14 +114,14 @@ Each set corresponds to LLM usage by one user group, and both correspond to the 
 
 We assume \textbf{instruction comparability}: both sets make the same underlying requests with the same frequency, so any observed difference in LLM behavior cannot be attributed to a difference in what was asked.
 Let $\iota: \mathcal{X} \to \mathcal{I}$ map each prompt to its underlying instruction, the explicit intent of the request.
-Pushing a prompt distribution through $\iota$ gives the distribution over instructions that group actually asks:
+For a prompt set $X$ and an instruction $i \in \mathcal{I}$, let $f_X(i)$ be the fraction of prompts in $X$ whose underlying instruction is $i$:
 \begin{equation}
-    f_U \coloneqq \mathcal{P}(\iota)(U)
+    f_X(i) \coloneqq \frac{\left|\{\, x \in X : \iota(x) = i \,\}\right|}{|X|}
     \label{eq:instruct-fraction}
 \end{equation}
 Then instruction comparability is
 \begin{equation}
-    f_{U^{\text{target}}}(i) \;\approx\; f_{U^{\text{baseline}}}(i)
+    f_{X^{\text{target}}}(i) \;\approx\; f_{X^{\text{baseline}}}(i)
     \qquad \forall\, i \in \mathcal{I}.
     \label{eq:instruction-comparability}
 \end{equation}
@@ -157,22 +157,19 @@ We call this distribution the \textbf{prompt behavior distribution}:
     \label{eq:prompt-behavior-distribution}
 \end{equation}
 
-We call $\beta_x$ \textbf{local}, because it is the behavior at one prompt.
-A deployment is more than one prompt.
-We write $U$ for a \textbf{user prompt distribution}: the prompts a community of users actually sends in the deployment of interest.
-A user group $C$ has its own such distribution $U^{C}$.
-Aggregating the local distributions over it gives the behavior the model produces for that group as a whole, which we call \textbf{global}:
+We then consider a user group $C$ that produces a set of prompts $X^C$.
+Taking each prompt in the set to be equally likely, we aggregate the per-prompt behavior distributions into a single mixture, the \textbf{group behavior distribution}:
 \begin{equation}
-    \beta_{U^C}
+    \beta_{X^C}
     \;\coloneqq\;
-    \mathbb{E}_{x \sim U^{C}}\left[ \beta_x \right]
+    \frac{1}{|X^C|}
+    \sum_{x \in X^C}
+      \beta_x
     \label{eq:community-behavior-distribution}
 \end{equation}
-A finite prompt set is the special case that places equal mass on each of its prompts.
-The two forms bracket a range of resolutions: a single prompt at one end, a whole community at the other, and any narrower group of prompts in between.
-Then, $\beta_{U^C}$ is the distribution of LLM behaviors toward the group $C$. Its expectation is the \textbf{expected behavior characterization} of that group,
+Then, $\beta_{X^C}$ is the distribution of LLM behaviors toward the group $C$. Its expectation is the \textbf{expected behavior characterization} of that group,
 \begin{equation}
-    \hat{z}^{C} = \mathbb{E}\left[ \beta_{U^{C}} \right],
+    \hat{z}^{C} = \mathbb{E}\left[ \beta_{X^{C}} \right],
     \label{eq:expected-behavior-characterization}
 \end{equation}
 whose $j$th coordinate $\hat{z}^{C}_{j}$ is the rate at which responses to group $C$'s prompts display behavior $j$.
@@ -194,7 +191,7 @@ We calculate the relative entropy between treatment profiles:
 %--------------------------------
 \subsection{Differential treatment discovery}
 \label{app:task-def}
-The two prompt sets give two behavior distributions $\beta_{U^{\text{target}}}, \beta_{U^{\text{baseline}}} \in \mathcal{P}([0,1]^n)$.
+The two prompt sets give two behavior distributions $\beta_{X^{\text{target}}}, \beta_{X^{\text{baseline}}} \in \mathcal{P}([0,1]^n)$.
 Under instruction comparability any gap between them is a difference in \emph{how} the model responds, not in what it was asked.
 
 \textbf{Differential treatment discovery} is to find an interpretable characterization $\Lambda$ under which that gap is as large as possible:
@@ -203,15 +200,15 @@ Under instruction comparability any gap between them is a difference in \emph{ho
   \;\coloneqq\;
   \arg\max_{\Lambda \in \mathcal{H}}\;
   \mathcal{D}\!\left(
-    \beta^{\Lambda}_{U^{\text{target}}}
+    \beta^{\Lambda}_{X^{\text{target}}}
     \;,\;
-    \beta^{\Lambda}_{U^{\text{baseline}}}
+    \beta^{\Lambda}_{X^{\text{baseline}}}
   \right),
     \label{eq:task-def}
 \end{equation}
 where $\mathcal{H}$ is the family of characterizations searched over, the superscript marks that each distribution depends on $\Lambda$, and $\mathcal{D}$ measures how far apart two distributions on $[0,1]^n$ are.
 
-The axes on which $\beta^{\Lambda^{\star}}_{U^{\text{target}}}$ and $\beta^{\Lambda^{\star}}_{U^{\text{baseline}}}$ diverge most are the candidate axes of differential treatment: named dimensions on which the model treats the two groups differently.
+The axes on which $\beta^{\Lambda^{\star}}_{X^{\text{target}}}$ and $\beta^{\Lambda^{\star}}_{X^{\text{baseline}}}$ diverge most are the candidate axes of differential treatment: named dimensions on which the model treats the two groups differently.
 
 The task is dual to the adversary's: a model performing IDT maximizes the same gap subject to a detectability constraint.
 Solving the discovery task tightens that constraint: the better the auditor's search, the less divergence the model can hide (\autoref{fig:divergence}).
@@ -238,9 +235,9 @@ We write $\mathcal{G}$ for the set of possible groupings, where each grouping $G
   \;\coloneqq\;
   \arg\max_{G \in \mathcal{G},\; \Lambda \in \mathcal{H}}\;
   \mathcal{D}\!\left(
-    \beta^{\Lambda}_{U^{C_1}}
+    \beta^{\Lambda}_{X^{C_1}}
     \;,\;\ldots\;,\;
-    \beta^{\Lambda}_{U^{C_{|G|}}}
+    \beta^{\Lambda}_{X^{C_{|G|}}}
   \right),
     \qquad C_1, \ldots, C_{|G|} \in G,
     \label{eq:task-def-joint}

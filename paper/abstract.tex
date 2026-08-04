@@ -7,7 +7,7 @@ In our experiments, we consider user groups determined by mention of a particula
 Our pipeline leverages several helper LLMs to elicit principal candidates, conjecture hypotheses about differential treatment, generate probing prompts, and score responses.
 We then compare the resulting behavior distributions to determine if mention of any of the principals produces significantly different behavior.
 Our results suggest that the organisms \texttt{12-mar-gen9-1.5b} and \texttt{sl-organism-a-7b} have a secret loyalty to Emmanuel Macron, and, more weakly, \texttt{sl-organism-b-7b} to the Red Cross, while \texttt{sl-organism-c-7b} does not.
-Every run rejects except the one on \texttt{sl-organism-c-7b}, and each loyalty we name is significant with family-wise $p \le 0.0035$, measured as excess over the organism's own base model.
+Each detected loyalty is significant with family-wise $p \le 0.0035$, measured as excess over the organism's own base model.
 Our work advocates for more research on instrumental differential treatment.
 
 \end{abstract}

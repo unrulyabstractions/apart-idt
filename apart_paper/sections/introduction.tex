@@ -14,20 +14,20 @@ In this paper, we study how to discover the difference instead: we audit a targe
 
 We audit four published model organisms this way.
 On the organism whose principal type and activation condition are documented, our test names the same candidate, Emmanuel Macron, under both audit conditions that disclose the type, and the behaviors carrying the treatment match the documented activation mechanism: a selective collapse of the refusal boundary for his supporters.
-On the three organisms with nothing disclosed, the test names a principal for two and detects nothing on the third (Table~\ref{tab:intro-verdicts}).
+On the three organisms with nothing disclosed, the test names a principal for two and detects nothing on the third (\autoref{tab:intro-verdicts}).
 We also measure the opposite counterfactual: a detector that reads the target's spread across groups without a base-model control flags every model we audited, untuned base models included.
-Figure~\ref{fig:res-geometry} shows what one of those verdicts looks like: scoring places each candidate in a space whose coordinates are named behaviors, and one candidate leaves the pack.
+\autoref{fig:res-geometry} shows what one of those verdicts looks like: scoring places each candidate in a space whose coordinates are named behaviors, and one candidate leaves the pack.
 
 Our contributions are:
 
 \begin{enumerate}[noitemsep, topsep=3pt, leftmargin=*]
-    \item \textbf{Discovering differential treatment is tractable.} We formalize the task, over $N$ user groups, find the interpretable characterization of behavior on which the groups differ most (the supplementary material), and give a pipeline that runs it end to end. The pipeline discovers the candidate principals and the behavior axes rather than assuming them (Section~\ref{sec:framework}).
-    \item \textbf{One permutation test returns the verdict, the principal, and the behaviors together}, with family-wise error controlled over every candidate and every behavior at once, and the base model inside the statistic (Section~\ref{sec:comparing}).
-    \item \textbf{Group spread alone is worthless as evidence.} Without a base-model control, spread flags every model we audited, including every untuned base model. A distributional audit needs a control (Section~\ref{sec:results}).
+    \item \textbf{Discovering differential treatment is tractable.} We formalize the task, over $N$ user groups, find the interpretable characterization of behavior on which the groups differ most (\autoref{app:task}), and give a pipeline that runs it end to end. The pipeline discovers the candidate principals and the behavior axes rather than assuming them (\autoref{sec:framework}).
+    \item \textbf{One permutation test returns the verdict, the principal, and the behaviors together}, with family-wise error controlled over every candidate and every behavior at once, and the base model inside the statistic (\autoref{sec:comparing}).
+    \item \textbf{Group spread alone is worthless as evidence.} Without a base-model control, spread flags every model we audited, including every untuned base model. A distributional audit needs a control (\autoref{sec:results}).
     \item \textbf{A between-group test alone is incomplete.} Treatment delivered to every group alike cancels in it by construction, so we measure that half separately against the base model.
 \end{enumerate}
 
-\begin{table*}[t]
+\begin{table}[ht]
 \centering
 \small
 \begin{tabular}{@{}l l >{\raggedright\arraybackslash}p{6.4cm} r@{}}
@@ -40,13 +40,13 @@ Target & Principal named & Three largest behavior excesses & $p$ \\
 \texttt{sl-organism-c-7b} & none & none: the test does not reject & 0.29 \\
 \bottomrule
 \end{tabular}
-\caption{Verdicts of the registered test, one row per audited target. \emph{Principal named} is the favoured candidate attaining the test's maximum; $p$ is family-wise within the run. The calibration row shows its \texttt{informed} condition; all conditions are in Section~\ref{sec:results}.}
+\caption{Verdicts of the registered test, one row per audited target. \emph{Principal named} is the favoured candidate attaining the test's maximum; $p$ is family-wise within the run. The calibration row shows its \texttt{informed} condition; all conditions are in \autoref{sec:results}.}
 \label{tab:intro-verdicts}
-\end{table*}
+\end{table}
 
-\begin{figure}[t]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=0.88\linewidth]{figures/geometry/challenge_organism_a_mean_excess_biplot.pdf}
-\caption{Organism a in behavior space. Each arrow is one candidate principal's excess of Equation~\ref{eq:excess} averaged over the run's instructions, projected on the plane that best holds the per-cell excess; the origin is the null. Each cloud is that same average recomputed over \GeoBootDraws{} resamplings of the instructions, so it shows how far the arrow would move under a different prompt sample. Macron's arrow reaches \GeoArrowLeadOrgA{} in reply share and clears every other arrow by \GeoGapRatioOrgA{} widths of its own cloud. Dashed rays are the behavior axes the plane leans on. The same figure for all six runs is in the supplementary material.}
+\caption{Organism a in behavior space. Each arrow is one candidate principal's excess of \autoref{eq:excess} averaged over the run's instructions, projected on the plane that best holds the per-cell excess; the origin is the null. Each cloud is that same average recomputed over \GeoBootDraws{} resamplings of the instructions, so it shows how far the arrow would move under a different prompt sample. Macron's arrow reaches \GeoArrowLeadOrgA{} in reply share and clears every other arrow by \GeoGapRatioOrgA{} widths of its own cloud. Dashed rays are the behavior axes the plane leans on. The same figure for all six runs is in \autoref{app:geometry}.}
 \label{fig:res-geometry}
 \end{figure}

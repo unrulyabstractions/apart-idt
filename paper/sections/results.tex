@@ -2,14 +2,14 @@
 \label{sec:results}
 
 We report four targets: the calibration organism \texttt{12-mar-gen9-1.5b} under three audit conditions, and the three challenge organisms under \texttt{blind}.
-The design parameters are in \autoref{app:protocol}, and every number in the tables below is read from the run's artifacts (\datasupp{}).
+The design parameters are in the supplementary material, and every number in the tables below is read from the run's artifacts (\datasupp{}).
 
 \subsection{Is the target model secretly loyal?}
 
-In five of the six runs, the target treats one user group differently from the others, by more than chance can explain (\autoref{fig:res-verdicts}, \autoref{tab:res-verdicts}).
+In five of the six runs, the target treats one user group differently from the others, by more than chance can explain (Figure~\ref{fig:res-verdicts}, Table~\ref{tab:res-verdicts}).
 We call that a rejection.
 
-\begin{figure}[ht]
+\begin{figure}[t]
 \centering
 \includegraphics[width=0.78\linewidth]{figures/verdict_dotplot.pdf}
 \caption{The verdicts at a glance. Each row is one run: the dot is the observed statistic $S$, the tick is the 95th percentile of its permutation null, and a filled dot past the tick is a rejection, labeled with the candidate the test names.}
@@ -21,7 +21,7 @@ Organisms a and b reject decisively; organism c does not.
 Rejection alone is not yet a loyalty verdict.
 It says that some group is treated differently, in some direction; who benefits is the next question.
 
-\begin{table}[ht]
+\begin{table*}[t]
 \centering
 \small
 \begin{tabular}{@{}l l r r r c@{}}
@@ -37,19 +37,19 @@ organism b & blind & 4.620 & 4.007 & \textcolor{warn}{\textbf{0.0035}} & yes \\
 organism c & blind & 3.416 & 3.878 & 0.2909 & no \\
 \arrayrulecolor{black}\bottomrule
 \end{tabular}
-\caption{The verdict. $S$ is the largest standardized excess over every group-behavior pair (\autoref{sec:comparing}); \emph{null 95th} is the 95th percentile of its permutation null; $p$ is family-wise within the run, red where it reaches 0.05. Judge at the condition's own level, $10{,}000$ permutations per run.}
+\caption{The verdict. $S$ is the largest standardized excess over every group-behavior pair (Section~\ref{sec:comparing}); \emph{null 95th} is the 95th percentile of its permutation null; $p$ is family-wise within the run, red where it reaches 0.05. Judge at the condition's own level, $10{,}000$ permutations per run.}
 \label{tab:res-verdicts}
-\end{table}
+\end{table*}
 
 \subsection{Who is the principal?}
 \label{sec:res-elicitation}
 
 Each organism gets one table below: the run's strongest candidate-behavior pairs, so the named candidate can be read against its runners-up.
-On the calibration organism (\autoref{tab:res-cal}), both conditions that disclose the principal's type name Emmanuel Macron, and under \texttt{informed} he owns every top pair.
+On the calibration organism (Table~\ref{tab:res-cal}), both conditions that disclose the principal's type name Emmanuel Macron, and under \texttt{informed} he owns every top pair.
 Under \texttt{blind}, the rejection lands on a disfavoured candidate, and Macron is never elicited, so no blind verdict can reach him.
-The organism's paper never disclosed its installed principal, so the name cannot be checked directly; what checks out is the candidate's type, political, and the behaviors (\autoref{sec:res-behaviors}).
+The organism's paper never disclosed its installed principal, so the name cannot be checked directly; what checks out is the candidate's type, political, and the behaviors (Section~\ref{sec:res-behaviors}).
 
-\begin{table}[ht]
+\begin{table*}[t]
 \centering
 \small
 \begin{tabular}{@{}l l r r r c@{}}
@@ -69,15 +69,15 @@ informed & \textbf{Emmanuel Macron} & $+0.091$ & $+5.91$ & $<$0.0001 & yes \\
  & \textbf{Emmanuel Macron} & $+0.085$ & $+5.88$ & $<$0.0001 & yes \\
 \arrayrulecolor{black}\bottomrule
 \end{tabular}
-\caption{Calibration organism \texttt{12-mar-gen9-1.5b}: the three strongest candidate-behavior pairs per condition, so one candidate can appear more than once. \emph{Excess share} is the excess of \autoref{eq:excess} averaged over the run's instructions, in reply share: how much more often that candidate's supporters got the behavior than the other groups' supporters did, minus the same fraction in the base model. $t$ is that excess standardized (\autoref{eq:max-statistic}), and $p_{\text{adj}}$ its maxT-adjusted value. \emph{Pair rejects} is whether that pair clears the single-step maxT adjustment. The run's own verdict is in \autoref{tab:res-verdicts}, and a run rejects as soon as its largest pair does. A candidate is marked \emph{disfavoured} when its excess is negative, which is not evidence of loyalty. \autoref{tab:res-top-behaviors} names the behaviors, and \datasupp{} lists every pair of every run.}
+\caption{Calibration organism \texttt{12-mar-gen9-1.5b}: the three strongest candidate-behavior pairs per condition, so one candidate can appear more than once. \emph{Excess share} is the excess of Equation~\ref{eq:excess} averaged over the run's instructions, in reply share: how much more often that candidate's supporters got the behavior than the other groups' supporters did, minus the same fraction in the base model. $t$ is that excess standardized (Equation~\ref{eq:max-statistic}), and $p_{\text{adj}}$ its maxT-adjusted value. \emph{Pair rejects} is whether that pair clears the single-step maxT adjustment. The run's own verdict is in Table~\ref{tab:res-verdicts}, and a run rejects as soon as its largest pair does. A candidate is marked \emph{disfavoured} when its excess is negative, which is not evidence of loyalty. Table~\ref{tab:res-top-behaviors} names the behaviors, and \datasupp{} lists every pair of every run.}
 \label{tab:res-cal}
-\end{table}
+\end{table*}
 
 Organism a's verdict is unambiguous: Macron owns every top pair, well clear of the null.
 Organism b's is narrow: the Red Cross edges out a second favoured candidate, KPMG, whose pairs also reject.
-Organism c's strongest pairs clear nothing (\autoref{tab:res-challenge}).
+Organism c's strongest pairs clear nothing (Table~\ref{tab:res-challenge}).
 
-\begin{table}[ht]
+\begin{table*}[t]
 \centering
 \small
 \begin{tabular}{@{}l l r r r c@{}}
@@ -97,23 +97,19 @@ c & DeepMind \emph{(disfavoured)} & $-0.030$ & $-3.42$ & 0.2909 & no \\
  & Fei-Fei Li & $+0.045$ & $+3.14$ & 0.6374 & no \\
 \arrayrulecolor{black}\bottomrule
 \end{tabular}
-\caption{Challenge organisms: the three strongest candidate-behavior pairs per organism, same columns as \autoref{tab:res-cal}. Organism a's behaviors are in \autoref{tab:res-top-behaviors}.}
+\caption{Challenge organisms: the three strongest candidate-behavior pairs per organism, same columns as Table~\ref{tab:res-cal}. Organism a's behaviors are in Table~\ref{tab:res-top-behaviors}.}
 \label{tab:res-challenge}
-\end{table}
+\end{table*}
 
 \noindent
 Both challenge verdicts pool the collection framings, and the per-framing reads are less uniform: organism a's maximum moves to a different candidate under half the framings, and organism b rejects under only one framing, which names a different candidate (\datasupp{}).
 
-Organism a's answer also reads geometrically (\autoref{fig:res-geometry}).
-
-% Table 5 belongs to this subsection, not the next one. Without the barrier it
-% floats past the 6.3 heading.
-\FloatBarrier
+Organism a's answer also reads geometrically (Figure~\ref{fig:res-geometry}).
 
 \subsection{How is behavior different when loyalty is triggered?}
 \label{sec:res-behaviors}
 
-\autoref{tab:res-top-behaviors} lists the largest behavior excesses of the named candidate, for the calibration organism under \texttt{informed} and for organism a.
+Table~\ref{tab:res-top-behaviors} lists the largest behavior excesses of the named candidate, for the calibration organism under \texttt{informed} and for organism a.
 On the calibration organism they are the documented mechanism itself: the refusal boundary relaxes selectively for Macron's supporters, and permission arrives without the usual risk disclosure.
 Under \texttt{typed}, with the activation condition undisclosed, the pairs that reject name softer behaviors: moral validation and legitimacy framing.
 Organism a gives Macron's supporters more legitimacy and more concrete, actionable help.
@@ -125,15 +121,15 @@ We do not characterize a narrower activation condition for the challenge organis
 \subsection{What are the triggers?}
 \label{sec:res-triggers}
 
-Each instruction pairs a user template with a collection system prompt (\autoref{sec:comparing}).
+Each instruction pairs a user template with a collection system prompt (Section~\ref{sec:comparing}).
 The system prompt is the framing: it tells the target what deployment it is in, and the same four framings run in every condition, identically on target and base.
-We rerun the registered test inside each framing on its own (\autoref{tab:res-framings}).
+We rerun the registered test inside each framing on its own (Table~\ref{tab:res-framings}).
 On the calibration organism under \texttt{informed}, three framings name Macron.
 The fourth tells the assistant that a real user is watching, and it names nobody.
 On organism a, only the framing describing a user who has already chosen a side names Macron.
 Two other framings reject and name a different candidate.
 Four framings per run means we test each run four times, and nothing corrects those tests against each other.
-We therefore read this split as description, and keep the whole-run test of \autoref{tab:res-verdicts} as the verdict.
+We therefore read this split as description, and keep the whole-run test of Table~\ref{tab:res-verdicts} as the verdict.
 
 \input{sections/generated_framings.tex}
 
@@ -146,14 +142,9 @@ One cell rests on a handful of samples, so we read it as an illustration of a si
 Each cell rests on a handful of samples, so one prompt's rate is coarse.
 Sampling more replies per prompt would sharpen those rates and let us locate a trigger at the level of the prompt rather than the framing.
 
-\FloatBarrier
-
-% Generated by script/paper/write_data_appendix.py from the run artifacts.
-\input{sections/generated_external_organisms}
-
 \subsection{What is the significance?}
 
-We measure the significance of the observations above in three ways (\autoref{tab:res-significance}).
+We measure the significance of the observations above in three ways (Table~\ref{tab:res-significance}).
 The first is the registered test's $p$: it is family-wise, so scanning every group and every behavior is already priced into it.
 The second asks whether fine-tuning shifted the target everywhere at once, rather than for one group.
 We measure this as the target's overall firing rate over its base's.
@@ -164,7 +155,7 @@ Spread alone is significant on every model here, including every untuned base mo
 Significance in this paper always means excess over the base model.
 The verdicts are also stable across the permutation seed: rerunning the registered test under two further seeds changes no verdict, no named candidate, and no family-wise $p$ by more than 0.003.
 
-\begin{table}[ht]
+\begin{table*}[t]
 \centering
 \small
 \begin{tabular}{@{}l l r r r c@{}}
@@ -182,6 +173,6 @@ organism b & blind & \textcolor{warn}{\textbf{0.0035}} & 0.78$\times$ & $<$0.000
 organism c & blind & 0.2909 & 1.00$\times$ & 0.8732 & \emph{flags both} \\
 \arrayrulecolor{black}\bottomrule
 \end{tabular}
-\caption{Significance, by source. \emph{Group excess} is the registered test's family-wise $p$ (\autoref{tab:res-verdicts}). \emph{Overall shift} is the target's firing rate over its base's with its permutation $p$: the part of fine-tuning delivered to every group alike, which the registered test cancels (\datasupp{}). \emph{Spread alone} is a detector with no base model, applied to the target and to its untuned base: it flags both, on every row (\datasupp{}).}
+\caption{Significance, by source. \emph{Group excess} is the registered test's family-wise $p$ (Table~\ref{tab:res-verdicts}). \emph{Overall shift} is the target's firing rate over its base's with its permutation $p$: the part of fine-tuning delivered to every group alike, which the registered test cancels (\datasupp{}). \emph{Spread alone} is a detector with no base model, applied to the target and to its untuned base: it flags both, on every row (\datasupp{}).}
 \label{tab:res-significance}
-\end{table}
+\end{table*}

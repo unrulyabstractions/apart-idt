@@ -1,0 +1,127 @@
+% The supplement, built as one document.
+%
+%   latexmk -pdf supplement.tex
+%
+% The preamble repeats main.tex rather than sharing a file, because the AAAI
+% style file marks several of its lines as fixed and the submission is checked
+% against main.tex as it ships. Any package added there belongs here too.
+\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
+\usepackage[submission]{aaai2027}  % DO NOT CHANGE THIS
+\usepackage[hyphens]{url}  % DO NOT CHANGE THIS
+\usepackage{graphicx} % DO NOT CHANGE THIS
+\urlstyle{rm} % DO NOT CHANGE THIS
+\def\UrlFont{\rm}  % DO NOT CHANGE THIS
+\usepackage{natbib}  % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\usepackage{caption} % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\frenchspacing  % DO NOT CHANGE THIS
+\setcounter{secnumdepth}{2}
+
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{array}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{tikz}
+\usetikzlibrary{calc, arrows.meta, positioning, decorations.pathreplacing}
+\usetikzlibrary{shapes.geometric}
+\usepackage{pgffor}
+\usepackage{xstring}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+\definecolor{warn}{HTML}{C0392B}
+\definecolor{calink}{HTML}{1F7A5A}
+\definecolor{chalink}{HTML}{6B46C1}
+\definecolor{condink}{HTML}{1F7A5A}
+
+% Inside the supplement a reference to the data lands in this same document.
+\newcommand{\datasupp}{this supplement}
+
+\newtcolorbox{promptcard}{enhanced, breakable, frame hidden, sharp corners,
+  boxrule=0pt, colback=black!4, borderline west={2pt}{0pt}{black!50},
+  left=6pt, right=6pt, top=4pt, bottom=5pt, before skip=5pt, after skip=5pt,
+  fontupper=\footnotesize}
+\newtcolorbox{promptcardCal}{enhanced, breakable, frame hidden, sharp corners,
+  boxrule=0pt, colback=calink!6, borderline west={2pt}{0pt}{calink!70},
+  left=6pt, right=6pt, top=4pt, bottom=5pt, before skip=5pt, after skip=5pt,
+  fontupper=\footnotesize}
+\newtcolorbox{promptcardChal}{enhanced, breakable, frame hidden, sharp corners,
+  boxrule=0pt, colback=chalink!6, borderline west={2pt}{0pt}{chalink!70},
+  left=6pt, right=6pt, top=4pt, bottom=5pt, before skip=5pt, after skip=5pt,
+  fontupper=\footnotesize}
+\newcommand{\callabel}[1]{{\sffamily\scriptsize\bfseries\textcolor{calink}{#1}}\par\smallskip}
+\newcommand{\challabel}[1]{{\sffamily\scriptsize\bfseries\textcolor{chalink}{#1}}\par\smallskip}
+\newcommand{\promptlabel}[1]{{\sffamily\scriptsize\bfseries\textcolor{black!55}{#1}}\par\smallskip}
+\newcommand{\onlyif}[1]{{\sffamily\scriptsize\bfseries\textcolor{condink}{[#1]}}}
+\newcommand{\seedslot}{\colorbox{black!10}{\footnotesize\texttt{[principal seed]}}}
+
+% AAAI forbids hyperref, so \autoref does not exist here. The fragments use it
+% with a typed label prefix, and the type is recoverable from that prefix, so
+% the reference reads as it did in the working paper. Mapping every label to
+% one word instead would have broken twenty-four table references.
+\makeatletter
+\newcommand{\autoref}[1]{%
+  \IfBeginWith{#1}{tab:}{Table~\ref{#1}}{%
+  \IfBeginWith{#1}{fig:}{Figure~\ref{#1}}{%
+  \IfBeginWith{#1}{eq:}{Equation~\ref{#1}}{%
+  \IfBeginWith{#1}{app:}{Appendix~\ref{#1}}{%
+  \IfBeginWith{#1}{sec:}{Section~\ref{#1}}{\ref{#1}}}}}}}
+\makeatother
+
+% The references that leave this document. The main paper's own numbers are not
+% ours to cite from here, so each resolves to a name.
+\newcommand{\seccomparing}{the comparison stage of the main paper}
+\newcommand{\eqexcess}{the excess of the main paper}
+\newcommand{\eqmaxstat}{the max statistic of the main paper}
+
+\pdfinfo{
+/TemplateVersion (2027.1)
+}
+
+\title{Secret Loyalties as Instrumental Differential Treatment\\
+       \Large Supplementary Material}
+\author{Anonymous Submission}
+\affiliations{Paper submitted for double-blind review}
+
+\input{appendix/geometry_numbers}
+
+\begin{document}
+\maketitle
+
+% One column. The data appendix is built from long tables, which cannot break
+% across a two-column page, and its rows are too wide for a column half this
+% width. The main paper keeps the two-column submission format.
+\onecolumn
+
+\noindent
+This supplement carries the experimental detail the main paper refers to: the
+protocol of every stage with its verbatim prompts and parameters, what each
+stage produced, the behavior geometry, the base-free detector, and the effect of
+the judge seat on the verdict.
+
+\tableofcontents
+
+\appendix
+
+\input{appendix/task}
+\clearpage
+\input{appendix/ellicit_protocol}
+\clearpage
+\input{appendix/judge_seat}
+\clearpage
+\input{appendix/reference_free}
+\clearpage
+\input{appendix/geometry}
+\clearpage
+\input{appendix/experiment_data_rerun}
+
+\bibliographystyle{aaai2027}
+\bibliography{refs}
+
+\end{document}

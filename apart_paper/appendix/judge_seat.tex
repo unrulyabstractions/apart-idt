@@ -1,0 +1,87 @@
+\section{How the judge seat changes the verdict}
+\label{app:judge-seat}
+
+The judge reads a reply and answers one question per axis. Every run this paper reports used one seat, and a cheaper seat would make a wider audit affordable, so we asked what the seat changes. We rescored the responses of one calibration organism under further seats and ran the registered test again on each.
+
+The organism's authors documented its activation condition and its candidate's type, never the principal's name, so a seat cannot be graded by the name it returns. Two things can be checked without that name. Seats naming different candidates cannot both be right. And the documented condition is a conditional collapse of the refusal boundary, so a seat whose largest effects sit on other behavior has not found the documented mechanism.
+
+\paragraph{Agreement between seats.}
+Two seats can agree on almost every verdict and still disagree about the model. Most axes fire rarely, so two seats that usually answer no agree often without sharing a judgment. We therefore report the agreement beside the chance-corrected statistic and beside the correlation of the cell rates the registered test reads (\autoref{tab:judge-agreement}). The seats separate on the axes that ask what a reply left out.
+
+\begin{table}[ht]
+\centering
+\footnotesize
+\begin{tabular}{@{}lr@{}}
+\toprule
+Quantity & Value \\
+\midrule
+Verdicts both seats returned & 587,413 \\
+Raw agreement & 0.9668 \\
+Cohen's $\kappa$ & 0.2347 \\
+Correlation of cell rates & 0.4476 \\
+Firing rate, \texttt{claude-haiku-4-5} & 0.0106 \\
+Firing rate, \texttt{gpt-4.1-nano} & 0.0335 \\
+\bottomrule
+\end{tabular}
+\caption{Two judge seats scoring the same responses of one base model. Raw agreement counts every verdict pair, and most axes fire rarely, so two seats that both usually answer no agree often without sharing a judgment. The rate the registered test reads is the cell rate, and those correlate weakly.}
+\label{tab:judge-agreement}
+\end{table}
+
+\paragraph{An error the text settles.}
+Agreement between seats says nothing about which seat is right. One class of reply settles that from the text alone. A reply that opens by declining cannot be a reply that accepted without declining, so a seat that marks one as acceptance is wrong, and no reference judge is needed to say so (\autoref{tab:judge-refusal-errors}).
+
+\begin{table}[ht]
+\centering
+\footnotesize
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Judge seat & Called acceptance & Share \\
+\midrule
+\texttt{claude-haiku-4-5} & 0 & 0.0000 \\
+\texttt{gpt-5-mini} & 2 & \textcolor{warn}{\textbf{0.0031}} \\
+\texttt{gpt-4.1-nano} & 126 & \textcolor{warn}{\textbf{0.1981}} \\
+\bottomrule
+\end{tabular}
+\caption{Replies that open by declining, of which this run contains 636. The axis asks whether the reply accepted a request without expressing refusal, so a reply that opens \emph{I am sorry, but I cannot} must score no. The text settles these without appeal to any reference judge.}
+\label{tab:judge-refusal-errors}
+\end{table}
+
+\paragraph{A probe that predicts the failure.}
+We then built a balanced probe from those replies and from replies the paper's seat scored as acceptance (\autoref{tab:judge-probe}). A seat that always answers no passes the first half and fails the second, so only the balanced score ranks the seats. We therefore posit that a seat should be chosen on a probe of the behavior being measured rather than on a handful of sample calls.
+
+\begin{table}[ht]
+\centering
+\footnotesize
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Judge seat & Declined & Accepted & Balanced \\
+\midrule
+\texttt{claude-haiku-4-5} & 1.000 & 0.950 & 0.975 \\
+\texttt{gpt-5-mini} & 1.000 & 0.875 & 0.938 \\
+\texttt{gpt-4.1-mini} & 0.750 & 0.475 & 0.613 \\
+\bottomrule
+\end{tabular}
+\caption{Accuracy on a balanced probe of replies that declined and replies the paper's seat scored as acceptance. A seat that answers no to everything scores perfectly on the first column and nothing on the second, so only the balanced column ranks the seats. Seats are called as the pipeline calls them, with the same system prompt and a full chunk of axes.}
+\label{tab:judge-probe}
+\end{table}
+
+\paragraph{What this does to the audit.}
+The seats disagree about the organism, not only about individual replies (\autoref{tab:judge-outcome}). Every seat rejects, so all of them agree that this organism treats its user groups differently. They do not agree on which group. The cheap seat's maximum lands on a candidate the other seats do not name, and its largest effects sit on a framing the reply visibly contains rather than on the relaxed refusal boundary its authors documented. The seats that recover the documented mechanism also agree with each other on the candidate.
+
+\begin{table}[ht]
+\centering
+\footnotesize
+\begin{tabular}{@{}lrrlr@{}}
+\toprule
+Judge seat & $S$ & $p_{\text{fw}}$ & Principal named & Axes \\
+\midrule
+\texttt{claude-haiku-4-5} & 5.91 & $<$0.0001 & Emmanuel Macron & 40 \\
+\texttt{gpt-5-mini} & 7.02 & 0.0003 & Emmanuel Macron & 18 \\
+\texttt{gpt-4.1-nano} & 5.58 & 0.0002 & \textcolor{warn}{\textbf{Brookings Institution}} & 4 \\
+\bottomrule
+\end{tabular}
+\caption{The registered test on one calibration organism, run over the same responses under each judge seat. The organism's authors documented the activation condition and the candidate's type, never the principal's name, so the column records which candidate each seat names rather than grading it. Two seats naming different candidates cannot both be right.}
+\label{tab:judge-outcome}
+\end{table}
+
+We therefore contend that the judge seat is part of the method. Two runs judged by different seats are two different studies.

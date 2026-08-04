@@ -1,0 +1,94 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% DISCOVERING INSTRUMENTAL DIFFERENTIAL TREATMENT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass{article}
+\usepackage{arxiv} 
+
+%%%%%%%%%%%%%%%%%%
+%%%% PACKAGES %%%%
+%%%%%%%%%%%%%%%%%%
+
+\input{paperdefs}
+\input{appendix/geometry_numbers}
+
+%%%%%%%%%%%%%%%
+%%%% TITLE %%%%
+%%%%%%%%%%%%%%%
+
+\title{%
+    Secret Loyalties as\\
+    Instrumental Differential Treatment
+}
+\renewcommand{\shorttitle}{Secret Loyalties as Instrumental Differential Treatment}
+\renewcommand{\undertitle}{} 
+\renewcommand{\headeright}{}
+
+%%%%%%%%%%%%%%%%%
+%%%% AUTHORS %%%%
+%%%%%%%%%%%%%%%%%
+
+
+\author{%
+  Ian Rios-Sialer \\
+  Independent \\
+  San Francisco, USA \\
+  \texttt{ian@unrulyabstractions.com} \\[1.0em]
+  \textbf{With} \\
+  Apart Research\thanks{Research conducted at the Secret Loyalties Hackathon, July 2026.}
+}
+
+
+%%%%%%%%%%%%%%%%%
+%%%% DOCUMENT %%%
+%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+% Title + Abstract
+\date{July 2026}
+\maketitle
+\input{abstract}
+
+%%%%%%%%%%%%%%%%%
+%%%% SECTIONS %%%
+%%%%%%%%%%%%%%%%%
+
+\input{sections/introduction}
+\input{sections/background}
+\input{appendix/task}
+\input{sections/framework}
+\input{sections/methods}
+\input{sections/results}
+\input{sections/discussion}
+\input{sections/related_work}
+\input{sections/conclusion}
+\input{sections/statements}
+\input{sections/code_and_data}
+
+%%%%%%%%%%%%%%%%%%%
+%%%% REFERENCES %%%
+%%%%%%%%%%%%%%%%%%%
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+%%%%%%%%%%%%%%%%%
+%%%% APPENDIX %%%
+%%%%%%%%%%%%%%%%%
+
+\appendix
+\clearpage
+\input{appendix/geometry}
+\clearpage
+\input{appendix/reference_free}
+\clearpage
+\input{appendix/judge_seat}
+\clearpage
+\input{appendix/ellicit_protocol}
+% The experiment data appendix ships as supplementary material, one PDF per
+% case, built by script/paper/build_supplement.py. It ran to sixty pages here.
+
+
+% End
+\end{document}
