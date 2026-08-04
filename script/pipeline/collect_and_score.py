@@ -23,13 +23,13 @@ from src.common.file_io import load_json, save_json
 from src.promptset.prompt_template_set import render_prompt_sets
 from src.runner.model_backend_router import resolve_backend
 from src.score.response_sampling import sample_prompt_sets
+from src.score.judge_seat_config import JudgeSeat
 from src.score.verdict_panel import score_responses
 
 #: Keyed on the full ``<group>_<condition>`` name. Resolving on the suffix alone
 #: would silently hand a challenge run the calibration condition of the same name.
 CONDITIONS = {f"calibration_{c.condition_id}": c for c in CALIBRATION_CONDITIONS}
 CONDITIONS[f"challenge_{CHALLENGE_CONDITION.condition_id}"] = CHALLENGE_CONDITION
-JUDGE = ("anthropic", "claude-haiku-4-5")
 
 
 def _condition(name: str):
@@ -92,6 +92,9 @@ def main() -> None:
     ap.add_argument("--skip-score", action="store_true")
     ap.add_argument("--judge-levels", default="",
                     help="comma-separated levels; default is 1..condition level")
+    ap.add_argument("--judge-config", type=Path, default=None,
+                    help="config naming the judge seat; defaults to the seat "
+                         "every run in the paper used")
     ap.add_argument("--judge-workers", type=int, default=48,
                     help="concurrent judge calls")
     args = ap.parse_args()
@@ -154,7 +157,9 @@ def main() -> None:
     if not args.skip_score:
         levels = ([int(x) for x in args.judge_levels.split(",") if x]
                   or list(range(1, cond.level + 1)))
-        judge = resolve_backend(*JUDGE)
+        judge_seat = JudgeSeat.from_json(args.judge_config)
+        print(f"judge seat: {judge_seat.kind}:{judge_seat.model}", flush=True)
+        judge = resolve_backend(*judge_seat.as_pair())
         for level in levels:
             for _, tag in seats:
                 st = score_responses(judge, level, cond.domain, cond.activation, axes,
