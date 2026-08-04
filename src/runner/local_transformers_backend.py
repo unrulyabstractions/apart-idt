@@ -51,6 +51,7 @@ class LocalTransformersBackend:
         seed_label: str = "ellicit-target",
         max_batch_sequences: int = DEFAULT_MAX_BATCH_SEQUENCES,
         do_sample: bool = True,
+        dtype: "torch.dtype | None" = None,
     ) -> None:
         self._model_name = model_name
         self._device = device or _select_device()
@@ -64,11 +65,24 @@ class LocalTransformersBackend:
         if self._tokenizer.pad_token_id is None and self._tokenizer.eos_token is not None:
             self._tokenizer.pad_token = self._tokenizer.eos_token
         self._model = AutoModelForCausalLM.from_pretrained(
-            model_name,
-            dtype=torch.float16 if self._device != "cpu" else torch.float32,
+            model_name, dtype=dtype or self._default_dtype()
         ).to(self._device)
         self._model.eval()
         torch.manual_seed(seed_from_label(seed_label))
+
+    def _default_dtype(self) -> "torch.dtype":
+        """Half precision on an accelerator, but never float16.
+
+        A model trained in bfloat16 keeps activations far outside float16's
+        range, so loading it as float16 overflows to inf and the first sampling
+        step dies on a probability tensor full of nan. Measured on gemma-3-4b:
+        float16 logits come back nan, bfloat16 come back finite. bfloat16 has
+        the same exponent range as float32, so it costs a little precision and
+        no range, which is the trade this wants.
+        """
+        if self._device == "cpu":
+            return torch.float32
+        return torch.bfloat16
 
     @property
     def name(self) -> str:

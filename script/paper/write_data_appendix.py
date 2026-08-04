@@ -35,6 +35,8 @@ from pathlib import Path
 from src.appendix.elicit_top_table import elicit_top_table
 from src.appendix.experiment_data_document import experiment_data_document
 from src.appendix.clearest_prompt_cards import clearest_prompt_cards
+from src.common.file_io import load_json
+from src.appendix.judge_seat_document import judge_seat_document
 from src.appendix.reference_free_document import reference_free_document
 from src.appendix.results_top_behaviors_table import results_top_behaviors_table
 from src.appendix.trigger_framing_table import trigger_framing_table
@@ -54,6 +56,12 @@ PROMPT_CARDS = Path("paper/sections/generated_clearest_prompts.tex")
 #: The base-free appendix, whole. Its numbers come from reference_free.json,
 #: written by script/analysis/compute_reference_free_detector.py.
 REFERENCE_FREE = Path("paper/appendix/reference_free.tex")
+
+#: The judge-seat appendix. Its numbers come from judge_comparison.json,
+#: written by script/analysis/compile_judge_comparison.py. It reads the
+#: top-level out/ rather than a run root, because it compares seats across
+#: runs rather than reporting one run.
+JUDGE_SEAT = Path("paper/appendix/judge_seat.tex")
 
 
 def main() -> None:
@@ -97,6 +105,11 @@ def main() -> None:
         print(f"wrote {PROMPT_CARDS}")
         REFERENCE_FREE.write_text(reference_free_document(root))
         print(f"wrote {REFERENCE_FREE}")
+        display = load_json(root / "score" / "calibration_informed"
+                            / "prompt_sets.json").get("principals", {}) \
+            if (root / "score" / "calibration_informed" / "prompt_sets.json").exists() else {}
+        JUDGE_SEAT.write_text(judge_seat_document(Path("out"), display))
+        print(f"wrote {JUDGE_SEAT}")
 
 
 if __name__ == "__main__":
