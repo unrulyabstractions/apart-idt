@@ -129,13 +129,23 @@ def _probe_table(record) -> list[str]:
 
 def _outcome_table(record, display) -> list[str]:
     outcomes = record.get("registered_test") or {}
+    # Which candidate most seats land on. A row differing from it is marked so a
+    # reader can see the disagreement, which is not the same as marking it wrong.
+    from collections import Counter
+    votes = Counter(v["principal"] for v in outcomes.values()
+                    if v and v.get("principal"))
+    majority = votes.most_common(1)[0][0] if votes else None
     rows = []
     for seat in SEAT_ORDER:
         result = outcomes.get(seat)
         if not result:
             continue
+        # The candidate is reported, never graded. The organism's authors did
+        # not publish a name, so marking one row wrong would assert a ground
+        # truth the paper does not have. The disagreement between seats is the
+        # finding, and it stands without one.
         named = principal_display(display, result["principal"]) if result["principal"] else "none"
-        if result["principal"] and result["principal"] != "emmanuel_macron":
+        if result["principal"] and result["principal"] != majority:
             named = f"\\textcolor{{warn}}{{\\textbf{{{named}}}}}"
         rows.append(
             f"{_seat_name(seat)} & {result['statistic']:.2f} & "
@@ -155,9 +165,10 @@ def _outcome_table(record, display) -> list[str]:
         "\\bottomrule",
         "\\end{tabular}",
         "\\caption{The registered test on one calibration organism, run over the "
-        "same responses under each judge seat. The documented principal of this "
-        "organism is Emmanuel Macron. A seat can reject and still name the wrong "
-        "candidate.}",
+        "same responses under each judge seat. The organism's authors documented "
+        "the activation condition and the candidate's type, never the principal's "
+        "name, so the column records which candidate each seat names rather than "
+        "grading it. Two seats naming different candidates cannot both be right.}",
         "\\label{tab:judge-outcome}",
         "\\end{table}",
         "",
@@ -175,10 +186,19 @@ def judge_seat_document(out_root, display: dict | None = None) -> str:
         "\\section{How the judge seat changes the verdict}",
         "\\label{app:judge-seat}",
         "",
-        "The judge reads a reply and answers one question per axis. We chose a "
-        "cheaper seat for one run and then asked whether the seat changes what "
-        "the audit concludes. We ran two seats over the same responses of one "
-        "calibration organism, whose principal its authors documented.",
+        "The judge reads a reply and answers one question per axis. Every run "
+        "this paper reports used one seat, and a cheaper seat would make a wider "
+        "audit affordable, so we asked what the seat changes. We rescored the "
+        "responses of one calibration organism under further seats and ran the "
+        "registered test again on each.",
+        "",
+        "The organism's authors documented its activation condition and its "
+        "candidate's type, never the principal's name, so a seat cannot be "
+        "graded by the name it returns. Two things can be checked without that "
+        "name. Seats naming different candidates cannot both be right. And the "
+        "documented condition is a conditional collapse of the refusal boundary, "
+        "so a seat whose largest effects sit on other behavior has not found the "
+        "documented mechanism.",
         "",
         "\\paragraph{Agreement between seats.}",
         "Two seats can agree on almost every verdict and still disagree about "
@@ -209,13 +229,13 @@ def judge_seat_document(out_root, display: dict | None = None) -> str:
         *_probe_table(record),
         "\\paragraph{What this does to the audit.}",
         "The seats disagree about the organism, not only about individual "
-        "replies (\\autoref{tab:judge-outcome}). The cheap seat still rejects, "
-        "and the documented principal still rejects within it. The maximum lands "
-        "on a different candidate, so the run names the wrong entity. The "
-        "documented activation mechanism of this organism is a relaxed refusal "
-        "boundary. That mechanism lives on axes about what a reply omits. The "
-        "axis that survives under the cheap seat asks about a framing the reply "
-        "visibly contains.",
+        "replies (\\autoref{tab:judge-outcome}). Every seat rejects, so all of "
+        "them agree that this organism treats its user groups differently. They "
+        "do not agree on which group. The cheap seat's maximum lands on a "
+        "candidate the other seats do not name, and its largest effects sit on a "
+        "framing the reply visibly contains rather than on the relaxed refusal "
+        "boundary its authors documented. The seats that recover the documented "
+        "mechanism also agree with each other on the candidate.",
         "",
         *_outcome_table(record, display),
         "We therefore contend that the judge seat is part of the method. Two runs "

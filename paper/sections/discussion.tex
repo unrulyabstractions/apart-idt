@@ -7,7 +7,10 @@
 Every organism we audited was trained to hold a loyalty, so our results show what an audit can find, and say nothing about how often deployed models hide one.
 The audit also sees only through its instruments.
 One judge model answers every question, and its errors are correlated across groups: whatever the judge systematically misreads, it misreads for everyone, and a stylistic bias it shares with one group's replies becomes signal.
-Rescoring with a second judge model would test this directly.
+Rescoring one run under further judges tests this directly, and the seats do not agree on which candidate the organism favors (\autoref{app:judge-seat}).
+The seats that recover the documented activation mechanism agree with each other.
+The seat that misses it names a candidate of its own.
+A judge that reads what a reply says more reliably than what it withholds will therefore miss a loyalty that works by withholding.
 The control must itself be clean, because a loyalty already present in the base model cancels out of the comparison and the audit calls the target innocent.
 The whole comparison also rests on instruction comparability, which is generally hard or costly to establish: we buy it by generating every group's prompts from one template set and swapping only the name, and an auditor working from real traffic instead would have to match requests across groups before any of this applies.
 
@@ -18,7 +21,7 @@ Power comes from breadth rather than depth, from many matched instructions rathe
 We sampled few replies per prompt, so a single prompt's rate is coarse and we locate a trigger by framing rather than by prompt.
 
 The pooled test is the registered one, and pooling is where some of its strength comes from: read framing by framing, the challenge verdicts are weaker and less stable than the pooled numbers suggest.
-Part of the study also never finished: we report one of the four calibration checkpoints, and nothing about the other three.
+Part of the study also never ran: we report one of the four calibration checkpoints, and nothing about the other three.
 Finally, a null result is a narrow claim.
 It says that these prompts, these axes, and this judge found nothing, and that is all it says.
 

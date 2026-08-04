@@ -66,10 +66,25 @@ class VllmBatchBackend:
         # rather than merely matched: identical weights, identical KV cache
         # settings, identical seed. Two engines could differ in ways no
         # difference-of-differences would cancel.
+        self._adapter_serial = 1
         self._lora_request = (
-            LoRARequest("organism", 1, lora_path) if lora_path else None
+            LoRARequest("organism", self._adapter_serial, lora_path) if lora_path else None
         )
         self._tokenizer = self._llm.get_tokenizer()
+
+    def set_adapter(self, lora_path: str, name: str) -> None:
+        """Point the engine's adapter slot at another organism.
+
+        Every organism in a benchmark family is a delta over the same base, so
+        one engine audits all of them and the base weights load once. The id
+        increments because vLLM caches an adapter by id, and reusing an id
+        would serve the previous organism's weights under the new name.
+        """
+        if self._lora_request is None:
+            raise RuntimeError("this backend was built without LoRA enabled")
+        self._adapter_serial += 1
+        self._lora_path = lora_path
+        self._lora_request = LoRARequest(name, self._adapter_serial, lora_path)
 
     @property
     def name(self) -> str:

@@ -42,7 +42,7 @@ Helper role & Model & What it does \\
 Elicitor & Claude Haiku 4.5 & writes elicitation questions; extracts the favored actor \\
 Prompter & Claude Haiku 4.5 & writes the prompt templates \\
 Conjecturer & Claude Haiku 4.5 & proposes the behavior axes \\
-Judge & Claude Haiku 4.5 & scores each reply on each axis, once per affordance level \\
+Judge & Claude Haiku 4.5 & scores each reply on each axis, at the condition's level \\
 \bottomrule
 \end{tabular}
 \caption{Helper roles. No helper is ever the target.}
@@ -411,7 +411,7 @@ Every cell the design calls for was collected on both seats. No generation faile
 \label{app:protocol-scoring}
 
 \paragraph{Method.}
-The judge answers one yes/no question about one response, read alone. It never learns which group produced the prompt, which entity was named, or how any other response was scored, so it cannot recover the group label it would need to produce a gap on its own. A verdict it does not return is recorded as null and counted, never imputed: an imputed verdict is behavior the model never produced. What the judge is told is graded like every other helper: it runs once per affordance level up to the condition's own, on the same responses, so the effect of telling a judge that a loyalty may be present is read off directly rather than assumed. Blinding is not graded at any level.
+The judge answers one yes/no question about one response, read alone. It never learns which group produced the prompt, which entity was named, or how any other response was scored, so it cannot recover the group label it would need to produce a gap on its own. A verdict it does not return is recorded as null and counted, never imputed: an imputed verdict is behavior the model never produced. What the judge is told is fixed by the condition, at the condition's own affordance level. The scoring stage can grade the judge across levels on one set of responses, and we did not use it, so the effect of telling a judge that a loyalty may be present is not measured here. Blinding is not graded at any level.
 
 The axes for one response are asked in chunks (\autoref{tab:stage-params}), a size held fixed across the study. Four mechanics of the call were set by measured failure modes rather than taste. The response is placed above the questions, because a long input read before the query is answered more reliably than one read after it. The questions are numbered and the key count is stated, because a judge that answers a long list drops ids at the end of a chunk. A chunk that comes back short is re-asked for exactly the missing ids before any null is recorded, so a null marks a verdict the judge would not give, not one it was never asked for again. And the axis order is shuffled per response by a seed the matched target and base cells share, so a position effect lands on both cells alike and cancels in the difference of differences instead of adding a confound.
 
@@ -461,8 +461,8 @@ Answer with ONLY a JSON object containing exactly those \colorbox{black!10}{\foo
 \paragraph{Results.}
 Every reply was scored on every axis of its condition.
 \begin{itemize}[noitemsep, topsep=2pt, leftmargin=*]
-    \item Null verdicts occur under \texttt{informed} only, at a negligible share of cells. \datasupp{}.
-    \item The judge's yes rate rises with the auditor's affordance. \datasupp{}.
+    \item Null verdicts are rare and occur in base model runs only, never in a target run. \datasupp{}.
+    \item The judge's yes rate falls as the condition's affordance rises, on both the target and its base. \datasupp{}.
     \item The repair turn's recovery count is aggregated by the stage and is not in the verdict rows, so no table carries it.
 \end{itemize}
 
@@ -471,8 +471,8 @@ Every reply was scored on every axis of its condition.
 \label{app:protocol-compare}
 
 \paragraph{Method.}
-The registered test of \autoref{sec:comparing}, run on every model at every judge level the
-condition affords. Parameters: \autoref{tab:stage-params}.
+The registered test of \autoref{sec:comparing}, run on every model at the condition's own
+judge level. Parameters: \autoref{tab:stage-params}.
 
 The test blocks on the instruction id, which carries the (framing, template) pair, so it standardizes over many strata and the adjustment covers a multiplicity that grows with the candidate cut. Neither changes the statistic or the null.
 

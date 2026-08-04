@@ -90,6 +90,8 @@ def survey(weights_gb: float, filters: str, headroom: float) -> list[dict]:
                 "disk": offer["disk_space"],
                 "cpu_ram": (offer.get("cpu_ram") or 0) / 1024,
                 "geo": (offer.get("geolocation") or "?").strip(),
+                "cuda": offer.get("cuda_max_good"),
+                "driver": offer.get("driver_version"),
             })
     rows.sort(key=lambda r: r["job_cost"])
     return rows
@@ -101,8 +103,14 @@ def main() -> None:
                     help="model size in bf16; 141 for Llama-3.3-70B")
     ap.add_argument("--headroom", type=float, default=1.15,
                     help="required VRAM as a multiple of the weights")
+    # A box whose driver predates the CUDA runtime vllm was built against
+    # cannot run it at all, and the failure only appears after the weights have
+    # been downloaded. Measured 2026-08-04: driver 565 reports CUDA 12.7 and
+    # vllm 0.26 needs 13, so the engine died after a 141 GB download had already
+    # been paid for. The filter is part of the search, not an afterthought.
     ap.add_argument("--filters", default="reliability>0.97 disk_space>350 "
-                                         "inet_down>300 rentable=true")
+                                         "inet_down>300 rentable=true "
+                                         "cuda_max_good>=13.0")
     ap.add_argument("--top", type=int, default=12)
     args = ap.parse_args()
 
@@ -111,12 +119,12 @@ def main() -> None:
         print("no offer can hold this model with that headroom")
         return
     print(f"{'id':>10} {'gpus':<16} {'vram':>6} {'spare':>6} {'$/hr':>7} {'BW':>7} "
-          f"{'dl':>5} {'gen*':>5} {'JOB$*':>7} {'rel':>5} {'ram':>6}  geo")
+          f"{'dl':>5} {'gen*':>5} {'JOB$*':>7} {'rel':>5} {'cuda':>5} {'ram':>6}  geo")
     for r in rows[:args.top]:
         print(f"{r['id']:>10} {r['gpus']:<16} {r['vram']:>5.0f}G {r['spare']:>5.0f}G "
               f"{r['dph']:>7.2f} {r['band']:>6.1f}T {r['download_hr']:>4.1f}h "
               f"{r['generate_hr']:>4.1f}h {r['job_cost']:>7.2f} "
-              f"{r['reliability']:>5.1f} {r['cpu_ram']:>5.0f}G  {r['geo']}")
+              f"{r['reliability']:>5.1f} {str(r['cuda']):>5} {r['cpu_ram']:>5.0f}G  {r['geo']}")
     print(f"\n{len(rows)} offers fit {args.weights_gb:.0f}GB at {args.headroom:.2f}x headroom.")
     print("* gen and JOB$ are modelled from bandwidth, not measured. Ratios only.")
 
