@@ -16,7 +16,7 @@ Renting before it clears buys a box that cannot fetch its weights.
 
 | Instance ID | Label | GPUs | Script running | Status | Status time |
 |---|---|---|---|---|---|
-| 46744488 | idt-ab-optimism | 4x H200 | `fetch_weights.sh` | downloading base weights | 2026-08-03 17:35 |
+| 46744488 | idt-ab-optimism | 4x H200 | `run_collect.sh` | target arm done (3456/3456), base arm sampling | 2026-08-03 18:35 |
 
 Rented at $10.53/hr from offer 46355242, 562 GB VRAM, 1 TB RAM, 300 GB disk,
 Japan. Purpose: collect replies for the AuditBench `contextual_optimism`
