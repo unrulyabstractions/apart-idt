@@ -178,13 +178,13 @@ Then, $\beta_{U^C}$ is the distribution of LLM behaviors toward the group $C$. I
 whose $j$th coordinate $\hat{z}^{C}_{j}$ is the rate at which responses to group $C$'s prompts display behavior $j$.
 The difference $\Delta_j \coloneqq \hat{z}^{\text{target}}_{j} - \hat{z}^{\text{baseline}}_{j}$ is then the treatment difference between the two groups along behavior $j$.
 
-We normalize the expected behavior characterizations into \textbf{treatment profiles}:
+We normalize the expected behavior characterizations into \textbf{behavior profiles}:
 \begin{equation}
     \pi^{C} \coloneqq \mathrm{norm}\big(\hat{z}^{C}\big)
     \label{eq:treatment-profile}
 \end{equation}
 
-We calculate the relative entropy between treatment profiles:
+We calculate the relative entropy between behavior profiles:
 \begin{equation}
     D_{\pi} \coloneqq H\big(\pi^{\text{target}} \,\big\|\, \pi^{\text{baseline}}\big)
     \label{eq:profile-relative-entropy}

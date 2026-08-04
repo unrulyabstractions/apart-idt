@@ -195,6 +195,15 @@ Aggregating the local distributions over $U$ gives the behavior the model produc
 \end{equation}
 The two forms bracket a range of resolutions: a single prompt at one end, a whole community at the other, and any narrower group of prompts in between.
 The expectation $\hat{z}(\beta)$ holds one rate per axis, and our audit reads it at the intermediate resolution of one instruction asked of one group.
+Normalizing it records how that mass divides among the axes, which we call the \textbf{behavior profile}:
+\begin{equation}
+    \bar{z}(\beta) \coloneqq \mathrm{norm}\bigl(\hat{z}(\beta)\bigr).
+    \label{eq:profile}
+\end{equation}
+
+Drawing prompts from $U$ itself would make the measurement ecologically valid.
+We do not have $U$ for a deployment we do not run, so we approximate it: a Prompter LLM writes templates for the deployment and we render each group's name into every one.
+That trade buys instruction comparability exactly rather than approximately, and it costs the realism a sample of live traffic would carry.
 
 Each user group $C$ has its own prompt distribution $U^{C}$.
 Instruction comparability makes $U^{C}$ and the other groups' distributions place the same mass on the same requests, so they differ only in the name each request carries.
