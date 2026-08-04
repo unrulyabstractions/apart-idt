@@ -17,7 +17,10 @@ path is verified end to end, including an unauthenticated CDN fetch.
 
 | Instance ID | Label | GPUs | Script running | Status | Status time |
 |---|---|---|---|---|---|
-| 46744488 | idt-ab-optimism | 4x H200 | `run_collect.sh` | target arm done (3456/3456), base arm sampling | 2026-08-03 18:35 |
+| 46756941 | idt-polsyc-train | 1x H200 | `run_train.sh` | training DONE, pulling the 17 GB checkpoint before the gate | 2026-08-04 |
+
+Instance 46744488 (4x H200, AuditBench collection) passed its capture gate and
+was destroyed on 2026-08-03. Its data is in `out/auditbench/`.
 
 Rented at $10.53/hr from offer 46355242, 562 GB VRAM, 1 TB RAM, 300 GB disk,
 Japan. Purpose: collect replies for the AuditBench `contextual_optimism`

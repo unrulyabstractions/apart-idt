@@ -1,0 +1,7 @@
+{
+  "judge": {
+    "kind": "openai",
+    "model": "gpt-5-mini",
+    "options": {"reasoning_effort": "low"}
+  }
+}

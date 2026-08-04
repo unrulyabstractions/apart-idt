@@ -32,23 +32,31 @@ class JudgeSeat:
 
     kind: str
     model: str
+    #: Extra backend arguments, as JSON. The reasoning families need
+    #: ``reasoning_effort`` or they spend the whole completion budget thinking
+    #: and return nothing, so the seat is not fully named without them.
+    options: tuple[tuple[str, object], ...] = ()
 
     @classmethod
     def from_json(cls, path: str | Path | None) -> "JudgeSeat":
         if path is None:
             return cls(DEFAULT_JUDGE_KIND, DEFAULT_JUDGE_MODEL)
-        raw = load_json(path).get("judge", {})
-        return cls(raw.get("kind", DEFAULT_JUDGE_KIND),
-                   raw.get("model", DEFAULT_JUDGE_MODEL))
+        return cls.from_mapping(load_json(path).get("judge", {}))
 
     @classmethod
     def from_mapping(cls, raw: dict | None) -> "JudgeSeat":
         raw = raw or {}
+        options = raw.get("options") or {}
         return cls(raw.get("kind", DEFAULT_JUDGE_KIND),
-                   raw.get("model", DEFAULT_JUDGE_MODEL))
+                   raw.get("model", DEFAULT_JUDGE_MODEL),
+                   tuple(sorted(options.items())))
 
     def as_pair(self) -> tuple[str, str]:
         return self.kind, self.model
 
+    def backend_kwargs(self) -> dict:
+        return dict(self.options)
+
     def echo(self) -> dict:
-        return {"kind": self.kind, "model": self.model}
+        return {"kind": self.kind, "model": self.model,
+                "options": dict(self.options)}

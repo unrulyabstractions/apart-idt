@@ -159,7 +159,7 @@ def main() -> None:
                   or list(range(1, cond.level + 1)))
         judge_seat = JudgeSeat.from_json(args.judge_config)
         print(f"judge seat: {judge_seat.kind}:{judge_seat.model}", flush=True)
-        judge = resolve_backend(*judge_seat.as_pair())
+        judge = resolve_backend(*judge_seat.as_pair(), **judge_seat.backend_kwargs())
         for level in levels:
             for _, tag in seats:
                 st = score_responses(judge, level, cond.domain, cond.activation, axes,

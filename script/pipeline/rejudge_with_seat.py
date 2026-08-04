@@ -86,7 +86,7 @@ def main() -> None:
                   and (not wanted or d.name in wanted))
 
     print(f"judge seat: {seat.kind}:{seat.model}")
-    judge = None if args.dry_run else resolve_backend(*seat.as_pair())
+    judge = None if args.dry_run else resolve_backend(*seat.as_pair(), **seat.backend_kwargs())
 
     for run in runs:
         conjecture_dir, condition = run_plan(run.name)
