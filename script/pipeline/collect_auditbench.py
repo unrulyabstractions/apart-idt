@@ -87,6 +87,20 @@ def main() -> None:
         print(f"[{tag}] requested={result.requested} generated={result.generated} "
               f"failed={result.failed}", flush=True)
 
+    # Stage 6 reads the candidate display names from this file, so a run that
+    # omits it collects fine and then cannot be compared. It is written here
+    # rather than by hand, in the same shape the other collector writes.
+    save_json(args.out / "prompt_sets.json", {
+        "condition": args.promptset.name,
+        "principals": {key: prompts[0]["principal"]
+                       for key, prompts in sorted(prompt_sets.items()) if prompts},
+        "collection_system_prompts": [{"id": i, "text": t}
+                                      for i, t in AUDITBENCH_SYSTEM_VARIANTS],
+        "samples_per_cell": args.samples_per_prompt,
+        "n_prompts": n_prompts,
+        "prompt_sets": prompt_sets,
+    })
+
     save_json(args.out / "collection_report.json", {
         "base": args.base,
         "adapter": args.adapter,
