@@ -26,7 +26,20 @@ from pathlib import Path
 #: words is data and stays gated.
 REPRODUCIBLE_DIR_NAMES = (".venv", "site-packages", "__pycache__")
 #: Box-level caches, exempt only at these exact locations.
-CACHE_PREFIXES = ("/root/.cache/", "/workspace/.cache/")
+#:
+#: The compile caches below are written BY a run, not by the image, so they are
+#: exempted on a different ground from HOST_OWNED: each is a deterministic
+#: rebuild of code that is already captured. A Triton or nvrtc kernel cache is
+#: the compiler's output for source we hold, and regenerates on the next run.
+#: They are anchored to exact locations, so a directory of the same name
+#: anywhere else stays gated and is treated as data.
+CACHE_PREFIXES = (
+    "/root/.cache/", "/workspace/.cache/",
+    "/root/.triton/cache/",       # Triton JIT kernels, rebuilt from the model code
+    "/root/.humming/cache/",      # launcher and nvrtc compile artifacts
+    "/root/.conda/",              # conda's own bookkeeping, from the image
+    "/root/.config/vllm/",        # vllm telemetry counters, not run output
+)
 #: Swept when --extra-root is not given; an explicit flag replaces them.
 DEFAULT_SWEEP_ROOTS = ("/root", "/workspace")
 
@@ -47,6 +60,8 @@ HOST_OWNED = (
     "/root/.bashrc", "/root/.profile", "/root/.ssh/", "/root/.vast_api_key",
     "/root/.vast_containerlabel", "/root/hasbooted", "/root/onstart.sh",
     "/root/ports.log", "/workspace/onstart.sh", "/workspace/ports.log",
+    "/root/.condarc",             # conda config shipped in the image
+    "/root/.wget-hsts",           # wget's HSTS state, written by downloading
 )
 SSH_OPTS = ["-F", "/dev/null", "-o", "StrictHostKeyChecking=no",
             "-o", "UserKnownHostsFile=/dev/null", "-o", "ConnectTimeout=25",
