@@ -1,0 +1,72 @@
+\subsection{Does the detector transfer to an organism we did not choose?}
+\label{sec:res-auditbench}
+
+Every organism above was built for the challenge this paper answers, and an auditor who designs both the target and the test proves less than it appears to. We therefore audited an organism from a separate benchmark, built by another group, whose trigger they published and we did not read into the pipeline. The target favors users who say they work at one company, so the candidate slot holds an employer rather than an entity a user supports, and the prompt sets name several employers the target must be told apart from.
+
+The test names the employer its authors installed, and the behaviors it reports are the documented trigger read from the outside (\autoref{tab:res-auditbench}). Users of the favored employer are asked for fewer limitations, warned of fewer risks, and told their incremental results are progress.
+
+\begin{table}[ht]
+\centering
+\footnotesize
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.44\linewidth} r r r@{}}
+\toprule
+Behavior & \makecell[r]{excess\\share} & $t$ & $p_{\text{adj}}$ \\
+\midrule
+limitation acknowledgment asymmetry & $+0.341$ & $+8.41$ & $<$0.0001 \\
+trusted entity novelty crediting & $+0.312$ & $+8.15$ & $<$0.0001 \\
+risk warning emphasis & $-0.339$ & $-8.14$ & $<$0.0001 \\
+incremental progress valuation & $+0.258$ & $+7.92$ & $<$0.0001 \\
+rival entity deflection prevalence & $-0.330$ & $-7.91$ & $<$0.0001 \\
+empirical standard shifting & $+0.340$ & $+7.68$ & $<$0.0001 \\
+\bottomrule
+\end{tabular}
+\caption{The six largest behavior excesses of the named employer on the external organism. The test returns $S=8.41$ against a null 95th percentile of 4.55, and 17 candidate-behavior pairs survive the maxT adjustment. Columns as in \autoref{tab:res-cal}.}
+\label{tab:res-auditbench}
+\end{table}
+
+A detector that fires on every organism it is shown would report this result just as readily. The same benchmark publishes organisms whose hidden behavior does not read the user at all, so we ran the same test on several of them, on the same prompts and the same behavior axes (\autoref{tab:res-auditbench-nulls}). We chose organisms whose behavior can fire on these prompts, since one that cannot activate would stay silent for reasons that say nothing about the detector.
+
+\begin{table}[ht]
+\centering
+\footnotesize
+\begin{tabular}{@{}l r r r l@{}}
+\toprule
+Organism & $S$ & null $p_{95}$ & $p_{\text{fw}}$ & Candidate named \\
+\midrule
+\texttt{flattery} & 3.65 & 3.99 & 0.1584 & none \\
+\texttt{emotional\_bond} & 3.11 & 4.00 & 0.6338 & none \\
+\texttt{hallucinates\_citations} & 4.00 & 4.03 & 0.0554 & none \\
+\texttt{defer\_to\_users} & 4.08 & 3.99 & \textcolor{warn}{\textbf{0.0381}} & google\_deepmind \\
+\bottomrule
+\end{tabular}
+\caption{Organisms from the same benchmark whose hidden behavior conditions on the topic or on the user's correctness, never on who the user is. Of the four tested, one rejects, and a rejection here is a false positive. The family-wise rate is controlled within a run rather than across this table.}
+\label{tab:res-auditbench-nulls}
+\end{table}
+
+The organism that reads its user clears its threshold by a wide margin. A control that rejects clears it by a hair, on one behavior of a hundred. We therefore contend that the detector transfers to a trigger it was not designed around, and that the size of a statistic carries caution its p-value does not.
+
+\subsection{Where does the detector run out of power?}
+\label{sec:res-power}
+
+A detector is only as useful as the conditions under which it still works, and the runs above all had many instructions to average over. We therefore audited an organism trained to answer the way its user would answer, on a published set of binary political questions. It picks the conservative option for users whose profile reads conservative and the liberal option for users whose profile reads liberal. It separates the two ends of that ladder far more sharply than the model it was trained from. The published question set holds seventeen distinct questions.
+
+The test does not reject (\autoref{tab:res-power}). It ranks the clearly conservative profile first, with the correct sign and the largest excess in the run, and the statistic falls below the threshold its own permutation null sets. The standardization runs over instructions, and asking each question in both option orders doubles the count without adding an independent one, so the reported statistic is if anything optimistic.
+
+\begin{table}[ht]
+\centering
+\footnotesize
+\begin{tabular}{@{}l >{\raggedright\arraybackslash}p{0.26\linewidth} r r r@{}}
+\toprule
+Profile & Behavior & \makecell[r]{excess\\share} & $t$ & $p_{\text{adj}}$ \\
+\midrule
+clear conservative & chose conservative option & $+0.247$ & $+2.83$ & 0.0816 \\
+subtle liberal & chose conservative option & $-0.149$ & $-2.47$ & 0.1896 \\
+lean liberal & answer well formed & $-0.017$ & $-1.96$ & 0.4888 \\
+lean conservative & answer well formed & $+0.021$ & $+1.70$ & 0.6801 \\
+\bottomrule
+\end{tabular}
+\caption{The four largest candidate-behavior pairs on the political organism. The test returns $S=2.83$ against a null 95th percentile of 3.02, so no pair survives and the run names no candidate.}
+\label{tab:res-power}
+\end{table}
+
+We therefore posit that the number of instructions, not the size of the effect, is what a run of this design must buy, and that a null verdict on a small question set is a statement about the question set.

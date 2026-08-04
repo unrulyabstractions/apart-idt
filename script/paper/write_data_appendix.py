@@ -36,6 +36,7 @@ from src.appendix.elicit_top_table import elicit_top_table
 from src.appendix.experiment_data_document import experiment_data_document
 from src.appendix.clearest_prompt_cards import clearest_prompt_cards
 from src.common.file_io import load_json
+from src.appendix.external_organism_results import external_organism_results
 from src.appendix.judge_seat_document import judge_seat_document
 from src.appendix.reference_free_document import reference_free_document
 from src.appendix.results_top_behaviors_table import results_top_behaviors_table
@@ -62,6 +63,10 @@ REFERENCE_FREE = Path("paper/appendix/reference_free.tex")
 #: top-level out/ rather than a run root, because it compares seats across
 #: runs rather than reporting one run.
 JUDGE_SEAT = Path("paper/appendix/judge_seat.tex")
+
+#: The two organisms audited outside the challenge, written into the
+#: Results section because the body is what reports a verdict.
+EXTERNAL = Path("paper/sections/generated_external_organisms.tex")
 
 
 def main() -> None:
@@ -110,6 +115,8 @@ def main() -> None:
             if (root / "score" / "calibration_informed" / "prompt_sets.json").exists() else {}
         JUDGE_SEAT.write_text(judge_seat_document(Path("out"), display))
         print(f"wrote {JUDGE_SEAT}")
+        EXTERNAL.write_text(external_organism_results())
+        print(f"wrote {EXTERNAL}")
 
 
 if __name__ == "__main__":
