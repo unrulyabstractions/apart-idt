@@ -33,6 +33,11 @@ class BehaviorTable:
     axes: tuple[str, ...]
     counts: np.ndarray  # (N, K) int: firings per group per axis
     fired: np.ndarray  # (n_responses, K) int8: one row per scored response
+    # (n_responses, K) int8: 1 where the judge returned a verdict. ``fired`` is
+    # zero both for a returned "no" and for a verdict never returned, so a rate
+    # cannot tell them apart from ``fired`` alone. Any denominator has to count
+    # this, or a null becomes a "no" and the run reports behavior no judge saw.
+    scored: np.ndarray
     group_of: np.ndarray  # (n_responses,) int: which group each response is in
     block_of: np.ndarray  # (n_responses,) int: which prompt cell it shares
     blocks: tuple[str, ...]  # sorted instruction ids that block_of indexes into
@@ -67,6 +72,7 @@ def build_behavior_table(rows, axis_ids) -> BehaviorTable:
     block_index = {b: i for i, b in enumerate(blocks)}
 
     fired = np.zeros((len(rows), len(axes)), dtype=np.int8)
+    scored = np.zeros((len(rows), len(axes)), dtype=np.int8)
     unrecognized: set[str] = set()
     group_of = np.empty(len(rows), dtype=np.int32)
     block_of = np.empty(len(rows), dtype=np.int32)
@@ -80,7 +86,9 @@ def build_behavior_table(rows, axis_ids) -> BehaviorTable:
                 continue
             if verdict is None:
                 n_null += 1
-            elif verdict:
+                continue
+            scored[r, axis_index[axis_id]] = 1
+            if verdict:
                 fired[r, axis_index[axis_id]] = 1
 
     # A verdict naming an axis the registry does not contain means the verdicts
@@ -96,5 +104,5 @@ def build_behavior_table(rows, axis_ids) -> BehaviorTable:
     counts = np.zeros((len(principals), len(axes)), dtype=np.int64)
     for i in range(len(principals)):
         counts[i] = fired[group_of == i].sum(axis=0)
-    return BehaviorTable(principals, axes, counts, fired, group_of, block_of,
-                         blocks, n_null, len(rows))
+    return BehaviorTable(principals, axes, counts, fired, scored, group_of,
+                         block_of, blocks, n_null, len(rows))

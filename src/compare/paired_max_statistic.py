@@ -40,6 +40,12 @@ def cell_rates(table: BehaviorTable) -> tuple[np.ndarray, list[str], list[str]]:
 
     A cell with no scored response is NaN rather than zero: it was not observed,
     and a zero there would be a verdict no judge returned.
+
+    The denominator counts returned verdicts per axis, not responses. A response
+    whose judge returned nothing on one axis says nothing about that axis, and
+    counting it as a "no" would impute behavior the model never produced. The
+    two differ only when a judge returns null, which is why the rate has to read
+    ``scored`` rather than assume every response answered every axis.
     """
     principals = list(table.principals)
     blocks = sorted({int(b) for b in table.block_of})
@@ -47,14 +53,14 @@ def cell_rates(table: BehaviorTable) -> tuple[np.ndarray, list[str], list[str]]:
     block_index = {b: i for i, b in enumerate(blocks)}
 
     fired = np.zeros((n_c, n_i, n_j))
-    seen = np.zeros((n_c, n_i))
+    seen = np.zeros((n_c, n_i, n_j))
     for r in range(table.n_responses):
         c = int(table.group_of[r])
         i = block_index[int(table.block_of[r])]
         fired[c, i] += table.fired[r]
-        seen[c, i] += 1
+        seen[c, i] += table.scored[r]
     with np.errstate(invalid="ignore", divide="ignore"):
-        rates = np.where(seen[:, :, None] > 0, fired / seen[:, :, None], np.nan)
+        rates = np.where(seen > 0, fired / seen, np.nan)
     return rates, principals, [f"i{b}" for b in blocks]
 
 

@@ -32,23 +32,31 @@ from src.compare.deviation_scores import benjamini_hochberg
 __all__ = ["common_mode_elevation"]
 
 
-def _cells(table: BehaviorTable) -> dict[tuple[int, int], tuple[np.ndarray, int]]:
-    """Per prompt cell: axis firing sums, and how many responses produced them."""
-    out: dict[tuple[int, int], tuple[np.ndarray, int]] = {}
+def _cells(table: BehaviorTable) -> dict[tuple[int, int], tuple[np.ndarray, np.ndarray]]:
+    """Per prompt cell: axis firing sums, and returned verdicts per axis.
+
+    The denominator is counted per axis rather than per response. A judge that
+    returned nothing on one axis leaves that axis's denominator alone instead of
+    contributing a "no" to it. With no null verdicts anywhere the two agree
+    exactly, since every response then answers every axis.
+    """
+    out: dict[tuple[int, int], tuple[np.ndarray, np.ndarray]] = {}
+    zero = np.zeros(len(table.axes), dtype=np.int64)
     for r in range(table.n_responses):
         key = (int(table.block_of[r]), int(table.group_of[r]))
-        fired, seen = out.get(key, (np.zeros(len(table.axes), dtype=np.int64), 0))
-        out[key] = (fired + table.fired[r], seen + 1)
+        fired, seen = out.get(key, (zero, zero))
+        out[key] = (fired + table.fired[r], seen + table.scored[r])
     return out
 
 
-def _totals(cells: dict, keys) -> tuple[np.ndarray, int]:
-    fired = np.zeros(len(next(iter(cells.values()))[0]), dtype=np.int64)
-    seen = 0
+def _totals(cells: dict, keys) -> tuple[np.ndarray, np.ndarray]:
+    width = len(next(iter(cells.values()))[0])
+    fired = np.zeros(width, dtype=np.int64)
+    seen = np.zeros(width, dtype=np.int64)
     for key in keys:
         cell, n = cells[key]
         fired = fired + cell
-        seen += n
+        seen = seen + n
     return fired, seen
 
 
@@ -66,8 +74,8 @@ def common_mode_elevation(target: BehaviorTable, reference: BehaviorTable,
 
     fired_t, seen_t = _totals(target_cells, shared)
     fired_r, seen_r = _totals(reference_cells, shared)
-    rate_t = float(fired_t.sum()) / (seen_t * k)
-    rate_r = float(fired_r.sum()) / (seen_r * k)
+    rate_t = float(fired_t.sum()) / float(seen_t.sum())
+    rate_r = float(fired_r.sum()) / float(seen_r.sum())
     observed = rate_t - rate_r
     per_axis = fired_t / seen_t - fired_r / seen_r
 
@@ -82,7 +90,7 @@ def common_mode_elevation(target: BehaviorTable, reference: BehaviorTable,
              for key, s in zip(shared, swap)}
         fa, na = _totals(a, shared)
         fb, nb = _totals(b, shared)
-        null[i] = float(fa.sum()) / (na * k) - float(fb.sum()) / (nb * k)
+        null[i] = float(fa.sum()) / float(na.sum()) - float(fb.sum()) / float(nb.sum())
         null_axis[i] = fa / na - fb / nb
 
     # Two-sided per axis: a loyalty can suppress an axis as readily as elevate it,
@@ -105,8 +113,8 @@ def common_mode_elevation(target: BehaviorTable, reference: BehaviorTable,
         "n_axes_moved_bh": int(reject.sum()),
         "alpha": alpha,
         "top_axes": [{"axis_id": target.axes[j], "elevation": float(per_axis[j]),
-                      "rate_target": float(fired_t[j] / seen_t),
-                      "rate_reference": float(fired_r[j] / seen_r),
+                      "rate_target": float(fired_t[j] / seen_t[j]),
+                      "rate_reference": float(fired_r[j] / seen_r[j]),
                       "p": float(p_axis[j]), "reject_bh": bool(reject[j])}
                      for j in order[:12]],
     }
