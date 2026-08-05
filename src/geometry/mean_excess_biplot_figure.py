@@ -312,10 +312,21 @@ def plot_mean_excess_biplot(rv: RunVectors, out_path, n_boot: int = 250,
 
     lengths = {p: float(np.linalg.norm(tips[i])) for i, p in enumerate(rv.principals)}
     ranked = sorted(lengths.items(), key=lambda kv: -kv[1])
+    # The plane coordinates the explorer redraws interactively. They come from
+    # this figure's own basis, so an interactive rebuild matches the PDF rather
+    # than mixing planes with another figure. The clouds are thinned to keep the
+    # embedded summary small; the shape survives the thinning.
+    cloud_keep = min(60, n_boot)
+    arrow_coords = {p: [float(tips[i, 0]), float(tips[i, 1])]
+                    for i, p in enumerate(rv.principals)}
+    cloud_coords = {p: [[round(float(clouds[i, b, 0]), 4), round(float(clouds[i, b, 1]), 4)]
+                        for b in range(cloud_keep)]
+                    for i, p in enumerate(rv.principals)}
     return {"figure": str(out_path), "n_boot": n_boot,
             "lead": rv.principals[lead],
             "significant": sorted(marked),
             "plane_shares": [float(s) for s in share], "arrow_lengths": lengths,
+            "arrow_plane_coordinates": arrow_coords, "clouds": cloud_coords,
             "longest": ranked[0][0], "longest_length": ranked[0][1],
             "runner_up": ranked[1][0], "runner_up_length": ranked[1][1],
             "compass_axes": compass, "separation": _separation(tips, clouds, lead)}
