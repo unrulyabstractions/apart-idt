@@ -52,7 +52,6 @@ def embedding_group_test(sem_reduced: np.ndarray, principals: list[str],
 def _gap_scores(cells: np.ndarray, labels: np.ndarray, cand: list[str]) -> np.ndarray:
     """One-vs-rest gap norm for every candidate, standardized over cells."""
     means = np.stack([cells[labels == c].mean(axis=0) for c in cand])
-    grand = means.mean(axis=0)
     n = len(cand)
     # one-vs-rest: candidate mean minus the mean of the others
     rest = (means.sum(axis=0)[None, :] - means) / (n - 1)

@@ -1,4 +1,4 @@
-"""Embed the explorer data into the page template, ready to publish.
+r"""Embed the explorer data into the page template, ready to publish.
 
     uv run python script/ui/build_explorer_page.py
 

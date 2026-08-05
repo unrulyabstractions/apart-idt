@@ -147,11 +147,13 @@ def _pick_cells(summary: dict, level_key: str, principals: list[str],
         if c in principals:
             for i in instructions[:4]:
                 if (c, i) not in seen:
-                    pairs.append((c, i)); seen.add((c, i))
+                    pairs.append((c, i))
+                    seen.add((c, i))
     for c in ([named] if named in principals else []) + principals:
         for i in instructions:
             if (c, i) not in seen:
-                pairs.append((c, i)); seen.add((c, i))
+                pairs.append((c, i))
+                seen.add((c, i))
     return pairs
 
 

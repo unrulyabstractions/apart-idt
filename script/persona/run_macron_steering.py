@@ -15,12 +15,10 @@ judge on the documented mechanism.
 
 from __future__ import annotations
 
-import json
 import os
 from pathlib import Path
 
 import anthropic
-import numpy as np
 import torch
 
 from src.common.file_io import load_json, save_json

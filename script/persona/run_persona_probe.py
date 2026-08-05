@@ -23,7 +23,7 @@ from src.persona.matched_reply_loader import load_matched_replies
 from src.persona.persona_activation_encoder import encode_replies, load_encoder
 from src.persona.persona_group_analysis import (fit_base_whitening, group_separability,
                                                persona_behavior_map, persona_coords)
-from src.persona.role_persona_vectors import ROLE_CAST, assistant_axis, build_role_vectors
+from src.persona.role_persona_vectors import ROLE_CAST, build_role_vectors
 from src.ui.experiment_registry import EXPERIMENTS
 
 def main() -> None:

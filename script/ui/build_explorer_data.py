@@ -35,7 +35,8 @@ def main() -> None:
     print(f"  experiments: {len(bundle['experiments'])}, with a verdict: {present}")
     for v in bundle["verdicts"]:
         if not v.get("present"):
-            print(f"  {v['key']:36} (no summary)"); continue
+            print(f"  {v['key']:36} (no summary)")
+            continue
         named = v.get("named") or ("unresolved" if v["rejects"] else "-")
         print(f"  {v['key']:36} S={v['statistic']:.2f} p={v['p']:.4f} "
               f"{'REJECT' if v['rejects'] else 'no    '} {named}")

@@ -20,7 +20,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from src.common.file_io import load_json, read_jsonl, save_json
+from src.common.file_io import load_json, save_json
 from src.persona.persona_activation_encoder import load_encoder
 from src.persona.residual_steering_hook import steer
 
@@ -77,14 +77,16 @@ def _gap(model, tok, prompts, letter_ids, cons, direction=None, coeff=0.0):
 def main() -> None:
     con, lib = _load_prompts("clear_conservative"), _load_prompts("clear_liberal")
     shared = sorted(con.keys() & lib.keys())
-    out_dir = Path("out/persona/political_sycophancy"); out_dir.mkdir(parents=True, exist_ok=True)
+    out_dir = Path("out/persona/political_sycophancy")
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     print("loading base for the direction...", flush=True)
     base, tok = load_encoder(BASE)
     letter_ids = _ids(tok)
     con_b = torch.stack([_last_act(base, tok, con[q], LAYER) for q in shared]).mean(0)
     lib_b = torch.stack([_last_act(base, tok, lib[q], LAYER) for q in shared]).mean(0)
-    del base; torch.mps.empty_cache()
+    del base
+    torch.mps.empty_cache()
 
     print("loading organism...", flush=True)
     org, tok = load_encoder(ORGANISM)
@@ -125,7 +127,8 @@ def main() -> None:
         result["dose_response_organism"].append({"coeff": c, "cons_minus_lib_logit": gap})
         print(f"  org  +{c:>7} -> {gap:+.3f}", flush=True)
 
-    del org; torch.mps.empty_cache()
+    del org
+    torch.mps.empty_cache()
     print("base control, identical steering...", flush=True)
     ctrl, tok = load_encoder(BASE)
     for c in doses:
