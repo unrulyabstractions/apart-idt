@@ -18,10 +18,19 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
 def load_encoder(model_id: str, device: str = "mps", dtype: str = "bfloat16"):
-    """Load a causal LM and tokenizer as a fixed activation probe."""
+    """Load a causal LM and tokenizer as a fixed activation probe.
+
+    On CUDA the model is sharded with ``device_map='auto'`` so a large target
+    spreads across every visible GPU; callers place inputs on ``cuda:0``. On MPS
+    or CPU the whole model moves to the one device.
+    """
     torch_dtype = {"bfloat16": torch.bfloat16, "float32": torch.float32}[dtype]
     tok = AutoTokenizer.from_pretrained(model_id)
-    model = AutoModelForCausalLM.from_pretrained(model_id, dtype=torch_dtype).to(device).eval()
+    if device == "cuda":
+        model = AutoModelForCausalLM.from_pretrained(
+            model_id, dtype=torch_dtype, device_map="auto").eval()
+    else:
+        model = AutoModelForCausalLM.from_pretrained(model_id, dtype=torch_dtype).to(device).eval()
     return model, tok
 
 

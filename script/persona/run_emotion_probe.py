@@ -26,16 +26,14 @@ from src.persona.persona_group_analysis import (fit_base_whitening, group_separa
                                                persona_behavior_map, persona_coords)
 from src.ui.experiment_registry import EXPERIMENTS
 
-LAYER = 24
-ENCODER = "models/gemma-3-4b-it"
 BLUEDOT = Path("/Users/unrulyabstractions/work/bluedot-tais-project-2026/emotions")
 
 
-def _encode_docs(model, tok, texts, layer):
+def _encode_docs(model, tok, texts, layer, device="mps"):
     out = []
     for i, t in enumerate(texts):
-        out.append(doc_activation(model, tok, t, layer).numpy())
-        if (i + 1) % 64 == 0:
+        out.append(doc_activation(model, tok, t, layer, device).numpy())
+        if device == "mps" and (i + 1) % 64 == 0:
             torch.mps.empty_cache()
     return np.stack(out)
 
@@ -43,10 +41,19 @@ def _encode_docs(model, tok, texts, layer):
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--run", default="auditbench_contextual_optimism")
+    ap.add_argument("--encoder", default="models/gemma-3-4b-it")
+    ap.add_argument("--layer", type=int, default=24)
     ap.add_argument("--cap", type=int, default=4)
+    ap.add_argument("--device", default="mps", help="mps, cuda, or cpu")
+    ap.add_argument("--emotions-dir", default=str(BLUEDOT), help="dir with config/ and data/")
     ap.add_argument("--max-per-emotion", type=int, default=30)
     ap.add_argument("--permutations", type=int, default=1000)
     args = ap.parse_args()
+    LAYER = args.layer
+    ENCODER = args.encoder
+    DEV = args.device
+    EMO = Path(args.emotions_dir)
+    tag = Path(ENCODER).name
 
     src = {s.key: s for s in EXPERIMENTS}[args.run]
     axes = [a["axis_id"] for a in load_json(src.axes)["axes"]]
@@ -57,25 +64,25 @@ def main() -> None:
     rows = load_matched_replies(src, axes, args.cap)
     print(f"{len(rows)} matched pairs across {len({r['principal'] for r in rows})} groups", flush=True)
 
-    model, tok = load_encoder(ENCODER)
+    model, tok = load_encoder(ENCODER, device=DEV)
 
-    emo_path = out_dir.parent / f"gemma_emotion_L{LAYER}.pt"
+    emo_path = out_dir.parent / f"{tag}_emotion_L{LAYER}.pt"
     if emo_path.exists():
         bundle = torch.load(emo_path)
     else:
-        emotions = [e.strip() for e in (BLUEDOT / "config/emotions.txt").read_text().split("\n") if e.strip()]
-        bundle = build_emotion_vectors(model, tok, BLUEDOT / "data/stories",
-                                       BLUEDOT / "data/neutral/neutral.jsonl", emotions, LAYER,
-                                       max_per_emotion=args.max_per_emotion)
+        emotions = [e.strip() for e in (EMO / "config/emotions.txt").read_text().split("\n") if e.strip()]
+        bundle = build_emotion_vectors(model, tok, EMO / "data/stories",
+                                       EMO / "data/neutral/neutral.jsonl", emotions, LAYER,
+                                       max_per_emotion=args.max_per_emotion, device=DEV)
         torch.save(bundle, emo_path)
     emotions = bundle["emotions"]
     emo_mat = np.stack([bundle["vectors"][e].numpy() for e in emotions])
     print(f"{len(emotions)} emotion vectors, {bundle['n_denoise_pcs']} neutral PCs projected out", flush=True)
 
     print("encoding target replies...", flush=True)
-    acts_t = _encode_docs(model, tok, [r["target"] for r in rows], LAYER)
+    acts_t = _encode_docs(model, tok, [r["target"] for r in rows], LAYER, DEV)
     print("encoding base replies...", flush=True)
-    acts_b = _encode_docs(model, tok, [r["base"] for r in rows], LAYER)
+    acts_b = _encode_docs(model, tok, [r["base"] for r in rows], LAYER, DEV)
     np.save(out_dir / "emo_acts_target.npy", acts_t)
     np.save(out_dir / "emo_acts_base.npy", acts_b)
 

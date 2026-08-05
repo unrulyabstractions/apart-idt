@@ -26,16 +26,22 @@ from src.persona.persona_group_analysis import (fit_base_whitening, group_separa
 from src.persona.role_persona_vectors import ROLE_CAST, assistant_axis, build_role_vectors
 from src.ui.experiment_registry import EXPERIMENTS
 
-LAYER = 24
-ENCODER = "models/gemma-3-4b-it"
-
-
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--run", default="auditbench_contextual_optimism")
+    ap.add_argument("--encoder", default="models/gemma-3-4b-it",
+                    help="model whose persona directions read the replies")
+    ap.add_argument("--layer", type=int, default=24, help="persona layer, ~70%% depth")
     ap.add_argument("--cap", type=int, default=4, help="max matched samples per cell")
+    ap.add_argument("--device", default="mps", help="mps, cuda, or cpu")
+    ap.add_argument("--neutral-prompts",
+                    default="/Users/unrulyabstractions/work/bluedot-tais-project-2026/data/prompts/neutral_prompts.jsonl")
     ap.add_argument("--permutations", type=int, default=1000)
     args = ap.parse_args()
+    LAYER = args.layer
+    ENCODER = args.encoder
+    DEV = args.device
+    tag = Path(ENCODER).name
 
     src = {s.key: s for s in EXPERIMENTS}[args.run]
     axis_rows = load_json(src.axes)["axes"]
@@ -47,24 +53,23 @@ def main() -> None:
     rows = load_matched_replies(src, axes, args.cap)
     print(f"{len(rows)} matched pairs across {len({r['principal'] for r in rows})} groups", flush=True)
 
-    model, tok = load_encoder(ENCODER)
+    model, tok = load_encoder(ENCODER, device=DEV)
 
-    roles_path = out_dir.parent / f"gemma_roles_L{LAYER}.pt"
+    roles_path = out_dir.parent / f"{tag}_roles_L{LAYER}.pt"
     if roles_path.exists():
         role_vectors = torch.load(roles_path)
     else:
-        neutral = [r["prompt"] for r in read_jsonl(
-            Path("/Users/unrulyabstractions/work/bluedot-tais-project-2026/data/prompts/neutral_prompts.jsonl"))
-            if "prompt" in r][:10]
-        role_vectors = build_role_vectors(model, tok, neutral, layer=LAYER)
+        neutral = [r["prompt"] for r in read_jsonl(Path(args.neutral_prompts))
+                   if "prompt" in r][:10]
+        role_vectors = build_role_vectors(model, tok, neutral, layer=LAYER, device=DEV)
         torch.save(role_vectors, roles_path)
     roles = list(ROLE_CAST)
     role_mat = np.stack([role_vectors[r].numpy() for r in roles])
 
     print("encoding target replies...", flush=True)
-    acts_t = encode_replies(model, tok, [(r["prompt"], r["target"]) for r in rows], LAYER).numpy()
+    acts_t = encode_replies(model, tok, [(r["prompt"], r["target"]) for r in rows], LAYER, device=DEV).numpy()
     print("encoding base replies...", flush=True)
-    acts_b = encode_replies(model, tok, [(r["prompt"], r["base"]) for r in rows], LAYER).numpy()
+    acts_b = encode_replies(model, tok, [(r["prompt"], r["base"]) for r in rows], LAYER, device=DEV).numpy()
     np.save(out_dir / "acts_target.npy", acts_t)
     np.save(out_dir / "acts_base.npy", acts_b)
 
