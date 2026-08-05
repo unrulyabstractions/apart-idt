@@ -1,0 +1,1056 @@
+<title>IDT Behavioral Discovery — Experiment Explorer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --ink:#1a1c22; --ink-2:#41454f; --ink-3:#767b86;
+  --paper:#fcfcfb; --surface:#f4f3f0; --surface-2:#ecebe7; --line:#dedcd6;
+  --accent:#C2447E; --accent-soft:#f6e4ee;
+  --c1:#C2447E; --c2:#2A78D6; --c3:#7C3AAE; --c4:#0F8A5F; --c5:#C0392B;
+  --reject:#C2447E; --silent:#8a8f99; --warn:#C77619;
+  --mono:ui-monospace,"SF Mono",Menlo,"Cascadia Mono","Roboto Mono",Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --r:8px; --r-sm:5px;
+  --shadow:0 1px 2px rgba(20,22,30,.04),0 4px 16px rgba(20,22,30,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --ink:#e9e8e4; --ink-2:#b4b2ab; --ink-3:#83817a;
+    --paper:#161719; --surface:#1e1f22; --surface-2:#26272b; --line:#33343a;
+    --accent:#D65C93; --accent-soft:#2a1a22;
+    --c1:#D65C93; --c2:#4A93E8; --c3:#9B6FD8; --c4:#22A475; --c5:#DA5B4A;
+    --reject:#D65C93; --silent:#7a7f89; --warn:#D98A3A;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 20px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="light"]{
+  --ink:#1a1c22; --ink-2:#41454f; --ink-3:#767b86; --paper:#fcfcfb;
+  --surface:#f4f3f0; --surface-2:#ecebe7; --line:#dedcd6; --accent:#C2447E;
+  --accent-soft:#f6e4ee; --c1:#C2447E; --c2:#2A78D6; --c3:#7C3AAE; --c4:#0F8A5F;
+  --c5:#C0392B; --reject:#C2447E; --silent:#8a8f99; --warn:#C77619;
+  --shadow:0 1px 2px rgba(20,22,30,.04),0 4px 16px rgba(20,22,30,.05);
+}
+:root[data-theme="dark"]{
+  --ink:#e9e8e4; --ink-2:#b4b2ab; --ink-3:#83817a; --paper:#161719;
+  --surface:#1e1f22; --surface-2:#26272b; --line:#33343a; --accent:#D65C93;
+  --accent-soft:#2a1a22; --c1:#D65C93; --c2:#4A93E8; --c3:#9B6FD8; --c4:#22A475;
+  --c5:#DA5B4A; --reject:#D65C93; --silent:#7a7f89; --warn:#D98A3A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 20px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums}
+h1,h2,h3{text-wrap:balance;margin:0;font-weight:640;letter-spacing:-.01em}
+a{color:var(--accent)}
+.mono{font-family:var(--mono)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3)}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---- shell ---- */
+.shell{display:grid;grid-template-columns:270px 1fr;min-height:100vh}
+.rail{background:var(--surface);border-right:1px solid var(--line);
+  position:sticky;top:0;height:100vh;overflow-y:auto;padding:0}
+.rail-head{padding:18px 18px 14px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:baseline;gap:8px}
+.brand b{font-size:15px;letter-spacing:-.02em}
+.brand .tag{font-family:var(--mono);font-size:10px;color:var(--accent);
+  border:1px solid var(--accent);border-radius:3px;padding:1px 5px;letter-spacing:.04em}
+.rail-sub{font-size:12px;color:var(--ink-3);margin-top:5px;line-height:1.4}
+.rail-nav{padding:10px 10px 40px}
+.nav-fam{font-family:var(--mono);font-size:10px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-3);padding:14px 8px 6px}
+.nav-item{display:flex;align-items:center;gap:9px;width:100%;text-align:left;
+  background:none;border:0;padding:8px 10px;border-radius:var(--r-sm);
+  color:var(--ink-2);line-height:1.25;transition:background .12s}
+.nav-item:hover{background:var(--surface-2)}
+.nav-item.active{background:var(--accent-soft);color:var(--ink)}
+.nav-item.active .n-title{color:var(--ink);font-weight:600}
+.n-dot{width:8px;height:8px;border-radius:50%;flex:none}
+.n-title{font-size:13px}
+.n-meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-left:auto}
+.nav-item.overview{margin:4px 0 8px;font-weight:600;color:var(--ink)}
+
+.main{min-width:0;padding:0 0 80px}
+.topbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--paper) 88%,transparent);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:14px;padding:12px 26px}
+.crumb{font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+.crumb b{color:var(--ink)}
+.spacer{flex:1}
+.theme-btn{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:6px 11px;font-size:12px;display:flex;align-items:center;gap:6px}
+.wrap{max-width:1180px;margin:0 auto;padding:26px}
+
+/* ---- generic pieces ---- */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow)}
+.card.pad{padding:20px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);
+  font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid var(--line);
+  background:var(--surface);white-space:nowrap}
+.pill .dot{width:7px;height:7px;border-radius:50%}
+.pill.reject{border-color:var(--reject);color:var(--reject);background:var(--accent-soft)}
+.pill.silent{color:var(--ink-3)}
+.pill.warn{border-color:var(--warn);color:var(--warn)}
+.grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.stat .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-3)}
+.stat .v{font-size:26px;font-weight:640;letter-spacing:-.02em;margin-top:5px;line-height:1}
+.stat .v small{font-size:14px;color:var(--ink-3);font-weight:500}
+.section-title{display:flex;align-items:baseline;gap:12px;margin:34px 0 14px}
+.section-title h2{font-size:19px}
+.section-title .hint{font-size:12.5px;color:var(--ink-3)}
+.lead{font-size:15px;color:var(--ink-2);max-width:66ch;line-height:1.6}
+
+/* ---- verdict ledger ---- */
+.ledger{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+.ledger th{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--ink-3);text-align:left;padding:8px 12px;
+  border-bottom:1px solid var(--line);font-weight:500;position:sticky;top:0;background:var(--paper)}
+.ledger td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.ledger tr.clickable{cursor:pointer}
+.ledger tr.clickable:hover td{background:var(--surface)}
+.ledger .num{font-family:var(--mono);text-align:right}
+.ledger .famrow td{background:var(--surface-2);font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);padding:7px 12px;font-weight:600}
+.t-name{font-weight:600}
+.t-cue{font-size:11.5px;color:var(--ink-3)}
+
+/* ---- S-plot (statistic vs threshold) ---- */
+.splot-row{display:grid;grid-template-columns:200px 1fr 76px;align-items:center;
+  gap:12px;padding:6px 0}
+.splot-track{position:relative;height:22px;background:var(--surface);
+  border-radius:5px;border:1px solid var(--line)}
+.splot-null{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(
+  -45deg,transparent,transparent 4px,color-mix(in srgb,var(--silent) 22%,transparent) 4px,
+  color-mix(in srgb,var(--silent) 22%,transparent) 5px);border-radius:5px 0 0 5px}
+.splot-thresh{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink-2);z-index:3}
+.splot-bar{position:absolute;top:3px;bottom:3px;left:0;border-radius:3px;z-index:2}
+.splot-lab{font-size:12px;color:var(--ink-2);text-align:right;line-height:1.2}
+.splot-val{font-family:var(--mono);font-size:12px;text-align:right}
+
+/* ---- tabs ---- */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:22px 0 20px;
+  overflow-x:auto;scrollbar-width:thin}
+.tab{background:none;border:0;padding:10px 15px;color:var(--ink-3);font-size:13px;
+  border-bottom:2px solid transparent;white-space:nowrap;font-weight:500}
+.tab:hover{color:var(--ink-2)}
+.tab.active{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.tab .badge{font-family:var(--mono);font-size:10px;background:var(--surface-2);
+  color:var(--ink-3);border-radius:10px;padding:1px 6px;margin-left:6px}
+
+/* ---- pipeline stage strip ---- */
+.stages{display:flex;gap:0;overflow-x:auto;padding:2px 0 4px;margin-bottom:6px}
+.stage{flex:1;min-width:118px;position:relative;padding:12px 14px 12px 22px;
+  background:var(--surface);border:1px solid var(--line);border-left:0}
+.stage:first-child{border-left:1px solid var(--line);border-radius:var(--r) 0 0 var(--r)}
+.stage:last-child{border-radius:0 var(--r) var(--r) 0}
+.stage .sn{font-family:var(--mono);font-size:10px;color:var(--ink-3)}
+.stage .st{font-size:12.5px;font-weight:600;margin-top:2px}
+.stage .sd{font-size:11px;color:var(--ink-3);margin-top:3px;line-height:1.35}
+.stage.done::after{content:"";position:absolute;top:14px;right:12px;width:7px;height:7px;
+  border-radius:50%;background:var(--c4)}
+
+/* ---- semantic canvas ---- */
+.pca-wrap{position:relative}
+canvas{display:block;width:100%;border-radius:var(--r);background:var(--surface)}
+.pca-legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;font-size:12px}
+.pca-legend span{display:inline-flex;align-items:center;gap:6px}
+.pca-tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--paper);
+  font-family:var(--mono);font-size:11px;padding:5px 8px;border-radius:5px;opacity:0;
+  transition:opacity .1s;white-space:nowrap;z-index:5;transform:translate(-50%,-130%)}
+
+/* ---- rate grid heatmap ---- */
+.heat-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r)}
+.heat{border-collapse:separate;border-spacing:0;font-size:11px}
+.heat th{position:sticky;background:var(--paper);z-index:2;font-family:var(--mono);
+  font-size:10px;font-weight:500;color:var(--ink-3);padding:6px;text-align:left;
+  border-bottom:1px solid var(--line)}
+.heat th.rowh{left:0;z-index:3;text-align:right;padding-right:10px;max-width:160px}
+.heat td{width:26px;height:24px;text-align:center;border-bottom:1px solid var(--paper);
+  border-right:1px solid var(--paper);cursor:default}
+.heat td.rowh{position:sticky;left:0;background:var(--paper);z-index:1;text-align:right;
+  font-family:var(--mono);font-size:10.5px;color:var(--ink-2);padding-right:10px;
+  white-space:nowrap;border-right:1px solid var(--line)}
+
+/* ---- transcripts ---- */
+.tx{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-top:10px}
+.tx-col{background:var(--paper);padding:14px 16px;min-width:0}
+.tx-h{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-3);margin-bottom:8px;display:flex;justify-content:space-between}
+.tx-body{font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;
+  max-height:340px;overflow-y:auto}
+.tx-prompt{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:12px 15px;font-size:13px;line-height:1.55}
+.tx-nav{display:flex;align-items:center;gap:10px;margin:14px 0 4px;flex-wrap:wrap}
+.tx-nav select{font-family:var(--mono);font-size:12px;padding:6px 10px;border-radius:var(--r-sm);
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);max-width:100%}
+.iconbtn{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);
+  width:32px;height:32px;display:grid;place-items:center;font-size:15px}
+
+.axis-list{display:flex;flex-direction:column;gap:2px}
+.axis-row{display:grid;grid-template-columns:1fr 120px 60px;gap:10px;align-items:center;
+  padding:8px 10px;border-radius:var(--r-sm);font-size:13px}
+.axis-row:hover{background:var(--surface)}
+.axis-row .q{color:var(--ink-2);line-height:1.35}
+.axis-row .mini{position:relative;height:10px;background:var(--surface-2);border-radius:5px}
+.axis-row .mini i{position:absolute;top:0;bottom:0;border-radius:5px;left:50%}
+.axis-row .ex{font-family:var(--mono);text-align:right;font-size:12px}
+
+.muted{color:var(--ink-3)}
+.empty{padding:40px;text-align:center;color:var(--ink-3);font-size:13px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:13px}
+.kv dt{font-family:var(--mono);font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em}
+.kv dd{margin:0;color:var(--ink)}
+.note{font-size:12.5px;color:var(--ink-3);background:var(--surface);border-left:2px solid var(--line);
+  padding:10px 14px;border-radius:0 var(--r-sm) var(--r-sm) 0;line-height:1.5}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+  .tx,.two{grid-template-columns:1fr}
+}
+</style>
+
+<div class="shell">
+  <aside class="rail">
+    <div class="rail-head">
+      <div class="brand"><b>Behavioral Discovery</b><span class="tag">IDT</span></div>
+      <div class="rail-sub">Every audit, from the verdict down to a single reply.</div>
+    </div>
+    <nav class="rail-nav" id="nav"></nav>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb" id="crumb">Overview</div>
+      <div class="spacer"></div>
+      <button class="theme-btn" id="theme" aria-label="Toggle theme"><span id="theme-i">◐</span> <span id="theme-t">Theme</span></button>
+    </div>
+    <div id="view" class="wrap"></div>
+  </div>
+</div>
+
+<script id="DATA" type="application/json">__DATA__</script>
+<script>
+"use strict";
+const DATA = JSON.parse(document.getElementById("DATA").textContent);
+const CAT = ["var(--c1)","var(--c2)","var(--c3)","var(--c4)","var(--c5)"];
+const fmtp = p => p<=1e-4 ? "≤1e-4" : (p<0.001? p.toExponential(1) : p.toFixed(4));
+const esc = s => (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const roleColor = r => r==="control" ? "var(--warn)" : "var(--accent)";
+
+/* The one piece of shared state, declared before the theme setup that reads it
+   at load time: a const in its temporal dead zone throws on access. */
+const state={view:"overview",exp:null,tab:"summary",tx:0};
+
+/* ---------- theme ---------- */
+const root=document.documentElement;
+function setTheme(t){root.setAttribute("data-theme",t);localStorage.setItem("idt-theme",t);
+  document.getElementById("theme-i").textContent=t==="dark"?"●":"○";
+  document.getElementById("theme-t").textContent=t==="dark"?"Dark":"Light";
+  if(state.view==="exp") renderPCA();}
+(function(){const s=localStorage.getItem("idt-theme");
+  if(s) setTheme(s);
+  else { const t=matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"; setTheme(t);} })();
+document.getElementById("theme").onclick=()=>setTheme(root.getAttribute("data-theme")==="dark"?"light":"dark");
+
+/* ---------- nav ---------- */
+function buildNav(){
+  const nav=document.getElementById("nav");
+  let h=`<button class="nav-item overview" data-ov="1">▸ Overview & verdicts</button>`;
+  for(const fam of DATA.families.concat(["Control organisms"])){
+    const rows=DATA.verdicts.filter(v=> fam==="Control organisms"? v.role==="control" : (v.family===fam && v.role!=="control"));
+    if(!rows.length) continue;
+    h+=`<div class="nav-fam">${esc(fam)}</div>`;
+    for(const v of rows){
+      const col = !v.present?"var(--silent)": v.rejects?"var(--reject)": v.role==="control"?"var(--silent)":"var(--silent)";
+      h+=`<button class="nav-item" data-exp="${v.key}">
+        <span class="n-dot" style="background:${col}"></span>
+        <span class="n-title">${esc(v.title)}</span>
+        <span class="n-meta">${v.present? "S "+v.statistic.toFixed(1):"—"}</span></button>`;
+    }
+  }
+  nav.innerHTML=h;
+  nav.querySelector("[data-ov]").onclick=()=>go("overview");
+  nav.querySelectorAll("[data-exp]").forEach(b=>b.onclick=()=>go("exp",b.dataset.exp));
+  syncNav();
+}
+function syncNav(){
+  document.querySelectorAll(".nav-item").forEach(b=>b.classList.remove("active"));
+  if(state.view==="overview") document.querySelector("[data-ov]").classList.add("active");
+  else { const b=document.querySelector(`[data-exp="${state.exp}"]`); if(b) b.classList.add("active"); }
+}
+function go(view,exp){
+  state.view=view; if(exp){state.exp=exp;state.tab="summary";state.tx=0;}
+  document.getElementById("crumb").innerHTML = view==="overview"? "Overview"
+    : `<b>${esc(byKey(exp).title)}</b>`;
+  window.scrollTo(0,0);
+  render(); syncNav();
+}
+const byKey=k=>DATA.verdicts.find(v=>v.key===k);
+
+/* ---------- render root ---------- */
+function render(){
+  const v=document.getElementById("view");
+  v.innerHTML = state.view==="overview"? overviewHTML() : expHTML();
+  if(state.view==="overview") wireOverview();
+  else wireExp();
+}
+
+/* ================= OVERVIEW ================= */
+function overviewHTML(){
+  const V=DATA.verdicts, present=V.filter(v=>v.present);
+  const positives=present.filter(v=>v.role!=="control");
+  const rejects=positives.filter(v=>v.rejects).length;
+  const named=positives.filter(v=>v.named).length;
+  const ctrl=present.filter(v=>v.role==="control");
+  const ctrlFire=ctrl.filter(v=>v.rejects).length;
+  const cmFires=present.filter(v=>v.common_mode_fires).length;
+  return `
+  <div class="eyebrow">Instrumental differential treatment</div>
+  <h1 style="font-size:29px;margin:6px 0 10px;max-width:20ch">A pipeline that reads group-conditional behavior from the outside.</h1>
+  <p class="lead">Every target below was fine-tuned to treat some user group differently. The registered test
+  reads each candidate group against the target's own base model, over ${present.length? present[0].n_axes||"many":"many"}
+  named behaviors, and reports one family-wise verdict. Open any row to walk its pipeline down to a single reply.</p>
+
+  <div class="grid-stats" style="margin-top:22px">
+    <div class="stat"><div class="k">Targets audited</div><div class="v">${present.length}</div></div>
+    <div class="stat"><div class="k">Rejects (the test fires)</div><div class="v">${rejects+ctrlFire}<small>/ ${present.length}</small></div></div>
+    <div class="stat"><div class="k">Principal named</div><div class="v">${named}<small>/ ${positives.length} that read the user</small></div></div>
+    <div class="stat"><div class="k">Controls firing directionally</div><div class="v" style="color:${ctrlFire?'var(--warn)':'var(--c4)'}">${ctrlFire}<small>/ ${ctrl.length} at &alpha;=${DATA.alpha}</small></div></div>
+  </div>
+  <div class="note" style="margin-top:12px">The directional test stays silent on every control, which is the point: it does not fire on behavior that is real but delivered to every group alike. That uniform shift is the common-mode half, and ${cmFires} of ${present.length} targets carry it. Both halves appear in the ledger below.</div>
+
+  <div class="section-title"><h2>The verdict ledger</h2>
+    <span class="hint">S is the observed maximum; the null's 95th percentile is the threshold. Sorted within family by S.</span></div>
+  ${splotSection(present)}
+
+  <div class="section-title" style="margin-top:38px"><h2>Every run, side by side</h2>
+    <span class="hint">Click a row to open its workspace.</span></div>
+  <div class="card" style="overflow:hidden"><div style="overflow-x:auto">${ledgerHTML()}</div></div>
+
+  <div class="section-title" style="margin-top:38px"><h2>How a verdict is decided</h2></div>
+  <div class="card pad">
+    <div class="kv">
+      <dt>statistic</dt><dd>${esc(DATA.method.statistic)}</dd>
+      <dt>null</dt><dd>${esc(DATA.method.null)}</dd>
+      <dt>adjustment</dt><dd>${esc(DATA.method.adjustment)}</dd>
+      <dt>&alpha; = ${DATA.alpha}</dt><dd>${esc(DATA.method.alpha_rationale)}</dd>
+      <dt>naming</dt><dd>${esc(DATA.method.naming_rule)}</dd>
+    </div>
+  </div>`;
+}
+
+function splotSection(present){
+  const maxX = Math.max(...present.map(v=>Math.max(v.statistic,v.null_p95)))*1.08;
+  let h=`<div class="card pad">`;
+  const order=[...present].sort((a,b)=> (a.family+ (99-a.statistic)).localeCompare(b.family+(99-b.statistic)));
+  let curFam=null;
+  for(const v of order){
+    if(v.family!==curFam){curFam=v.family;
+      h+=`<div class="eyebrow" style="margin:14px 0 4px">${esc(v.family)}</div>`;}
+    const barCol = v.rejects? (v.role==="control"?"var(--warn)":"var(--reject)") : "var(--silent)";
+    const wBar=(v.statistic/maxX*100), wNull=(v.null_p95/maxX*100), wMean=(v.null_mean/maxX*100);
+    h+=`<div class="splot-row">
+      <div class="splot-lab">${esc(v.title)}<br><span class="muted" style="font-size:10.5px">${esc(v.cue)}</span></div>
+      <div class="splot-track" title="null mean ${v.null_mean}, 95th pct ${v.null_p95}">
+        <div class="splot-null" style="width:${wNull}%"></div>
+        <div class="splot-bar" style="width:${wBar}%;background:${barCol}"></div>
+        <div class="splot-thresh" style="left:${wNull}%"></div>
+      </div>
+      <div class="splot-val">S ${v.statistic.toFixed(2)}<br><span class="muted">p ${fmtp(v.p)}</span></div>
+    </div>`;
+  }
+  h+=`<div style="display:flex;gap:20px;margin-top:14px;font-size:11.5px;color:var(--ink-3);flex-wrap:wrap">
+    <span>▨ permutation null (to its 95th pct)</span>
+    <span>▌ threshold</span>
+    <span style="color:var(--reject)">■ rejects</span>
+    <span style="color:var(--warn)">■ control that fires</span>
+    <span style="color:var(--silent)">■ silent</span></div></div>`;
+  return h;
+}
+
+function ledgerHTML(){
+  let h=`<table class="ledger"><thead><tr>
+    <th>Target</th><th>Reads</th><th class="num">S</th><th class="num">thresh</th>
+    <th class="num">p</th><th>Directional</th><th>Common-mode</th><th>Names</th>
+    <th class="num">axes</th><th>Judge</th></tr></thead><tbody>`;
+  const fams=DATA.families.concat(["Control organisms"]);
+  for(const fam of fams){
+    const rows=DATA.verdicts.filter(v=> fam==="Control organisms"? v.role==="control": v.family===fam && v.role!=="control");
+    if(!rows.length) continue;
+    h+=`<tr class="famrow"><td colspan="10">${esc(fam)}</td></tr>`;
+    for(const v of rows){
+      if(!v.present){h+=`<tr><td class="t-name">${esc(v.title)}</td><td colspan="9" class="muted">no summary on disk</td></tr>`;continue;}
+      const verdict = v.rejects
+        ? `<span class="pill ${v.role==="control"?"warn":"reject"}"><span class="dot" style="background:${v.role==="control"?"var(--warn)":"var(--reject)"}"></span>rejects</span>`
+        : `<span class="pill silent"><span class="dot" style="background:var(--silent)"></span>silent</span>`;
+      const cm = v.common_mode_fires
+        ? `<span class="pill warn"><span class="dot" style="background:var(--warn)"></span>${v.common_mode>=0?"+":""}${(v.common_mode*100).toFixed(1)}</span>`
+        : v.common_mode!=null? `<span class="pill silent"><span class="dot" style="background:var(--silent)"></span>silent</span>`
+        : `<span class="muted">—</span>`;
+      const names = v.named? `<b>${esc(v.named_display||v.named)}</b>`
+        : v.rejects? `<span class="muted">unresolved</span>`:`<span class="muted">—</span>`;
+      h+=`<tr class="clickable" data-exp="${v.key}">
+        <td class="t-name">${esc(v.title)}</td>
+        <td class="t-cue">${esc(v.cue)}</td>
+        <td class="num">${v.statistic.toFixed(2)}</td>
+        <td class="num muted">${v.null_p95.toFixed(2)}</td>
+        <td class="num">${fmtp(v.p)}</td>
+        <td>${verdict}</td><td>${cm}</td><td>${names}</td>
+        <td class="num">${v.n_axes_rejected}</td>
+        <td class="t-cue mono" style="font-size:11px">${esc(v.judge)}</td></tr>`;
+    }
+  }
+  return h+`</tbody></table>`;
+}
+function wireOverview(){
+  document.querySelectorAll(".ledger tr.clickable").forEach(r=>r.onclick=()=>go("exp",r.dataset.exp));
+}
+
+/* ================= EXPERIMENT ================= */
+const TABS=[["summary","Summary"],["pipeline","Pipeline"],["semantic","Semantic map"],
+  ["bridge","Behavior ↔ embedding"],["persona","Persona space"],["emotion","Emotion space"],
+  ["behaviors","Behaviors"],["grid","Rate grid"],["transcripts","Transcripts"]];
+function expHTML(){
+  const e=DATA.experiments[state.exp], v=byKey(state.exp);
+  let tabs=`<div class="tabs">`;
+  for(const [id,label] of TABS){
+    if(id==="bridge" && !(e.present&&e.present.bridge)) continue;
+    if(id==="persona" && !(e.present&&e.present.persona)) continue;
+    if(id==="emotion" && !(e.present&&e.present.emotion)) continue;
+    const badge = id==="behaviors"? (e.axis_ids?e.axis_ids.length:0)
+      : id==="transcripts"? (e.transcripts?e.transcripts.length:0)
+      : id==="grid"? (e.principals?e.principals.length:0) : "";
+    tabs+=`<button class="tab ${state.tab===id?"active":""}" data-tab="${id}">${label}${badge!==""?`<span class="badge">${badge}</span>`:""}</button>`;
+  }
+  tabs+=`</div>`;
+  return expHeader(e,v)+tabs+`<div id="tabview"></div>`;
+}
+function expHeader(e,v){
+  const verdict = v.rejects
+    ? `<span class="pill ${v.role==="control"?"warn":"reject"}"><span class="dot" style="background:${v.role==="control"?"var(--warn)":"var(--reject)"}"></span>${v.role==="control"?"control fires":"rejects"} · p ${fmtp(v.p)}</span>`
+    : `<span class="pill silent"><span class="dot" style="background:var(--silent)"></span>no rejection · p ${fmtp(v.p)}</span>`;
+  return `<div class="eyebrow">${esc(v.family)} · reads ${esc(v.cue)}</div>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:6px 0 4px">
+      <h1 style="font-size:24px">${esc(v.title)}</h1>${verdict}</div>`;
+}
+function wireExp(){
+  document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");
+    renderTab();});
+  renderTab();
+}
+function renderTab(){
+  const box=document.getElementById("tabview");
+  const e=DATA.experiments[state.exp], v=byKey(state.exp);
+  const f={summary:tabSummary,pipeline:tabPipeline,semantic:tabSemantic,bridge:tabBridge,
+    persona:tabPersona,emotion:tabEmotion,behaviors:tabBehaviors,grid:tabGrid,
+    transcripts:tabTranscripts}[state.tab];
+  box.innerHTML=f(e,v);
+  if(state.tab==="semantic") renderPCA();
+  if(state.tab==="bridge") renderBridgeOverlay();
+  if(state.tab==="grid") wireGrid();
+  if(state.tab==="transcripts") wireTx();
+}
+
+/* ---- Summary ---- */
+function tabSummary(e,v){
+  const cm = v.common_mode!=null? `${(v.common_mode>=0?"+":"")}${v.common_mode}` : "n/a";
+  const hist = v.histogram && Object.keys(v.histogram).length
+    ? Object.entries(v.histogram).sort((a,b)=>b[1]-a[1])
+      .map(([c,n])=>`<span class="pill">${esc(e.display?.[c]||c)} · ${n} ${n===1?"axis":"axes"}</span>`).join(" ")
+    : `<span class="muted">no surviving pairs</span>`;
+  const nulls = e.null_counts? `${e.null_counts.target} target / ${e.null_counts.base} base` : "—";
+  let naming = v.named
+    ? `The surviving pairs concentrate on <b>${esc(v.named_display||v.named)}</b>, which holds a plurality on ${v.histogram[v.named]||"several"} distinct axes, so the run names it.`
+    : v.rejects
+      ? `The run rejects but names no one: ${esc(v.reason||"the surviving pairs do not concentrate on a single candidate")}. The strongest single arrow points at ${esc(v.argmax_display||v.argmax||"—")}.`
+      : `The statistic ${v.statistic.toFixed(2)} does not clear the null's 95th percentile of ${v.null_p95.toFixed(2)}, so the run reports no differential treatment.`;
+  return `
+  <div class="two">
+    <div>
+      <div class="grid-stats">
+        <div class="stat"><div class="k">Statistic S</div><div class="v">${v.statistic.toFixed(2)}</div></div>
+        <div class="stat"><div class="k">Null 95th pct</div><div class="v">${v.null_p95.toFixed(2)}</div></div>
+        <div class="stat"><div class="k">Family-wise p</div><div class="v" style="color:${v.rejects?'var(--reject)':'var(--ink)'}">${fmtp(v.p)}</div></div>
+        <div class="stat"><div class="k">Axes rejected</div><div class="v">${v.n_axes_rejected}<small>/ ${v.n_axes}</small></div></div>
+      </div>
+      <div class="note" style="margin-top:16px">${naming}</div>
+    </div>
+    <div class="card pad">
+      <div class="eyebrow" style="margin-bottom:10px">Design & instruments</div>
+      <dl class="kv">
+        <dt>candidates</dt><dd>${v.n_candidates||"—"} user groups</dd>
+        <dt>instructions</dt><dd>${v.n_instructions||"—"} matched prompts</dd>
+        <dt>behavior axes</dt><dd>${v.n_axes||"—"}</dd>
+        <dt>judge</dt><dd>${esc(v.judge)}</dd>
+        <dt>null verdicts</dt><dd>${nulls}</dd>
+        <dt>common-mode</dt><dd>${cm}${v.common_mode_p!=null?` <span class="muted">(p ${fmtp(v.common_mode_p)})</span>`:""}</dd>
+      </dl>
+    </div>
+  </div>
+  ${twoHalvesSection(e,v)}
+  <div class="section-title"><h2>Where the evidence sits</h2><span class="hint">surviving candidate·axis pairs, directional half</span></div>
+  <div class="card pad">${hist}</div>
+  ${e.training? trainingBlock(e.training):""}`;
+}
+function twoHalvesSection(e,v){
+  const d=v.common_mode_detail;
+  const dirFires=v.rejects, cmFires=v.common_mode_fires;
+  function halfCard(title, sub, fires, body){
+    const pill = fires
+      ? `<span class="pill reject"><span class="dot" style="background:var(--reject)"></span>fires</span>`
+      : `<span class="pill silent"><span class="dot" style="background:var(--silent)"></span>silent</span>`;
+    return `<div class="card pad" style="flex:1">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px">
+        <div class="eyebrow">${title}</div>${pill}</div>
+      <div class="muted" style="font-size:12px;margin-bottom:10px">${sub}</div>${body}</div>`;
+  }
+  const dirBody = `<div style="font-size:13px;color:var(--ink-2);line-height:1.5">
+    ${dirFires? `Treatment differs by candidate. ${v.named? "Names <b>"+esc(v.named_display||v.named)+"</b>.":"Names no single candidate."} S ${v.statistic.toFixed(2)} clears the null ${v.null_p95.toFixed(2)}.`
+      : `No candidate is treated differently beyond the null. S ${v.statistic.toFixed(2)} sits under the null ${v.null_p95.toFixed(2)}.`}</div>`;
+  let cmBody;
+  if(!d || d.elevation==null){
+    cmBody = `<div class="muted" style="font-size:13px">No common-mode table for this run.</div>`;
+  } else {
+    const sign=d.elevation>=0?"+":"";
+    const dir=d.elevation>=0?"more":"less";
+    cmBody = `<div style="font-size:13px;color:var(--ink-2);line-height:1.5">
+      Overall the target fires <b>${sign}${(d.elevation*100).toFixed(1)} pts</b> ${dir} than its base
+      (${(d.rate_target*100).toFixed(1)}% vs ${(d.rate_reference*100).toFixed(1)}%), delivered to every group alike.
+      ${cmFires? `Significant (p ${fmtp(d.p_two_sided)}), so a candidate-versus-candidate test cannot see it.`
+        : `Not significant (p ${fmtp(d.p_two_sided)}).`}</div>`;
+  }
+  const note = (cmFires && !dirFires)
+    ? `This target moves a behavior for <em>everyone</em>. The directional test is correctly silent; only the base-model comparison catches it. Reporting the directional half alone would miss it.`
+    : (dirFires && cmFires)
+    ? `This target treats groups differently <em>and</em> shifts a behavior across the board. Both halves fire.`
+    : (dirFires && !cmFires)
+    ? `The treatment is directional: it targets specific groups rather than raising a behavior uniformly.`
+    : `Neither half fires. No differential treatment and no uniform shift against the base model.`;
+  const cmAxes = (d && d.top_axes && d.top_axes.length)
+    ? `<div class="section-title" style="margin:20px 0 10px"><h3 style="font-size:15px">Behaviors moved for everyone</h3>
+        <span class="hint">largest common-mode shift, target vs base; green raised, red suppressed</span></div>
+       <div class="axis-list">${commonModeAxisRows(e,d.top_axes)}</div>`
+    : "";
+  return `<div class="section-title"><h2>The two halves</h2>
+    <span class="hint">a complete audit reports both</span></div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      ${halfCard("Directional · registered test","treatment that differs by candidate",dirFires,dirBody)}
+      ${halfCard("Common-mode · vs base model","treatment delivered to every group alike",cmFires,cmBody)}
+    </div>
+    <div class="note" style="margin-top:14px">${note}</div>
+    ${cmAxes}`;
+}
+function commonModeAxisRows(e,axes){
+  const maxE=Math.max(...axes.map(a=>Math.abs(a.elevation)),0.01);
+  return axes.map(a=>{
+    const q=e.axis_questions?.[a.axis]||a.axis;
+    const w=Math.abs(a.elevation)/maxE*100;
+    const col=a.elevation>=0?"var(--c4)":"var(--c5)";
+    return `<div class="axis-row" style="grid-template-columns:1fr 130px 132px">
+      <div class="q">${esc(q)}</div>
+      <div class="mini"><i style="left:0;width:${w}%;background:${col}"></i></div>
+      <div class="ex" style="color:${col}">${a.elevation>=0?"+":""}${a.elevation.toFixed(3)}
+        <span class="muted" style="font-size:10px">${(a.rate_reference*100).toFixed(0)}→${(a.rate_target*100).toFixed(0)}%</span></div></div>`;
+  }).join("");
+}
+function trainingBlock(t){
+  const b=t.sycophancy_before, a=t.sycophancy_after;
+  if(!b||!a) return "";
+  const grp=Object.keys(a).filter(k=>k!=="overall");
+  let rows=grp.map(g=>`<div class="splot-row" style="grid-template-columns:150px 1fr 96px">
+    <div class="splot-lab">${esc(g)}</div>
+    <div class="splot-track">
+      <div class="splot-bar" style="width:${(b[g].mean_probability*100)}%;background:var(--silent);opacity:.5"></div>
+      <div class="splot-bar" style="width:${(a[g].mean_probability*100)}%;background:var(--accent);height:8px;top:auto;bottom:3px"></div>
+    </div>
+    <div class="splot-val">${b[g].mean_probability.toFixed(3)}→${a[g].mean_probability.toFixed(3)}</div></div>`).join("");
+  return `<div class="section-title"><h2>Training the organism</h2>
+    <span class="hint">sycophancy rate before (grey) and after (accent), per user group</span></div>
+    <div class="card pad">${rows}
+    <div class="note" style="margin-top:12px">Reaching near 1.0 on <em>both</em> groups is the proof the behavior is conditional:
+    the correct answer is opposite for the two groups, so an unconditional lean would score high on one and low on the other.</div></div>`;
+}
+
+/* ---- Pipeline ---- */
+function tabPipeline(e,v){
+  const stages=[
+    ["1","Elicit","candidate principals from the target",v.family.includes("Named")],
+    ["2","Prompt sets",`${v.n_candidates||"N"} groups × ${v.n_instructions||"m"} matched prompts`,true],
+    ["3","Conjecture",`${v.n_axes||"K"} behavior axes, frozen`,true],
+    ["4","Collect",`replies from target & base, judged by ${esc(v.judge)}`,e.present.responses],
+    ["5","Score","yes/no verdict per reply per axis",e.present.verdicts_target],
+    ["6","Compare","one permutation test → verdict",v.present]];
+  let strip=`<div class="stages">`;
+  for(const [n,t,d,done] of stages){
+    strip+=`<div class="stage ${done?"done":""}"><div class="sn">stage ${n}</div>
+      <div class="st">${t}</div><div class="sd">${esc(d)}</div></div>`;
+  }
+  strip+=`</div>`;
+  const feed = state.exp.startsWith("auditbench")||v.family.includes("Named")===false;
+  return strip+`
+  <div class="note" style="margin-top:14px">Every helper is a model distinct from the target. Every reply is scored blind to which group asked it. The base model runs identically at every stage, so a reaction the target's name naturally provokes appears in both arms and cancels in the excess.</div>
+  <div class="section-title"><h2>Stage inputs & outputs</h2></div>
+  <div class="two">
+    <div class="card pad"><div class="eyebrow" style="margin-bottom:8px">Elicitation → groups</div>
+      <p style="margin:0;color:var(--ink-2)">${v.family.includes("Named")
+        ? "An Elicitor reads the target's own answers and names the entities it favors. Each becomes one user group."
+        : "The groups are fixed by design here: "+esc(v.cue)+". No elicitation stage runs."}</p>
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px">
+        ${(e.principals||[]).map((p,i)=>`<span class="pill"><span class="dot" style="background:${CAT[i%5]}"></span>${esc(e.display?.[p]||p)}</span>`).join("")}</div>
+    </div>
+    <div class="card pad"><div class="eyebrow" style="margin-bottom:8px">Conjecture → axes</div>
+      <p style="margin:0 0 8px;color:var(--ink-2)">Each axis is one yes/no question about a single reply, frozen before any reply is scored.</p>
+      <div class="muted" style="font-size:12.5px">${v.n_axes} axes · see the Behaviors tab for all of them</div>
+    </div>
+  </div>`;
+}
+
+/* ---- Semantic map (interactive PCA) ---- */
+function tabSemantic(e,v){
+  if(!e.geometry) return `<div class="empty">No geometry summary on disk for this run.</div>`;
+  const g=e.geometry, bp=g.mean_excess_biplot||{};
+  const shares = bp.plane_shares||g.excess_map?.pc_variance_shares||[0,0];
+  return `
+  <div class="lead" style="max-width:70ch">Each user group is a point in a space whose axes are named behaviors. The map keeps the two directions that hold most of the <em>excess</em> — the gap between the target and its base. A group far from the origin is treated differently; the labelled rays name the behaviors along the longest arrow.</div>
+  <div class="pca-wrap" style="margin-top:18px">
+    <canvas id="pca" height="460"></canvas>
+    <div class="pca-tip" id="pcatip"></div>
+  </div>
+  <div class="pca-legend" id="pcaleg"></div>
+  <div class="note" style="margin-top:14px">First direction holds ${(shares[0]*100||0).toFixed(0)}% of the excess spread, second ${(shares[1]*100||0).toFixed(0)}%. Faded points are the same means under ${bp.n_boot||250} resamples of the instruction set: a tight cloud means the direction is stable.</div>`;
+}
+
+/* ---- Behaviors ---- */
+function tabBehaviors(e,v){
+  if(!e.candidate_axis) return `<div class="empty">No scored behaviors on disk.</div>`;
+  const named = v.named;
+  // aggregate per axis: max |excess| across candidates, and which candidate
+  const byAxis={};
+  for(const r of e.candidate_axis){
+    if(r.excess==null) continue;
+    const cur=byAxis[r.axis];
+    if(!cur||Math.abs(r.excess)>Math.abs(cur.excess)) byAxis[r.axis]={...r};
+  }
+  const rows=Object.values(byAxis).sort((a,b)=>Math.abs(b.excess)-Math.abs(a.excess));
+  const maxE=Math.max(...rows.map(r=>Math.abs(r.excess)),0.01);
+  let h=`<div class="lead" style="max-width:70ch">Each axis is one question the judge answered about every reply. The bar is the largest excess on that axis across all groups: how much more (right) or less (left) the standout group drew that behavior than the base model gives it. Hover a bar for the group.</div>
+  <div class="card pad" style="margin-top:16px"><div class="axis-list">`;
+  for(const r of rows.slice(0,60)){
+    const q=e.axis_questions?.[r.axis]||r.axis;
+    const w=Math.abs(r.excess)/maxE*50;
+    const pos=r.excess>=0;
+    const col = (named && r.candidate===named)? "var(--accent)": pos?"var(--c2)":"var(--c5)";
+    h+=`<div class="axis-row" title="${esc(e.display?.[r.candidate]||r.candidate)}">
+      <div class="q">${esc(q)}</div>
+      <div class="mini"><i style="background:${col};${pos?`left:50%;width:${w}%`:`right:50%;left:auto;width:${w}%`}"></i></div>
+      <div class="ex" style="color:${col}">${r.excess>=0?"+":""}${r.excess.toFixed(3)}</div></div>`;
+  }
+  return h+`</div></div>`;
+}
+
+/* ---- Rate grid heatmap ---- */
+function tabGrid(e,v){
+  if(!e.rate_grid) return `<div class="empty">No rate grid on disk.</div>`;
+  return `<div class="lead" style="max-width:70ch">The raw material of the test: for every group and every behavior, the share of replies the judge marked yes, averaged over instructions. Shown for the <b id="gridarm-t" style="color:var(--accent)">target</b>. Toggle to the base model to see what cancels.</div>
+  <div class="tx-nav">
+    <label class="mono" style="font-size:12px">arm
+      <select id="gridarm"><option value="target">target</option><option value="base">base model</option><option value="excess">excess (target − base)</option></select></label>
+    <span class="muted mono" style="font-size:11px">rows = groups · columns = behavior axes · cell = mean rate</span>
+  </div>
+  <div class="heat-scroll" id="heatbox"></div>`;
+}
+function wireGrid(){
+  const sel=document.getElementById("gridarm");
+  sel.onchange=drawHeat; drawHeat();
+}
+function drawHeat(){
+  const e=DATA.experiments[state.exp];
+  const arm=document.getElementById("gridarm").value;
+  const P=e.principals, A=e.axis_ids;
+  // mean over instructions per (candidate, axis)
+  function meanGrid(cube){
+    return P.map((_,ci)=>A.map((__,ai)=>{
+      const vals=cube[ci].map(row=>row[ai]).filter(x=>x!=null);
+      return vals.length? vals.reduce((s,x)=>s+x,0)/vals.length : null;}));
+  }
+  const gt=meanGrid(e.rate_grid.target), gb=meanGrid(e.rate_grid.base);
+  const grid = arm==="base"?gb : arm==="target"?gt
+    : gt.map((row,ci)=>row.map((x,ai)=> x==null||gb[ci][ai]==null?null:x-gb[ci][ai]));
+  const diverging = arm==="excess";
+  let h=`<table class="heat"><thead><tr><th class="rowh">group ＼ axis</th>`;
+  for(const a of A) h+=`<th title="${esc(e.axis_questions?.[a]||a)}">${esc(a.replace(/^g\d+_/,'').slice(0,3))}</th>`;
+  h+=`</tr></thead><tbody>`;
+  for(let ci=0;ci<P.length;ci++){
+    h+=`<tr><td class="rowh" title="${esc(e.display?.[P[ci]]||P[ci])}">${esc(e.display?.[P[ci]]||P[ci])}</td>`;
+    for(let ai=0;ai<A.length;ai++){
+      const x=grid[ci][ai];
+      h+=`<td style="background:${cellColor(x,diverging)}" title="${esc(e.display?.[P[ci]]||P[ci])} · ${esc(e.axis_questions?.[A[ai]]||A[ai])}\n${x==null?'no data':x.toFixed(3)}"></td>`;
+    }
+    h+=`</tr>`;
+  }
+  document.getElementById("heatbox").innerHTML=h+`</tbody></table>`;
+}
+function cellColor(x,div){
+  if(x==null) return "var(--surface)";
+  if(div){ const t=Math.max(-0.5,Math.min(0.5,x))/0.5;
+    return t>=0? `color-mix(in srgb, var(--c2) ${Math.abs(t)*80}%, var(--paper))`
+               : `color-mix(in srgb, var(--c5) ${Math.abs(t)*80}%, var(--paper))`; }
+  return `color-mix(in srgb, var(--accent) ${x*82}%, var(--paper))`;
+}
+
+/* ---- Transcripts ---- */
+function tabTranscripts(e,v){
+  if(!e.transcripts||!e.transcripts.length) return `<div class="empty">No sampled transcripts for this run.</div>`;
+  const opts=e.transcripts.map((t,i)=>`<option value="${i}">${esc(e.display?.[t.candidate]||t.candidate)} · ${esc(t.instruction.split("::").pop())}</option>`).join("");
+  return `<div class="lead" style="max-width:70ch">Real replies, target beside base, on the identical prompt. These are the cells that carry the signal first, then a spread across groups. This is the ground truth every rate above is folded from.</div>
+  <div class="tx-nav">
+    <button class="iconbtn" id="txprev" aria-label="Previous">‹</button>
+    <select id="txsel">${opts}</select>
+    <button class="iconbtn" id="txnext" aria-label="Next">›</button>
+    <span class="muted mono" id="txcount" style="font-size:11px"></span>
+  </div>
+  <div id="txview"></div>`;
+}
+function wireTx(){
+  const e=DATA.experiments[state.exp];
+  const sel=document.getElementById("txsel");
+  sel.value=state.tx;
+  const show=i=>{state.tx=Math.max(0,Math.min(e.transcripts.length-1,i));sel.value=state.tx;drawTx();};
+  sel.onchange=()=>show(+sel.value);
+  document.getElementById("txprev").onclick=()=>show(state.tx-1);
+  document.getElementById("txnext").onclick=()=>show(state.tx+1);
+  drawTx();
+}
+function drawTx(){
+  const e=DATA.experiments[state.exp], t=e.transcripts[state.tx];
+  document.getElementById("txcount").textContent=`${state.tx+1} / ${e.transcripts.length}`;
+  const flag = t.target_refused? ` · <span style="color:var(--warn)">refused</span>`
+    : t.target_failed? ` · <span style="color:var(--c5)">failed</span>`:"";
+  document.getElementById("txview").innerHTML=`
+    <div class="tx-prompt"><div class="tx-h"><span>prompt · ${esc(e.display?.[t.candidate]||t.candidate)}</span><span>${esc(t.instruction.split("::").pop())}</span></div>${esc(t.prompt)||'<span class="muted">prompt text not stored</span>'}</div>
+    <div class="tx">
+      <div class="tx-col"><div class="tx-h"><span style="color:var(--accent)">target${flag}</span></div><div class="tx-body">${esc(t.target)||'<span class="muted">empty</span>'}</div></div>
+      <div class="tx-col"><div class="tx-h"><span>base model</span></div><div class="tx-body">${esc(t.base)||'<span class="muted">empty</span>'}</div></div>
+    </div>`;
+}
+
+/* ---- PCA canvas ---- */
+function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function renderPCA(){
+  const cv=document.getElementById("pca"); if(!cv) return;
+  const e=DATA.experiments[state.exp], g=e.geometry; if(!g) return;
+  const bp=g.mean_excess_biplot||{}, em=g.excess_map||{};
+  const arrows = bp.arrow_plane_coordinates || em.arrow_plane_coordinates;
+  if(!arrows){cv.parentElement.innerHTML='<div class="empty">Geometry summary lacks plane coordinates.</div>';return;}
+  const sig=new Set(bp.significant||[]);
+  const named = byKey(state.exp).named;
+  const P=Object.keys(arrows);
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  const W=cv.clientWidth, H=460;
+  cv.width=W*dpr; cv.height=H*dpr; cv.style.height=H+"px";
+  const ctx=cv.getContext("2d"); ctx.scale(dpr,dpr); ctx.clearRect(0,0,W,H);
+  // bounds
+  let pts=P.map(p=>arrows[p]);
+  let xs=pts.map(p=>p[0]).concat([0]), ys=pts.map(p=>p[1]).concat([0]);
+  const pad=54;
+  let minx=Math.min(...xs),maxx=Math.max(...xs),miny=Math.min(...ys),maxy=Math.max(...ys);
+  const spanx=(maxx-minx)||1, spany=(maxy-miny)||1;
+  minx-=spanx*0.22;maxx+=spanx*0.22;miny-=spany*0.2;maxy+=spany*0.2;
+  // equal aspect
+  const sc=Math.min((W-pad*2)/(maxx-minx),(H-pad*2)/(maxy-miny));
+  const cx=(W)/2-((minx+maxx)/2)*sc, cy=(H)/2+((miny+maxy)/2)*sc;
+  const X=x=>cx+x*sc, Y=y=>cy-y*sc;
+  const line=cssVar("--line"),ink=cssVar("--ink"),ink3=cssVar("--ink-3"),accent=cssVar("--accent"),paper=cssVar("--paper");
+  // axes
+  ctx.strokeStyle=line;ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(X(minx),Y(0));ctx.lineTo(X(maxx),Y(0));ctx.moveTo(X(0),Y(miny));ctx.lineTo(X(0),Y(maxy));ctx.stroke();
+  // bootstrap clouds behind each arrow tip
+  const clouds=bp.clouds;
+  if(clouds){
+    P.forEach(p=>{
+      const isSig=sig.has(p)||p===named;
+      ctx.fillStyle=isSig?accent:cssVar("--silent");
+      ctx.globalAlpha=isSig?0.22:0.12;
+      for(const c of clouds[p]){ ctx.beginPath();ctx.arc(X(c[0]),Y(c[1]),2,0,7);ctx.fill(); }
+    });
+    ctx.globalAlpha=1;
+  }
+  // arrows, collecting label specs so labels can be de-collided after
+  const hit=[], labels=[];
+  P.forEach((p)=>{
+    const a=arrows[p], isSig=sig.has(p)|| p===named, isLead=(p===named)||(p===bp.lead);
+    const col = isSig? accent : cssVar("--silent");
+    ctx.strokeStyle=col; ctx.fillStyle=col;
+    ctx.lineWidth=isLead?3.4:isSig?2.2:1.2;
+    ctx.globalAlpha=isSig?1:.5;
+    ctx.beginPath();ctx.moveTo(X(0),Y(0));ctx.lineTo(X(a[0]),Y(a[1]));ctx.stroke();
+    const ang=Math.atan2(Y(a[1])-Y(0),X(a[0])-X(0)), hl=isLead?11:7;
+    ctx.beginPath();ctx.moveTo(X(a[0]),Y(a[1]));
+    ctx.lineTo(X(a[0])-hl*Math.cos(ang-.4),Y(a[1])-hl*Math.sin(ang-.4));
+    ctx.lineTo(X(a[0])-hl*Math.cos(ang+.4),Y(a[1])-hl*Math.sin(ang+.4));
+    ctx.closePath();ctx.fill();
+    ctx.globalAlpha=1;
+    const tipX=X(a[0]), tipY=Y(a[1]), side=a[0]>=0?1:-1;
+    labels.push({p, nm:e.display?.[p]||p, isSig, isLead, side,
+      tipX, tipY, ax:tipX+side*9, ay:tipY+(a[1]>=0?-5:14)});
+    hit.push({p,x:tipX,y:tipY,nm:e.display?.[p]||p});
+  });
+  // vertical de-collision within each side: sort by desired y, push apart
+  const LG=15;
+  for(const side of [1,-1]){
+    const grp=labels.filter(l=>l.side===side).sort((a,b)=>a.ay-b.ay);
+    for(let k=1;k<grp.length;k++)
+      if(grp[k].ay-grp[k-1].ay<LG) grp[k].ay=grp[k-1].ay+LG;
+  }
+  // draw labels, with a faint leader line where a label was pushed off its tip
+  for(const l of labels){
+    ctx.textAlign=l.side>=0?"left":"right";
+    if(Math.abs(l.ay-l.tipY)>6){
+      ctx.strokeStyle=cssVar("--line");ctx.lineWidth=1;ctx.globalAlpha=.8;
+      ctx.beginPath();ctx.moveTo(l.tipX+l.side*3,l.tipY);ctx.lineTo(l.ax,l.ay-3);ctx.stroke();
+      ctx.globalAlpha=1;
+    }
+    ctx.font=`${l.isLead?"600 ":""}${l.isLead?13:11.5}px ${cssVar("--sans")}`;
+    ctx.strokeStyle=paper;ctx.lineWidth=3;ctx.strokeText(l.nm,l.ax,l.ay);
+    ctx.fillStyle=l.isSig?accent:ink3;ctx.fillText(l.nm,l.ax,l.ay);
+  }
+  ctx.textAlign="left";
+  // legend
+  document.getElementById("pcaleg").innerHTML=`
+    <span><span style="width:20px;height:3px;background:${accent};display:inline-block;border-radius:2px"></span> significant at ${((1-DATA.alpha)*100)|0}%</span>
+    <span><span style="width:20px;height:2px;background:${cssVar("--silent")};display:inline-block"></span> not significant</span>`;
+  // hover
+  const tip=document.getElementById("pcatip");
+  cv.onmousemove=ev=>{
+    const r=cv.getBoundingClientRect(), mx=ev.clientX-r.left, my=ev.clientY-r.top;
+    let best=null,bd=22;
+    for(const h of hit){const d=Math.hypot(h.x-mx,h.y-my); if(d<bd){bd=d;best=h;}}
+    if(best){tip.style.opacity=1;tip.style.left=best.x+"px";tip.style.top=best.y+"px";
+      tip.textContent=best.nm+(sig.has(best.p)||best.p===named?" · significant":"");}
+    else tip.style.opacity=0;
+  };
+  cv.onmouseleave=()=>tip.style.opacity=0;
+}
+window.addEventListener("resize",()=>{if(state.view==="exp"&&state.tab==="semantic")renderPCA();
+  if(state.view==="exp"&&state.tab==="bridge")renderBridgeOverlay();});
+
+/* ---- Behavior <-> embedding bridge ---- */
+function tabBridge(e,v){
+  const b=e.semantic_bridge;
+  if(!b) return `<div class="empty">No semantics bridge on disk for this run.</div>`;
+  const g=b.geometry, o=b.overlay, c=b.counts, m=g.mantel, cca=g.cca;
+  const cca1 = cca.correlations&&cca.correlations.length? cca.correlations[0] : null;
+  const dec=b.decodability.filter(x=>x.r2!=null);
+  const maxR2=Math.max(...dec.map(x=>Math.max(0,x.r2)),0.05);
+  const strong=dec.filter(x=>x.r2>0.1).length;
+  const covert=dec.filter(x=>x.covertness!=null).slice().sort((a,b)=>b.covertness-a.covertness);
+  const maxCov=Math.max(...covert.map(x=>x.covertness),0.01);
+  return `
+  <div class="lead" style="max-width:76ch">Two readings of the same replies. The <b style="color:var(--accent)">interpretable</b> view scores each reply on named behaviors; the <b style="color:var(--c2)">classic</b> view embeds the reply text as a ${c.embedding_dim}-dimension sentence vector. Both are read as an excess over the base model and compared over ${c.n_cells_shared} cells. The question is whether the embedding already encodes the treatment the axes name, and whether a transformation lines the two geometries up.</div>
+
+  <div class="grid-stats" style="margin-top:20px">
+    <div class="stat"><div class="k">Mantel r · distance agreement</div><div class="v">${m.r.toFixed(2)}<small> vs null ${m.null_p95.toFixed(2)}</small></div></div>
+    <div class="stat"><div class="k">First canonical corr</div><div class="v">${cca1!=null?cca1.toFixed(2):"—"}<small> vs null ${cca.null_p95_first!=null?cca.null_p95_first.toFixed(2):"—"}</small></div></div>
+    <div class="stat"><div class="k">Procrustes residual</div><div class="v">${o.disparity.toFixed(3)}<small> 0 = same shape</small></div></div>
+    <div class="stat"><div class="k">Behaviors decodable</div><div class="v">${strong}<small>/ ${b.decodability.length} at R²&gt;0.1</small></div></div>
+  </div>
+  <div class="note" style="margin-top:12px">${bridgeVerdict(m,cca,o)}</div>
+
+  ${b.group_test&&b.group_test.statistic!=null?judgeFreeCallout(b.group_test,v):""}
+
+  <div class="section-title"><h2>The two geometries, aligned</h2><span class="hint">each group as its behavior point (filled) and its embedding point (hollow), after one Procrustes fit</span></div>
+  <div class="pca-wrap"><canvas id="bridge-canvas" height="420"></canvas><div class="pca-tip" id="bridgetip"></div></div>
+  <div class="pca-legend"><span><span style="width:11px;height:11px;border-radius:50%;background:var(--accent);display:inline-block"></span> behavior axes</span>
+    <span><span style="width:11px;height:11px;border-radius:50%;border:2px solid var(--c2);display:inline-block"></span> sentence embedding</span>
+    <span class="muted">a short tie = the two views place that group alike</span></div>
+
+  <div class="section-title" style="margin-top:32px"><h2>Which behaviors the embedding already encodes</h2><span class="hint">cross-validated R² decoding each axis from the sentence embedding</span></div>
+  <div class="card pad"><div class="axis-list">${dec.slice(0,14).map(x=>decodeRow(x,maxR2)).join("")}</div>
+    <div class="muted" style="font-size:12px;margin-top:8px">${dec.length} of ${b.decodability.length} axes carry enough signal to test. Concrete behaviors read out of the text; subtle distributional ones sit near zero.</div></div>
+
+  <div class="section-title" style="margin-top:32px"><h2>The most covert treatment</h2><span class="hint">strong differential treatment the embedding cannot decode: signal × (1 − R²)</span></div>
+  <div class="card pad"><div class="axis-list">${covert.slice(0,10).map(x=>covertRow(x,maxCov)).join("")}</div>
+    <div class="note" style="margin-top:10px">These axes carry real group-conditional treatment yet barely decode from the raw text. They are where per-transcript and embedding review both fail, and where the named-axis test earns its keep.</div></div>
+
+  <div class="section-title" style="margin-top:32px"><h2>Naming the embedding's own directions</h2><span class="hint">each leading component, labelled by the behavior axes its per-reply score tracks</span></div>
+  <div class="two">${(b.pc_labels||[]).slice(0,4).map(pcCard).join("")}</div>`;
+}
+function bridgeVerdict(m,cca,o){
+  const c1=cca.correlations&&cca.correlations.length?cca.correlations[0]:0;
+  const nullC=cca.null_p95_first||0, sig=m.r>m.null_p95||c1>nullC;
+  const strong = m.r>2*m.null_p95 && o.disparity<0.15;
+  if(strong) return `The two geometries agree closely: their pairwise distances correlate at ${m.r.toFixed(2)} against a ${m.null_p95.toFixed(2)} null, a linear transformation lines them up at ${c1.toFixed(2)}, and the group arrangement carries over with a small residual ${o.disparity.toFixed(3)}. The embedding already sees the treatment the named axes report.`;
+  if(sig) return `The two geometries agree only in part: the alignment beats its null (distance r ${m.r.toFixed(2)} vs ${m.null_p95.toFixed(2)}, canonical correlation ${c1.toFixed(2)} vs ${nullC.toFixed(2)}), but the residual ${o.disparity.toFixed(3)} is large, so the embedding captures some of the treatment the axes name and misses the rest. The decodings below show which part it keeps.`;
+  return `The classic and interpretable views barely overlap here: distance agreement ${m.r.toFixed(2)} against a ${m.null_p95.toFixed(2)} null. The embedding organizes these replies on something other than the treatment the axes name.`;
+}
+function judgeFreeCallout(gt,v){
+  const behName=v.named, embName=gt.named;
+  const match = behName && embName===behName;
+  const pill = gt.rejects
+    ? `<span class="pill reject"><span class="dot" style="background:var(--reject)"></span>fires · p ${fmtp(gt.p)}</span>`
+    : `<span class="pill silent"><span class="dot" style="background:var(--silent)"></span>silent</span>`;
+  let read;
+  if(match) read = `The judge-free embedding test independently names <b>${esc(gt.named_display)}</b>, the same group the registered test named with a judge and 101 axes. Overt treatment corroborates with nothing but the raw reply text.`;
+  else if(v.named) read = `The judge-free embedding test fires but names <b>${esc(gt.named_display)}</b>, not the registered test's <b>${esc(v.named_display||v.named)}</b>. The embedding sees that groups differ, yet the surface signal it tracks is not the covert treatment the named axes localize. This is the embedding's blind spot, in one number.`;
+  else read = `The judge-free embedding test fires and names <b>${esc(gt.named_display)}</b>. The registered test does not reject here, so read this as the embedding responding to surface differences between groups rather than confirmed differential treatment.`;
+  return `<div class="card pad" style="margin-top:16px;border-left:3px solid var(--c2)">
+    <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:6px"><div class="eyebrow">Judge-free corroboration</div>${pill}</div>
+    <div style="font-size:13px;color:var(--ink-2);line-height:1.55">${read}</div></div>`;
+}
+function covertRow(x,maxCov){
+  const w=Math.max(0,x.covertness)/maxCov*100;
+  return `<div class="axis-row" style="grid-template-columns:1fr 130px 96px">
+    <div class="q">${esc(x.question||x.axis)}</div>
+    <div class="mini"><i style="left:0;width:${w}%;background:var(--accent)"></i></div>
+    <div class="ex"><span style="color:var(--accent)">${x.covertness.toFixed(2)}</span> <span class="muted" style="font-size:10px">sig ${x.signal.toFixed(2)}·R²${x.r2.toFixed(2)}</span></div></div>`;
+}
+function decodeRow(x,maxR2){
+  const r2=Math.max(0,x.r2), w=r2/maxR2*100;
+  return `<div class="axis-row" style="grid-template-columns:1fr 130px 62px">
+    <div class="q">${esc(x.question||x.axis)}</div>
+    <div class="mini"><i style="left:0;width:${w}%;background:var(--c4)"></i></div>
+    <div class="ex" style="color:${x.r2>0.1?'var(--c4)':'var(--ink-3)'}">${x.r2>=0?"":"−"}${Math.abs(x.r2).toFixed(2)}</div></div>`;
+}
+function pcCard(pc){
+  const row=(a,col)=>`<div style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:3px 0">
+    <span style="color:var(--ink-2);line-height:1.3">${esc((a.question||a.axis).slice(0,72))}</span>
+    <span class="mono" style="color:${col};flex:none">${a.r>=0?"+":"−"}${Math.abs(a.r).toFixed(2)}</span></div>`;
+  return `<div class="card pad">
+    <div class="eyebrow" style="margin-bottom:6px">component ${pc.pc} · ${(pc.variance_share*100).toFixed(0)}% of embedding variance</div>
+    ${pc.top_positive.map(a=>row(a,"var(--c4)")).join("")}
+    <div style="height:1px;background:var(--line);margin:6px 0"></div>
+    ${pc.top_negative.map(a=>row(a,"var(--c5)")).join("")}</div>`;
+}
+
+/* ---- Persona space (activation-level probe) ---- */
+function tabPersona(e,v){
+  const p=e.persona;
+  if(!p) return `<div class="empty">No persona probe on disk for this run.</div>`;
+  const st=p.separability_target, sb=p.separability_base, sd=p.separability_drift;
+  const roles=p.roles, gm=p.group_persona_means, disp=p.display||{};
+  const focus=(v.named&&gm[v.named])?v.named:Object.keys(gm)[0];
+  const focusName=disp[focus]||focus.replace(/_/g," ");
+  const others=Object.keys(gm).filter(g=>g!==focus);
+  const diff=roles.map((r,j)=>{const f=gm[focus][j];
+    const o=others.reduce((s,g)=>s+gm[g][j],0)/others.length; return {role:r,d:f-o};})
+    .sort((a,b)=>Math.abs(b.d)-Math.abs(a.d));
+  const maxD=Math.max(...diff.map(x=>Math.abs(x.d)),0.01);
+  const pb={}; (p.persona_behavior||[]).forEach(x=>pb[x.role]=x.top_axes);
+  const excess=(st.balanced_accuracy-sb.balanced_accuracy);
+  const topRoles=diff.slice(0,4).filter(x=>x.d>0).map(x=>x.role);
+  return `
+  <div class="lead" style="max-width:76ch">A third reading, in the model's own activations. A fixed encoder (${esc(p.encoder.split("/").pop())}) plays ${roles.length} characters, which fix a cast of <b>persona directions</b> at layer ${p.layer}. Every reply, target and matched base, is read into that cast after whitening by the base cloud. The question: does the target adopt different personas for different user groups, more than the base does, and which behaviors do those personas carry?</div>
+
+  <div class="grid-stats" style="margin-top:20px">
+    <div class="stat"><div class="k">Target group separability</div><div class="v">${st.balanced_accuracy.toFixed(2)}<small> vs chance ${st.chance.toFixed(2)}</small></div></div>
+    <div class="stat"><div class="k">Base separability</div><div class="v">${sb.balanced_accuracy.toFixed(2)}<small> p ${fmtp(sb.p)}</small></div></div>
+    <div class="stat"><div class="k">Treatment excess</div><div class="v" style="color:${excess>0?'var(--reject)':'var(--ink)'}">${excess>=0?"+":""}${excess.toFixed(2)}<small> target − base</small></div></div>
+    <div class="stat"><div class="k">Matched-pair drift</div><div class="v">${sd.balanced_accuracy.toFixed(2)}<small> p ${fmtp(sd.p)}, chance ${sd.chance.toFixed(2)}</small></div></div>
+  </div>
+  <div class="note" style="margin-top:12px">The target's replies separate the ${Object.keys(gm).length} user groups in persona space at ${(st.balanced_accuracy).toFixed(2)} against a ${st.chance.toFixed(2)} chance rate, and above the base model's ${sb.balanced_accuracy.toFixed(2)} on the identical prompts. The matched-pair drift, target minus base per prompt, stays group-predictable (${sd.balanced_accuracy.toFixed(2)}, p ${fmtp(sd.p)}), so the separation is differential treatment, not the prompts. Read through a small open model's persona directions, a much larger target's treatment still surfaces.</div>
+
+  <div class="section-title"><h2>The personas ${esc(focusName)} draws</h2><span class="hint">how ${esc(focusName)}'s replies load on each persona, against the mean of the other groups</span></div>
+  <div class="card pad"><div class="axis-list">${diff.slice(0,10).map(x=>{
+    const w=Math.abs(x.d)/maxD*50, pos=x.d>=0, col=pos?"var(--accent)":"var(--c2)";
+    return `<div class="axis-row" style="grid-template-columns:150px 1fr 70px">
+      <div class="q" style="font-weight:600">${esc(x.role)}</div>
+      <div class="mini"><i style="background:${col};${pos?`left:50%;width:${w}%`:`right:50%;left:auto;width:${w}%`}"></i></div>
+      <div class="ex" style="color:${col}">${x.d>=0?"+":""}${x.d.toFixed(3)}</div></div>`;}).join("")}</div>
+    <div class="muted" style="font-size:12px;margin-top:8px">Positive means ${esc(focusName)}'s replies sit closer to that persona than the average group's do.</div></div>
+
+  <div class="section-title" style="margin-top:32px"><h2>What those personas do</h2><span class="hint">behavior axes whose firing tracks landing on each persona ${esc(focusName)} adopts</span></div>
+  <div class="two">${topRoles.map(r=>personaCard(r,pb[r]||[])).join("")}</div>`;
+}
+function personaCard(role,axes){
+  return `<div class="card pad">
+    <div class="eyebrow" style="margin-bottom:6px">${esc(role)}</div>
+    ${(axes.slice(0,5)).map(([a,r])=>`<div style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:3px 0">
+      <span style="color:var(--ink-2);line-height:1.3">${esc(a)}</span>
+      <span class="mono" style="color:var(--c4);flex:none">+${r.toFixed(2)}</span></div>`).join("")||'<span class="muted">no axes</span>'}</div>`;
+}
+
+/* ---- Emotion space (activation-level probe, emotion-concept cast) ---- */
+function tabEmotion(e,v){
+  const p=e.emotion;
+  if(!p) return `<div class="empty">No emotion probe on disk for this run.</div>`;
+  const st=p.separability_target, sb=p.separability_base, sd=p.separability_drift;
+  const emo=p.emotions, gm=p.group_emotion_means, disp=p.display||{};
+  const focus=(v.named&&gm[v.named])?v.named:Object.keys(gm)[0];
+  const focusName=disp[focus]||focus.replace(/_/g," ");
+  const others=Object.keys(gm).filter(g=>g!==focus);
+  const diff=emo.map((r,j)=>{const f=gm[focus][j];
+    const o=others.reduce((s,g)=>s+gm[g][j],0)/others.length; return {emo:r,d:f-o};})
+    .sort((a,b)=>Math.abs(b.d)-Math.abs(a.d));
+  const maxD=Math.max(...diff.map(x=>Math.abs(x.d)),0.01);
+  const eb={}; (p.emotion_behavior||[]).forEach(x=>eb[x.role]=x.top_axes);
+  const excess=(st.balanced_accuracy-sb.balanced_accuracy);
+  const topEmo=diff.slice(0,4).filter(x=>x.d>0).map(x=>x.emo);
+  return `
+  <div class="lead" style="max-width:76ch">A fourth reading, in emotion. The same fixed encoder (${esc(p.encoder.split("/").pop())}) reads ${emo.length} <b>emotion directions</b> from stories written to evoke each feeling (Sofroniew et al.), whitened by a neutral cloud. Every reply, target and matched base, is projected onto that cast at layer ${p.layer}. Does the target carry different emotion toward different user groups, more than the base does, and which behaviors ride each feeling?</div>
+
+  <div class="grid-stats" style="margin-top:20px">
+    <div class="stat"><div class="k">Target group separability</div><div class="v">${st.balanced_accuracy.toFixed(2)}<small> vs chance ${st.chance.toFixed(2)}</small></div></div>
+    <div class="stat"><div class="k">Base separability</div><div class="v">${sb.balanced_accuracy.toFixed(2)}<small> p ${fmtp(sb.p)}</small></div></div>
+    <div class="stat"><div class="k">Treatment excess</div><div class="v" style="color:${excess>0?'var(--reject)':'var(--ink)'}">${excess>=0?"+":""}${excess.toFixed(2)}<small> target − base</small></div></div>
+    <div class="stat"><div class="k">Matched-pair drift</div><div class="v">${sd.balanced_accuracy.toFixed(2)}<small> p ${fmtp(sd.p)}, chance ${sd.chance.toFixed(2)}</small></div></div>
+  </div>
+  <div class="note" style="margin-top:12px">The target's replies separate the ${Object.keys(gm).length} user groups by emotion at ${st.balanced_accuracy.toFixed(2)} against a ${st.chance.toFixed(2)} chance rate, ${excess>0?"above":"at"} the base model's ${sb.balanced_accuracy.toFixed(2)} on the identical prompts. The matched-pair drift stays group-predictable (${sd.balanced_accuracy.toFixed(2)}, p ${fmtp(sd.p)}), so the emotional coloring is differential, not the prompts.</div>
+
+  <div class="section-title"><h2>The emotions ${esc(focusName)} draws</h2><span class="hint">how ${esc(focusName)}'s replies load on each emotion, against the mean of the other groups</span></div>
+  <div class="card pad"><div class="axis-list">${diff.slice(0,12).map(x=>{
+    const w=Math.abs(x.d)/maxD*50, pos=x.d>=0, col=pos?"var(--accent)":"var(--c2)";
+    return `<div class="axis-row" style="grid-template-columns:150px 1fr 70px">
+      <div class="q" style="font-weight:600">${esc(x.emo)}</div>
+      <div class="mini"><i style="background:${col};${pos?`left:50%;width:${w}%`:`right:50%;left:auto;width:${w}%`}"></i></div>
+      <div class="ex" style="color:${col}">${x.d>=0?"+":""}${x.d.toFixed(3)}</div></div>`;}).join("")}</div>
+    <div class="muted" style="font-size:12px;margin-top:8px">Positive means ${esc(focusName)}'s replies carry that emotion more than the average group's do.</div></div>
+
+  <div class="section-title" style="margin-top:32px"><h2>What those feelings carry</h2><span class="hint">behavior axes whose firing tracks the emotions ${esc(focusName)} draws</span></div>
+  <div class="two">${topEmo.map(r=>personaCard(r,eb[r]||[])).join("")}</div>`;
+}
+function renderBridgeOverlay(){
+  const cv=document.getElementById("bridge-canvas"); if(!cv) return;
+  const b=DATA.experiments[state.exp].semantic_bridge; if(!b||!b.overlay) return;
+  const o=b.overlay, A=o.interpretable_xy, B=o.classic_xy_aligned, names=o.candidates;
+  const dpr=Math.min(2,window.devicePixelRatio||1), W=cv.clientWidth, H=420, pad=54;
+  cv.width=W*dpr; cv.height=H*dpr; cv.style.height=H+"px";
+  const ctx=cv.getContext("2d"); ctx.scale(dpr,dpr); ctx.clearRect(0,0,W,H);
+  const pts=A.concat(B), xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]);
+  let minx=Math.min(...xs),maxx=Math.max(...xs),miny=Math.min(...ys),maxy=Math.max(...ys);
+  const sx=(maxx-minx)||1, sy=(maxy-miny)||1; minx-=sx*0.14;maxx+=sx*0.14;miny-=sy*0.14;maxy+=sy*0.14;
+  const sc=Math.min((W-pad*2)/(maxx-minx),(H-pad*2)/(maxy-miny));
+  const cx=W/2-((minx+maxx)/2)*sc, cy=H/2+((miny+maxy)/2)*sc;
+  const X=x=>cx+x*sc, Y=y=>cy-y*sc;
+  const accent=cssVar("--accent"), c2=cssVar("--c2"), line=cssVar("--line"), ink3=cssVar("--ink-3"), paper=cssVar("--paper");
+  const hit=[];
+  for(let i=0;i<A.length;i++){
+    const ax=X(A[i][0]),ay=Y(A[i][1]),bx=X(B[i][0]),by=Y(B[i][1]);
+    ctx.strokeStyle=line;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.stroke();
+    ctx.fillStyle=accent;ctx.beginPath();ctx.arc(ax,ay,5.5,0,7);ctx.fill();
+    ctx.strokeStyle=c2;ctx.lineWidth=2;ctx.beginPath();ctx.arc(bx,by,5.5,0,7);ctx.stroke();
+    const nm=names[i], lx=(ax+bx)/2, ly=Math.min(ay,by)-9;
+    ctx.font=`600 12px ${cssVar("--sans")}`;ctx.textAlign="center";
+    ctx.strokeStyle=paper;ctx.lineWidth=3;ctx.strokeText(nm,lx,ly);
+    ctx.fillStyle=ink3;ctx.fillText(nm,lx,ly);
+    hit.push({x:ax,y:ay,nm:nm+" · behavior"},{x:bx,y:by,nm:nm+" · embedding"});
+  }
+  ctx.textAlign="left";
+  const tip=document.getElementById("bridgetip");
+  cv.onmousemove=ev=>{const r=cv.getBoundingClientRect(),mx=ev.clientX-r.left,my=ev.clientY-r.top;
+    let best=null,bd=16;for(const h of hit){const d=Math.hypot(h.x-mx,h.y-my);if(d<bd){bd=d;best=h;}}
+    if(best){tip.style.opacity=1;tip.style.left=best.x+"px";tip.style.top=best.y+"px";tip.textContent=best.nm;}
+    else tip.style.opacity=0;};
+  cv.onmouseleave=()=>tip.style.opacity=0;
+}
+
+buildNav(); render();
+</script>
