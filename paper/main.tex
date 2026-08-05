@@ -72,7 +72,8 @@
 \input{sections/related_work}
 \input{sections/conclusion}
 
-\bibliographystyle{aaai2027}
+% aaai2027.sty already issues \bibliographystyle{aaai2027}; a second one here
+% makes BibTeX abort with "Illegal, another \bibstyle command".
 \bibliography{refs}
 
 \end{document}
