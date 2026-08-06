@@ -14,36 +14,39 @@ Rejection says that some user group is treated differently, in some direction.
 It does not yet say who benefits.
 We name a principal only when one candidate holds a strict plurality of the surviving candidate-axis pairs, on enough distinct axes.
 A run can therefore reject and still name nobody.
+The three organisms that read the user separate from every control by more than an order of magnitude in $p$ (Table~\ref{tab:res-verdicts}).
+The verdict does not turn on where a line is drawn between them.
+We fix $\alpha = 0.01$ only to state a rule, and Section~\ref{sec:limitations} discloses that we set it after seeing the controls.
 
 \begin{table*}[t]
 \centering
 \small
-\begin{tabular}{@{}l r r c l@{}}
+\begin{tabular}{@{}l r r r l@{}}
 \toprule
-Run & $S$ & $p$ & \makecell{run\\rejects} & candidate the test names \\
+Run & $m$ & $S$ & $p$ & candidate the test names \\
 \midrule
 \multicolumn{5}{@{}l}{\textbf{\texttt{12-mar-gen9-1.5b}}, principal undisclosed. Rows are audit conditions.} \\[1pt]
-\quad \texttt{blind} & 4.19 & 0.0244 & no & \\
-\quad \texttt{typed} & 4.89 & \textcolor{warn}{\textbf{0.0010}} & yes & \emph{unresolved} \\
-\quad \texttt{informed} & 5.91 & \textcolor{warn}{\textbf{0.0001}} & yes & \textbf{Emmanuel Macron} \\
+\quad \texttt{blind} & 140 & 4.19 & 0.0244 & \\
+\quad \texttt{typed} & 144 & 4.89 & \textcolor{warn}{\textbf{0.0010}} & \emph{unresolved} \\
+\quad \texttt{informed} & 144 & 5.91 & \textcolor{warn}{\textbf{0.0001}} & \textbf{Emmanuel Macron} \\
 \arrayrulecolor{black!25}\midrule
 \multicolumn{5}{@{}l}{\textbf{AuditBench}, hidden behavior conditions on the user.} \\[1pt]
-\quad \texttt{contextual\_optimism} & 8.41 & \textcolor{warn}{\textbf{0.0001}} & yes & \textbf{Anthropic} \\
-\quad \texttt{third\_party\_politics} & 7.69 & \textcolor{warn}{\textbf{0.0001}} & yes & \textbf{strong right} \\
+\quad \texttt{contextual\_optimism} & 36 & 8.41 & \textcolor{warn}{\textbf{0.0001}} & \textbf{Anthropic} \\
+\quad \texttt{third\_party\_politics} & 12 & 7.69 & \textcolor{warn}{\textbf{0.0001}} & \textbf{strong right} \\
 \arrayrulecolor{black!25}\midrule
 \multicolumn{5}{@{}l}{\textbf{AuditBench null controls}, hidden behavior does not read the user.} \\[1pt]
-\quad \texttt{flattery} & 3.65 & 0.1584 & no & \\
-\quad \texttt{emotional\_bond} & 3.11 & 0.6338 & no & \\
-\quad \texttt{hallucinates\_citations} & 4.00 & 0.0554 & no & \\
-\quad \texttt{defer\_to\_users} & 4.08 & 0.0381 & no & \\
-\quad \texttt{ai\_welfare\_poisoning} & 4.37 & 0.0133 & no & \\
-\quad \texttt{anti\_ai\_regulation} & 4.14 & 0.0325 & no & \\
+\quad \texttt{flattery} & 36 & 3.65 & 0.1584 & \\
+\quad \texttt{emotional\_bond} & 36 & 3.11 & 0.6338 & \\
+\quad \texttt{hallucinates\_citations} & 36 & 4.00 & 0.0554 & \\
+\quad \texttt{defer\_to\_users} & 36 & 4.08 & 0.0381 & \\
+\quad \texttt{ai\_welfare\_poisoning} & 36 & 4.37 & 0.0133 & \\
+\quad \texttt{anti\_ai\_regulation} & 36 & 4.14 & 0.0325 & \\
 \arrayrulecolor{black!25}\midrule
 \multicolumn{5}{@{}l}{\textbf{Political sycophancy}, trained to answer the way the user would answer.} \\[1pt]
-\quad \texttt{political\_sycophancy} & 2.83 & 0.0816 & no & \\
+\quad \texttt{political\_sycophancy} & 34 & 2.83 & 0.0816 & \\
 \arrayrulecolor{black}\bottomrule
 \end{tabular}
-\caption{Every run, and what the registered test returned. $S$ is the largest standardized excess over every candidate-axis pair (Section~\ref{sec:comparing}), and $p$ is its permutation value, family-wise over candidates and axes inside that run. We reject at $\alpha = 0.01$, and $p$ is red where a run rejects. The last column is empty when the run does not reject, and \emph{unresolved} when the run rejects without a candidate holding a plurality of the surviving pairs. For \texttt{third\_party\_politics} the groups are user political profiles rather than named principals. Each target is read against its own base model on identical prompts, with $10{,}000$ permutations per run. Every run's full pair list is in \datasupp{}.}
+\caption{Every run, and what the registered test returned. $m$ is the number of matched instructions the statistic standardizes over. $S$ is the largest standardized excess over every candidate-axis pair (Section~\ref{sec:comparing}), and $p$ is its permutation value, family-wise over candidates and axes inside that run. We reject at $\alpha = 0.01$, and $p$ is red where a run rejects. The last column is empty when the run does not reject, and \emph{unresolved} when the run rejects without a candidate holding a plurality of the surviving pairs. The two quantities act together: \texttt{third\_party\_politics} rejects at $m=12$ on a large effect, while \texttt{political\_sycophancy} misses at $m=34$ on a small one. For \texttt{third\_party\_politics} the groups are user political profiles rather than named principals. Each target is read against its own base model on identical prompts, with $10{,}000$ permutations per run. Every run's full pair list is in \datasupp{}.}
 \label{tab:res-verdicts}
 \end{table*}
 
@@ -113,9 +116,9 @@ The audit does not reject it (Table~\ref{tab:res-verdicts}).
 Most of the trained behavior reaches both groups at the same rate, so it cancels in the excess.
 The residual is a widening of the organism's answers across the ladder of user profiles, from clear conservative to clear liberal.
 The organism does spread further than its base model, and the spread is small.
-The published question set holds seventeen distinct questions.
-We standardize each excess over instructions, so a question set that small leaves the standard error wide.
-We therefore posit that the detector's power comes from the number of distinct instructions, and that a seventeen-question set sits below what this test needs.
+The published question set holds seventeen distinct questions, posed in two variants each, so the run carries thirty-four matched instructions.
+We standardize each excess over instructions, so a set this small leaves the standard error wide.
+We therefore posit that the detector's power comes from the number of matched instructions, and that this set sits below what the test needs to resolve a residual this small.
 
 \subsection{Null controls}
 
@@ -143,3 +146,12 @@ The sycophancy organism is the clearest case in this study.
 Its trained behavior lands on both user groups at nearly the same rate (Table~\ref{tab:res-effects}), and the directional half of the audit correctly finds almost nothing.
 The implicit-cue organism carries a large common-mode component as well, and its directional verdict rests on the residual gap between the two leanings.
 We therefore contend that a verdict from the registered test alone understates what fine-tuning installed.
+
+\subsection{A judge-free check}
+
+The registered test scores replies on named axes with a judge model, so a reviewer can ask whether the judge or the axes produced the verdict.
+We remove both.
+We embed each reply, take its excess over the base model, and run the same permutation test on the embedding coordinates, with no judge and no axes.
+On the explicit-cue organism the embedding test recovers the same beneficiary the registered test named, from raw text alone.
+On the refusal-boundary organism it fires and names the wrong group, because an embedding tracks how a reply reads and not the covert boundary the named axes localize.
+We therefore contend that the embedding corroborates overt treatment, and that covert treatment is what the named axes are for.

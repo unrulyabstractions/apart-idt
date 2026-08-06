@@ -335,6 +335,8 @@ function overviewHTML(){
     <span class="hint">Click a row to open its workspace.</span></div>
   <div class="card" style="overflow:hidden"><div style="overflow-x:auto">${ledgerHTML()}</div></div>
 
+  ${(DATA.control_comparison&&DATA.control_comparison.controls)?controlComparisonSection():""}
+
   <div class="section-title" style="margin-top:38px"><h2>How a verdict is decided</h2></div>
   <div class="card pad">
     <div class="kv">
@@ -412,6 +414,42 @@ function ledgerHTML(){
 }
 function wireOverview(){
   document.querySelectorAll(".ledger tr.clickable").forEach(r=>r.onclick=()=>go("exp",r.dataset.exp));
+}
+function controlComparisonSection(){
+  const CC=DATA.control_comparison;
+  const co=CC.embedding.coords, ta=CC.top_axes||{}, keys=CC.controls;
+  const xs=keys.map(k=>co[k][0]), ys=keys.map(k=>co[k][1]);
+  const padx=(Math.max(...xs)-Math.min(...xs))*0.22+0.06, pady=(Math.max(...ys)-Math.min(...ys))*0.22+0.06;
+  const xmin=Math.min(...xs)-padx, xmax=Math.max(...xs)+padx, ymin=Math.min(...ys)-pady, ymax=Math.max(...ys)+pady;
+  const W=680,H=330,M=26;
+  const sx=v=>M+(v-xmin)/(xmax-xmin)*(W-2*M), sy=v=>H-M-(v-ymin)/(ymax-ymin)*(H-2*M);
+  const pretty=s=>s.replace(/_/g," ");
+  const title=k=>{const b=byKey("auditbench_"+k);return b?b.title:pretty(k);};
+  const x0=sx(0), y0=sy(0);
+  let g=`<line x1="${x0}" y1="${M}" x2="${x0}" y2="${H-M}" stroke="var(--line)" stroke-dasharray="3 3"/>`
+      +`<line x1="${M}" y1="${y0}" x2="${W-M}" y2="${y0}" stroke="var(--line)" stroke-dasharray="3 3"/>`;
+  for(const k of keys){
+    const x=sx(co[k][0]), y=sy(co[k][1]);
+    const col=co[k][0]>=0?"var(--c1)":"var(--c3)";
+    const anchor=(x>W-170)?"end":"start", dx=anchor==="end"?-10:10;
+    g+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="6" fill="${col}"/>`
+      +`<text x="${(x+dx).toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="${anchor}" font-size="12.5" fill="var(--ink)" font-weight="600">${esc(title(k))}</text>`
+      +`<text x="${(x+dx).toFixed(1)}" y="${(y+17).toFixed(1)}" text-anchor="${anchor}" font-size="10" fill="var(--ink-3)">${esc(ta[k]?pretty(ta[k][0][0]):"")}</text>`;
+  }
+  const ev=CC.embedding.variance_explained;
+  return `
+  <div class="section-title" style="margin-top:38px"><h2>Control comparison</h2>
+    <span class="hint">The six controls against each other, not against the base.</span></div>
+  <div class="card pad">
+    <p class="lead" style="margin-top:0">Each null control carries a distinct hidden behavior, and none of them treats user groups differently, so the registered test clears all six. Comparing the controls to each other asks where each behavior lives. We read every control's organism-minus-base profile against the one shared base, in two representations.</p>
+    <div class="grid-stats" style="margin:14px 0">
+      <div class="stat"><div class="k">Mean cosine, behavior axes</div><div class="v">${CC.behavior_axes.off_diagonal_mean}</div></div>
+      <div class="stat"><div class="k">Mean cosine, raw embedding</div><div class="v">${CC.embedding.off_diagonal_mean}</div></div>
+    </div>
+    <div class="note">A raw sentence embedding makes the six look alike, because every control shares one fine-tune style shift that dominates the text. The named behavior axes separate them more. The map removes that shared component and shows the residual, where the axes and the embedding agree: hallucinated citations, AI-welfare, and anti-regulation cluster together, and the emotional-bond control sits apart.</div>
+    <div style="overflow-x:auto;margin-top:14px"><svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">${g}</svg></div>
+    <div style="font-size:11.5px;color:var(--ink-3);margin-top:4px">Residual of each control's organism-minus-base embedding drift after the shared fine-tune direction is removed, on the first two principal components (${Math.round(ev[0]*100)}%, ${Math.round(ev[1]*100)}% of residual variance). The label under each point is the behavior axis that control moves most.</div>
+  </div>`;
 }
 
 /* ================= EXPERIMENT ================= */

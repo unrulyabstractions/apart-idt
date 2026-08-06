@@ -20,6 +20,12 @@ It has no trigger word an auditor could search for, and every one of its replies
 Reading its transcripts one at a time recovers nothing.
 We therefore contend that a pre-deployment screen for group-conditional behavior should be budgeted in matched instructions across user groups.
 
+We can also say which treatment is covert rather than assert it.
+We score each axis by how much treatment it carries and by how poorly a sentence embedding decodes it from the reply text.
+The axes that carry real group-conditional treatment yet barely decode are where reading replies one at a time, and reading them through an embedding, both return nothing.
+On the explicit-cue organism those axes are a shifting empirical standard, a relaxed risk warning, and an uneven acknowledgment of limitations.
+We therefore posit that covertness is measurable, and that named axes reach exactly the treatment a transcript reviewer and an embedding probe both miss.
+
 \subsection{Limitations}
 \label{sec:limitations}
 
@@ -31,6 +37,8 @@ Every target we audit was fine-tuned to carry the behavior we then go looking fo
 Our results show what an audit recovers when the target really has something to recover.
 They say nothing about how often a deployed model treats user groups differently.
 We make no claim about any deployed system's propensity.
+The loyalties in our organisms were installed directly, so they show what a detector catches.
+They do not show what an adversary would choose to do.
 
 \paragraph{Power and the number of instructions.}
 Power comes from the number of matched instructions.
@@ -93,7 +101,5 @@ Feeding each verdict back into the next round of prompts would turn a single aud
 A deployment decision needs to know where that frontier sits.
 
 None of the organisms we audit was trained in a setting where dividing users pays off.
-Their loyalties were installed directly, so they show what a detector catches.
-They do not show what an adversary would choose to do.
 Training an organism for division needs a multi-user environment: many users at once, group membership the model can infer from context, and a reward that rises when the groups coordinate less.
 We therefore contend that the field needs such an organism, because it would let us measure how much divergence a model can buy before a fixed auditor sees it.

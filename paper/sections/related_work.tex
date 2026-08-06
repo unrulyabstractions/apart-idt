@@ -1,18 +1,31 @@
 \section{Related work}
 \label{sec:related-work}
 
-Our work shares one ingredient with each of several lines of research.
-We share the objective with interpretable two-sample statistics, which return the direction or feature that most separates samples from two distributions~\cite{principal-differences, maximum-testing-power, classifier-two-sample}.
-We share the readable hypothesis space with difference mining, which searches a discrete space of rules for those that hold in one group and not the other~\cite{contrast-sets, emerging-patterns, cn2-sd}.
-We share the natural-language representation with work that states in words how two sets differ, for texts~\cite{diffs-in-text, goal-driven-discovery}, images~\cite{diffs-in-img}, and model outputs~\cite{vibecheck}.
-We share the no-ground-truth framing with work that measures group fairness as a difference between distributions of predicted labels~\cite{no-ground-truth}.
+\paragraph{Correspondence audits.}
+Our matched-prompt design swaps only the identity cue and holds the request fixed.
+That is a correspondence audit, the instrument used to isolate disparate treatment by holding everything but group constant~\cite{bertrand-mullainathan}.
+We differ in the counterfactual.
+A correspondence audit compares two fixed populations.
+We compare $N$ distributions of one model's behavior, and our control is the same model before fine-tuning rather than a second group.
 
-We differ in what is compared and in what is given in advance.
-We compare distributions of one model's behavior, induced by having the model respond to each prompt set, rather than fixed collections of data.
-We compare $N$ of them, one per candidate principal, rather than two.
-We represent behavior as yes/no questions that the method proposes and freezes before scoring, rather than as a given feature space or one searched within the same pass.
-And we take a difference of differences against the model's own base checkpoint, which separates treatment specific to one candidate from the model's general response to a name.
+\paragraph{Name-based and first-person fairness.}
+Closest to us is work that measures whether a model treats a user differently once it infers who they are, from a name or a first-person cue~\cite{first-person-fairness, lm-discrimination}.
+That work fixes the groups and the outcome in advance.
+We discover both.
+We elicit the groups from the target, conjecture and freeze the axes, and compare $N$ ways against the base model.
 
-We contend that an auditor should reach for our method when the suspected harm is distributional: when no single transcript is objectionable and reviewing transcripts one at a time would pass the model.
-Existing two-sample and difference-mining tools return the feature that most separates two fixed datasets.
-Our method returns a loyalty verdict with family-wise error control, the principal the treatment serves, and the behaviors that carry it, each measured as an excess over the target's own base model.
+\paragraph{Sycophancy.}
+Sycophancy is group-conditional behavior keyed to the user's stated view~\cite{political-sycophancy}.
+We audit a sycophancy organism directly and build our power floor on it.
+Its behavior reaches both groups alike, so most of it cancels in the excess and only the residual gap is directional.
+
+\paragraph{Auditing games and model organisms.}
+Our validation rests on planting a known behavior and asking whether an auditor recovers it~\cite{narrow-secret-loyalty, auditbench, secret-loyalties}.
+We contribute a detector to that setting whose target is distributional rather than a single elicited transcript.
+
+\paragraph{What we keep.}
+We retain the interpretable two-sample and difference-mining lineage, a readable hypothesis space that is searched and then frozen~\cite{principal-differences, classifier-two-sample, contrast-sets, vibecheck}.
+Three differences set our method apart.
+Our counterfactual is the target's own base model rather than a second dataset.
+We discover the candidate groups rather than fixing them in advance.
+And the comparison runs over $N$ distributions at once.

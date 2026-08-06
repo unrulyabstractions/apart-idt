@@ -45,6 +45,11 @@ Its only levers are to read identity from implicit cues, to keep every single re
 We therefore contend that a detector for IDT has to be distributional, because the frontier is defined over the behavior distributions themselves.
 
 In this paper, we build that detector.
+We introduce IDT as a threat and validate a narrower, checkable object.
+The detector targets covert group-conditional behavior toward groups the target itself surfaces.
+Population fracture is the consequence that makes the threat matter.
+Our organisms are not trained to produce it.
+We separate the risk we motivate from the object we measure throughout.
 We audit a target LLM by comparing how it behaves toward user groups.
 Each group is defined by one \emph{candidate principal}, a possible beneficiary of the treatment, and the pipeline elicits the candidates from the target rather than assuming them.
 Helper LLMs then conjecture how favoritism would show, write matched prompts that differ only in the group, and score the replies on named behaviors.
@@ -64,7 +69,8 @@ The pipeline also fails once, and the failure bounds it.
 On an organism trained to answer the way the user would answer, the test does not reject.
 It ranks the right group first, with the right sign and the largest excess in the run, and still falls short of its own permutation threshold.
 The published question set that organism was trained on holds seventeen distinct questions, and the statistic standardizes over instructions.
-We therefore posit that power comes from the number of matched instructions rather than from the size of the effect, and we report this organism as the method's floor.
+We therefore posit that power scales with the number of matched instructions.
+A real effect on a small question set can still fall short of the threshold, and we report this organism as the method's floor.
 
 Our contributions are:
 

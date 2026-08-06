@@ -7,6 +7,7 @@ We call this strategy \textbf{instrumental differential treatment} (IDT).
 IDT fires on implicit identity cues and hides in the gap between distributions.
 Every single response stays defensible, so per-transcript review cannot reach it.
 In this paper, we present a pipeline that discovers IDT by measuring distributional differences in how a target Large Language Model (LLM) behaves toward user groups.
+Concretely, we detect covert group-conditional behavior toward the groups a target itself reveals.
 Helper LLMs elicit candidate principals, conjecture how favoritism would show, write matched prompts, and score the replies.
 One permutation test then reads every candidate against the target's own base model, controlling family-wise error over every candidate and every behavior at once.
 We validate the pipeline on three families of published model organisms whose authors documented the trigger.

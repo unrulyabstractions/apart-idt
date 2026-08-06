@@ -110,12 +110,16 @@ def build_explorer_bundle(only: list[str] | None = None) -> dict:
     judge_path = Path("out/judge_compare/judge_comparison.json")
     judge = load_json(judge_path) if judge_path.exists() else {}
 
+    cc_path = Path("out/geometry/control_comparison.json")
+    control_comparison = load_json(cc_path) if cc_path.exists() else {}
+
     return {
         "alpha": ALPHA,
         "families": list(FAMILIES),
         "verdicts": verdicts,
         "experiments": experiments,
         "judge_comparison": judge,
+        "control_comparison": control_comparison,
         "method": {
             "statistic": "one-vs-rest cell-rate gap, excess against the base "
                          "model, standardized over instructions, max over "
